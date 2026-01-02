@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SHSK Pekanbaru - Login</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="login-page mode-petugas">
+    <div id="app-notification" class="popup">
+      <i class="fa fa-info-circle"></i>
+      <span id="popup-message">Notifikasi...</span>
+    </div>
+
+    <div class="auth-container">
+      <div class="auth-card mode-petugas" id="loginCard">
+        <h2 id="titleText">LOGIN PETUGAS</h2>
+
+        <div class="role-switch">
+          <div class="slider"></div>
+          <button
+            class="role-btn active"
+            id="btnPetugas"
+            onclick="switchRole('PETUGAS')"
+          >
+            Petugas
+          </button>
+          <button
+            class="role-btn"
+            id="btnPengguna"
+            onclick="switchRole('PENGGUNA')"
+          >
+            Pengguna
+          </button>
+        </div>
+
+        <form id="formPetugas" onsubmit="handleLoginWrapper(event, 'PETUGAS')">
+          <div class="input-group">
+            <input
+              type="text"
+              id="nip"
+              required
+              autocomplete="off"
+              placeholder=" "
+            />
+            <label>NIP Pegawai</label>
+          </div>
+          <div class="input-group">
+            <input
+              type="password"
+              id="passPetugas"
+              required
+              autocomplete="off"
+              placeholder=" "
+            />
+            <label>Password</label>
+            <i
+              class="fa-solid fa-eye password-icon"
+              onclick="togglePass(this)"
+            ></i>
+          </div>
+
+          <div class="options-row">
+            <label class="remember-me">
+              <input type="checkbox" id="checkPetugas" /> Ingat Saya
+            </label>
+          </div>
+
+          <button type="submit" class="btn-neon" id="btnSubmitPetugas">
+            MASUK SISTEM
+          </button>
+        </form>
+
+        <form
+          id="formPengguna"
+          class="hidden"
+          onsubmit="handleLoginWrapper(event, 'PENGGUNA')"
+        >
+          <div class="input-group">
+            <input
+              type="email"
+              id="email"
+              required
+              autocomplete="off"
+              placeholder=" "
+            />
+            <label>Email Perusahaan</label>
+          </div>
+          <div class="input-group">
+            <input
+              type="password"
+              id="passPengguna"
+              required
+              autocomplete="off"
+              placeholder=" "
+            />
+            <label>Password</label>
+            <i
+              class="fa-solid fa-eye password-icon"
+              onclick="togglePass(this)"
+            ></i>
+          </div>
+
+          <div class="options-row">
+            <label class="remember-me">
+              <input type="checkbox" id="checkPengguna" /> Ingat Saya
+            </label>
+            <a href="forgot.html" class="forgot-link">Lupa Password?</a>
+            >
+          </div>
+
+          <button type="submit" class="btn-neon" id="btnSubmitPengguna">
+            MASUK LAYANAN
+          </button>
+
+          <div class="auth-links">
+            <span>Belum punya akun?</span>
+            <a href="register.html"
+              >DAFTAR SEKARANG <i class="fa fa-arrow-right"></i
+            ></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <script>
+      // --- 1. TOGGLE PASSWORD ---
+      function togglePass(icon) {
+        const input = icon.parentElement.querySelector("input");
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("fa-eye");
+          icon.classList.add("fa-eye-slash");
+        } else {
+          input.type = "password";
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        }
+      }
+
+      // --- 2. LOAD REMEMBER ME ---
+      window.onload = function () {
+        const savedNip = localStorage.getItem("shsk_nip");
+        if (savedNip) {
+          document.getElementById("nip").value = savedNip;
+          document.getElementById("checkPetugas").checked = true;
+        }
+        const savedEmail = localStorage.getItem("shsk_email");
+        if (savedEmail) {
+          document.getElementById("email").value = savedEmail;
+          document.getElementById("checkPengguna").checked = true;
+        }
+      };
+
+      // --- 3. HANDLE LOGIN UI (LOADING ANIMATION) ---
+      function handleLoginWrapper(e, role) {
+        e.preventDefault();
+
+        // 1. Tentukan Tombol & Input mana yang dipakai
+        let btnId, btnTextAsli, inputPassId, inputUserId;
+
+        if (role === "PETUGAS") {
+          btnId = "btnSubmitPetugas";
+          inputUserId = "nip";
+          inputPassId = "passPetugas"; // ID Statis (Anti Ribet)
+        } else {
+          btnId = "btnSubmitPengguna";
+          inputUserId = "email";
+          inputPassId = "passPengguna"; // ID Statis
+        }
+
+        const btn = document.getElementById(btnId);
+        const originalText = btn.innerHTML; // Simpan teks asli
+
+        // 2. Simpan 'Remember Me' Logic
+        const userVal = document.getElementById(inputUserId).value;
+        if (role === "PETUGAS") {
+          if (document.getElementById("checkPetugas").checked)
+            localStorage.setItem("shsk_nip", userVal);
+          else localStorage.removeItem("shsk_nip");
+        } else {
+          if (document.getElementById("checkPengguna").checked)
+            localStorage.setItem("shsk_email", userVal);
+          else localStorage.removeItem("shsk_email");
+        }
+
+        // 3. Ubah Tombol Jadi Loading (Spinner)
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+
+        // 4. Panggil Fungsi Login Utama di script.js
+        // Kita kirim callback (fungsi balikan) agar script.js bisa balikin tombol kalau gagal
+
+        // Cek apakah fungsi login ada (dari script.js)
+        if (typeof handleLogin === "function") {
+          // Kita modifikasi dikit cara panggilnya biar script.js tau passwordnya
+          // Masukkan value password ke variable global atau kirim via parameter
+          const passVal = document.getElementById(inputPassId).value;
+
+          // Panggil login (Asumsi script.js sudah diperbarui untuk terima parameter/baca ID ini)
+          // Jika script.js masih pakai ID 'password' hardcode, kita akali disini:
+          handleLogin(e, role, passVal, () => {
+            // Ini Callback jika Gagal: Balikin tombol
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = "1";
+          });
+        } else {
+          // Fallback kalau script.js belum siap
+          console.log("Login clicked. Role:", role);
+          setTimeout(() => {
+            showPopup("Maaf, Script Login belum terhubung.", "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = "1";
+          }, 1500);
+        }
+      }
+
+      // --- 4. SWITCH ROLE (LOGIC YANG LEBIH BERSIH) ---
+      function switchRole(role) {
+        const card = document.getElementById("loginCard");
+        const title = document.getElementById("titleText");
+        const btnPetugas = document.getElementById("btnPetugas");
+        const btnPengguna = document.getElementById("btnPengguna");
+        const formPetugas = document.getElementById("formPetugas");
+        const formPengguna = document.getElementById("formPengguna");
+
+        // Reset Form Password type biar icon mata sinkron
+        document.getElementById("passPetugas").type = "password";
+        document.getElementById("passPengguna").type = "password";
+        document.querySelectorAll(".password-icon").forEach((i) => {
+          i.classList.remove("fa-eye-slash");
+          i.classList.add("fa-eye");
+        });
+
+        if (role === "PETUGAS") {
+          // Ganti Style Body (Opsional, kalau mau background beda)
+          document.body.classList.remove("mode-pengguna");
+          document.body.classList.add("mode-petugas");
+
+          card.classList.remove("mode-pengguna");
+          card.classList.add("mode-petugas");
+          title.innerText = "LOGIN PETUGAS";
+
+          btnPetugas.classList.add("active");
+          btnPengguna.classList.remove("active");
+
+          formPetugas.classList.remove("hidden");
+          formPengguna.classList.add("hidden");
+        } else {
+          document.body.classList.remove("mode-petugas");
+          document.body.classList.add("mode-pengguna");
+
+          card.classList.remove("mode-petugas");
+          card.classList.add("mode-pengguna");
+          title.innerText = "LOGIN PENGGUNA";
+
+          btnPetugas.classList.remove("active");
+          btnPengguna.classList.add("active");
+
+          formPetugas.classList.add("hidden");
+          formPengguna.classList.remove("hidden");
+        }
+      }
+    </script>
+  </body>
+</html>

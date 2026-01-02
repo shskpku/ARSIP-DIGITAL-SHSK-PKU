@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Password - SHSK Pekanbaru</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="login-page">
+    <div id="app-notification" class="popup">
+      <i class="fa fa-info-circle"></i>
+      <span id="popup-message">Notifikasi...</span>
+    </div>
+
+    <div class="auth-container">
+      <div
+        class="auth-card theme-purple"
+        style="max-width: 500px; border-color: rgba(255, 255, 255, 0.2)"
+      >
+        <h2 id="headerTitle" style="color: #fff; margin-bottom: 10px">
+          LUPA PASSWORD
+        </h2>
+        <p
+          id="headerDesc"
+          style="
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+            font-size: 14px;
+          "
+        >
+          Masukkan email yang terdaftar untuk menerima kode verifikasi.
+        </p>
+
+        <form id="step1Form" onsubmit="handleSendOTP(event)">
+          <div class="input-group">
+            <input
+              type="email"
+              id="resetEmail"
+              required
+              autocomplete="off"
+              placeholder=" "
+            />
+            <label>Email Terdaftar</label>
+            <i
+              class="fa fa-envelope password-icon"
+              style="pointer-events: none"
+            ></i>
+          </div>
+          <button type="submit" class="btn-neon" id="btnStep1">
+            <i class="fa fa-paper-plane"></i> KIRIM KODE
+          </button>
+
+          <div class="auth-links" style="margin-top: 20px">
+            <a href="index.html" style="color: #fff; text-decoration: none">
+              <i class="fa fa-arrow-left"></i> Kembali ke Login
+            </a>
+          </div>
+        </form>
+
+        <form id="step2Form" class="hidden" onsubmit="handleVerifyOTP(event)">
+          <div class="input-group">
+            <input
+              type="number"
+              id="inputOTP"
+              required
+              autocomplete="off"
+              placeholder=" "
+              style="
+                letter-spacing: 8px;
+                font-weight: bold;
+                text-align: center;
+                font-size: 24px;
+              "
+            />
+            <label style="left: 50%; transform: translateX(-50%)"
+              >Kode 6 Angka</label
+            >
+          </div>
+
+          <button type="submit" class="btn-neon" id="btnStep2">
+            VERIFIKASI KODE
+          </button>
+
+          <div class="auth-links">
+            <span style="color: #bbb; font-size: 12px">Salah Email?</span>
+            <a
+              href="#"
+              onclick="window.location.reload()"
+              style="color: #00f3ff"
+              >Kirim Ulang</a
+            >
+          </div>
+        </form>
+
+        <form id="step3Form" class="hidden" onsubmit="handleResetFinal(event)">
+          <div class="input-group">
+            <input
+              type="password"
+              id="newPass"
+              required
+              minlength="6"
+              placeholder=" "
+            />
+            <label>Password Baru</label>
+            <i
+              class="fa-solid fa-eye password-icon"
+              onclick="togglePass(this)"
+            ></i>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="password"
+              id="confirmNewPass"
+              required
+              minlength="6"
+              placeholder=" "
+            />
+            <label>Konfirmasi Password</label>
+            <i
+              class="fa-solid fa-eye password-icon"
+              onclick="togglePass(this)"
+            ></i>
+          </div>
+
+          <button
+            type="submit"
+            class="btn-neon"
+            id="btnStep3"
+            style="background: linear-gradient(90deg, #00c853, #64dd17)"
+          >
+            <i class="fa fa-save"></i> SIMPAN PASSWORD
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <script>
+      // Variable Global untuk menyimpan email sementara
+      let currentEmail = "";
+
+      // 1. TOGGLE PASSWORD UTILS
+      function togglePass(icon) {
+        const input = icon.parentElement.querySelector("input");
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("fa-eye");
+          icon.classList.add("fa-eye-slash");
+        } else {
+          input.type = "password";
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        }
+      }
+
+      // 2. STEP 1: KIRIM OTP
+      async function handleSendOTP(e) {
+        e.preventDefault();
+        const email = document.getElementById("resetEmail").value;
+        const btn = document.getElementById("btnStep1");
+
+        // Loading Animasi
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENGIRIM...';
+        btn.disabled = true;
+
+        try {
+          // Panggil Backend: sendOTP
+          const res = await postData({ action: "sendOTP", email: email });
+
+          if (res.status === "SUCCESS") {
+            showPopup("Kode terkirim! Cek Email Anda.", "success");
+            currentEmail = email; // Simpan email buat step selanjutnya
+
+            // Transisi ke Step 2
+            document.getElementById("step1Form").classList.add("hidden");
+            document.getElementById("step2Form").classList.remove("hidden");
+
+            // Ubah Judul Header
+            document.getElementById("headerTitle").innerText =
+              "VERIFIKASI KODE";
+            document.getElementById(
+              "headerDesc"
+            ).innerHTML = `Kami telah mengirim 6 digit kode ke <b>${email}</b>.<br>Cek Inbox atau Spam.`;
+          } else {
+            showPopup(res.message, "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        } catch (err) {
+          showPopup("Gagal koneksi server.", "error");
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
+
+      // 3. STEP 2: VERIFIKASI OTP
+      async function handleVerifyOTP(e) {
+        e.preventDefault();
+        const otp = document.getElementById("inputOTP").value;
+        const btn = document.getElementById("btnStep2");
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMERIKSA...';
+        btn.disabled = true;
+
+        try {
+          // Panggil Backend: verifyOTP
+          const res = await postData({
+            action: "verifyOTP",
+            email: currentEmail,
+            otp: otp,
+          });
+
+          if (res.status === "SUCCESS") {
+            showPopup("Kode Valid! Silakan buat password baru.", "success");
+
+            // Transisi ke Step 3
+            document.getElementById("step2Form").classList.add("hidden");
+            document.getElementById("step3Form").classList.remove("hidden");
+
+            document.getElementById("headerTitle").innerText = "RESET PASSWORD";
+            document.getElementById("headerDesc").innerText =
+              "Buat password baru yang aman.";
+          } else {
+            showPopup(res.message, "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        } catch (err) {
+          showPopup("Terjadi kesalahan.", "error");
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
+
+      // 4. STEP 3: SIMPAN PASSWORD BARU
+      async function handleResetFinal(e) {
+        e.preventDefault();
+        const p1 = document.getElementById("newPass").value;
+        const p2 = document.getElementById("confirmNewPass").value;
+        const btn = document.getElementById("btnStep3");
+
+        if (p1 !== p2) {
+          showPopup("Password konfirmasi tidak sama!", "error");
+          return;
+        }
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENYIMPAN...';
+        btn.disabled = true;
+
+        try {
+          // Panggil Backend: resetPasswordFinal
+          const res = await postData({
+            action: "resetPasswordFinal",
+            email: currentEmail,
+            newPassword: p1,
+          });
+
+          if (res.status === "SUCCESS") {
+            showPopup(res.message, "success");
+
+            // Redirect ke Login setelah 2 detik
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 2000);
+          } else {
+            showPopup(res.message, "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        } catch (err) {
+          showPopup("Gagal menyimpan password.", "error");
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
+    </script>
+  </body>
+</html>

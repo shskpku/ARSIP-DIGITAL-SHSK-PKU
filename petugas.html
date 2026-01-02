@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Petugas - SHSK</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  </head>
+  <body class="petugas-page">
+    <div id="app-notification" class="popup">
+      <i class="fa fa-info-circle"></i><span id="popup-message">Pesan...</span>
+    </div>
+
+    <div id="modal-logout" class="modal-overlay hidden">
+      <div class="modal-box zoom-anim">
+        <div class="modal-icon-danger"><i class="fa fa-power-off"></i></div>
+        <h3>Konfirmasi Keluar</h3>
+        <p>Anda yakin ingin mengakhiri sesi?</p>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
+          <button class="btn-confirm-logout" onclick="confirmLogout()">
+            Ya, Keluar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-delete" class="modal-overlay hidden">
+      <div class="modal-box zoom-anim">
+        <div class="modal-icon-danger"><i class="fa fa-trash-can"></i></div>
+        <h3>Hapus Data?</h3>
+        <p>
+          Data ini akan dihapus secara permanen dari sistem dan Google Drive.
+        </p>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
+          <button class="btn-confirm-logout" onclick="executeDelete()">
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="sidebar-overlay"
+      class="sidebar-overlay"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <nav class="navbar glass-nav">
+      <div class="nav-left">
+        <i class="fa fa-bars mobile-toggle" onclick="toggleSidebar()"></i>
+        <div class="logo-area">
+          <i class="fa-solid fa-anchor" style="color: var(--gold)"></i>
+          <span>SHSK PEKANBARU</span>
+        </div>
+      </div>
+      <div class="system-status">
+        <div class="blink-dot-green"></div>
+        <span>SISTEM ONLINE</span>
+      </div>
+      <div class="nav-right">
+        <div class="user-info-nav">
+          <span id="nav-name">Petugas</span><small>Admin</small>
+        </div>
+        <button onclick="logout()" class="btn-logout-nav" title="Keluar">
+          <i class="fa fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-content">
+        <div class="profile-section">
+          <div class="profile-circle" id="sidebar-initial">P</div>
+          <h4 id="sidebar-name">Memuat...</h4>
+          <p id="sidebar-nip">NIP. -</p>
+          <span class="badge-role" id="sidebar-role">JABATAN</span>
+        </div>
+        <hr class="sidebar-divider" />
+        <div class="menu-item active" onclick="showSection('dashboard', this)">
+          <i class="fa fa-chart-pie"></i> Dashboard
+        </div>
+
+        <div class="menu-item has-submenu" onclick="toggleSubmenu('sub-shsk')">
+          <i class="fa fa-ship"></i> Status Hukum Kapal
+          <i class="fa fa-chevron-down arrow-icon"></i>
+        </div>
+        <div id="sub-shsk" class="submenu-container">
+          <div class="submenu-item" onclick="showSection('shsk-input', this)">
+            <i class="fa fa-plus-circle"></i> Input Arsip
+          </div>
+          <div class="submenu-item" onclick="showSection('shsk-data', this)">
+            <i class="fa fa-table"></i> Data Arsip
+          </div>
+        </div>
+
+        <div
+          class="menu-item has-submenu"
+          onclick="toggleSubmenu('sub-sertifikasi')"
+        >
+          <i class="fa fa-certificate"></i> Sertifikasi Kapal
+          <i class="fa fa-chevron-down arrow-icon"></i>
+        </div>
+        <div id="sub-sertifikasi" class="submenu-container">
+          <div
+            class="submenu-item"
+            onclick="showSection('sertifikasi-input', this)"
+          >
+            <i class="fa fa-plus-circle"></i> Input Sertifikasi
+          </div>
+          <div
+            class="submenu-item"
+            onclick="showSection('sertifikasi-data', this)"
+          >
+            <i class="fa fa-table"></i> Data Sertifikasi
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div id="sec-dashboard">
+        <div class="welcome-banner">
+          <h2>Halo, <span id="dash-name">Petugas</span>! 👋</h2>
+          <p>Sistem Arsip Digital Terintegrasi KSOP Kelas II Pekanbaru.</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="icon-box"><i class="fa fa-gavel"></i></div>
+            <div>
+              <h3>Apa itu Status Hukum Kapal?</h3>
+              <p>
+                Bagian yang menangani legalitas kepemilikan, pendaftaran, dan
+                balik nama kapal serta penerbitan Pas Besar/Surat Laut.
+              </p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="icon-box"><i class="fa fa-file-contract"></i></div>
+            <div>
+              <h3>Apa itu Sertifikasi Kapal?</h3>
+              <p>
+                Bagian yang menangani pemeriksaan teknis, keselamatan, dan
+                keamanan kapal untuk penerbitan sertifikat kelaiklautan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-container">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>
+                <i class="fa fa-chart-bar" style="color: var(--gold)"></i>
+                Volume Arsip
+              </h3>
+              <div class="chart-filter-group">
+                <button class="filter-btn" onclick="updateChartFilter('today')">
+                  Hari Ini
+                </button>
+                <button class="filter-btn" onclick="updateChartFilter('week')">
+                  Minggu Ini
+                </button>
+                <button class="filter-btn" onclick="updateChartFilter('month')">
+                  Bulan Ini
+                </button>
+                <button
+                  class="filter-btn active"
+                  onclick="updateChartFilter('year')"
+                >
+                  Tahun Ini
+                </button>
+              </div>
+            </div>
+            <div style="height: 250px; position: relative">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>
+              <i class="fa fa-bullseye" style="color: var(--gold)"></i> Target
+              2025
+            </h3>
+            <div
+              style="
+                height: 200px;
+                display: flex;
+                justify-content: center;
+                position: relative;
+              "
+            >
+              <canvas id="doughnutChart"></canvas>
+              <div
+                style="
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  text-align: center;
+                "
+              >
+                <strong style="font-size: 20px; color: var(--navy)"
+                  >2040</strong
+                >
+              </div>
+            </div>
+            <div class="target-info">
+              <span
+                ><i class="fa fa-circle" style="color: #eee"></i> Sisa:
+                <b>2,040</b></span
+              >
+              <span
+                ><i class="fa fa-circle" style="color: #00c853"></i> Terbit:
+                <b>0</b></span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sec-shsk-input" class="hidden">
+        <div class="section-header"><h2>Input Arsip Status Hukum</h2></div>
+        <form
+          id="formSHSK"
+          onsubmit="event.preventDefault(); handleSubmit('SHSK')"
+        >
+          <input type="hidden" name="noUrut" id="shsk-noUrut" />
+          <input type="hidden" name="oldFolderUrl" id="shsk-oldFolderUrl" />
+
+          <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Nama Kapal
+                  <input
+                    type="text"
+                    name="namaKapal"
+                    class="form-control"
+                    required
+                    style="text-transform: uppercase"
+                /></label>
+                <label
+                  >Tonase
+                  <input
+                    type="text"
+                    name="tonase"
+                    class="form-control"
+                    required
+                /></label>
+                <label
+                  >Tanda Pendaftaran
+                  <input
+                    type="text"
+                    name="tandaPendaftaran"
+                    class="form-control"
+                    required
+                /></label>
+                <label
+                  >Pemilik
+                  <input
+                    type="text"
+                    name="pemilik"
+                    class="form-control"
+                    required
+                    style="text-transform: uppercase"
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Tempat Terbit
+                  <input type="text" name="tempatStkk" class="form-control"
+                /></label>
+                <label
+                  >Tanggal
+                  <input type="date" name="tglStkk" class="form-control"
+                /></label>
+                <label
+                  >No. Urut
+                  <input type="text" name="noUrutStkk" class="form-control"
+                /></label>
+                <label
+                  >No. Hal
+                  <input type="text" name="noHalStkk" class="form-control"
+                /></label>
+                <label
+                  >No. Buku
+                  <input type="text" name="noBukuStkk" class="form-control"
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>3. Pengukuhan</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Status
+                  <input
+                    type="text"
+                    name="statusPengukuhan"
+                    class="form-control"
+                    placeholder="PENGUKUHAN / HIPOTIK"
+                    required
+                    style="text-transform: uppercase"
+                /></label>
+                <label
+                  >Tanggal
+                  <input
+                    type="date"
+                    name="tglPengukuhan"
+                    class="form-control"
+                    required
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Permohonan
+                  <input
+                    type="file"
+                    name="permohonan"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >STKK
+                  <input
+                    type="file"
+                    name="stkk"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Grosse
+                  <input
+                    type="file"
+                    name="grosse"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Surat Ukur
+                  <input
+                    type="file"
+                    name="ukur"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >PNBP
+                  <input
+                    type="file"
+                    name="pnbp"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <div id="btn-container-SHSK" class="form-actions">
+            <button type="submit" class="btn-gold-save" id="btn-save-SHSK">
+              <i class="fa fa-save"></i> SIMPAN DATA
+            </button>
+            <button
+              type="button"
+              class="btn-edit-mode hidden"
+              id="btn-unlock-SHSK"
+              onclick="enableEditMode('SHSK')"
+            >
+              <i class="fa fa-pencil-alt"></i> UBAH DATA
+            </button>
+            <button
+              type="button"
+              class="btn-cancel-edit hidden"
+              id="btn-cancel-SHSK"
+              onclick="cancelEdit('SHSK')"
+            >
+              BATAL
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="sec-shsk-data" class="hidden">
+        <div class="section-header">
+          <h2>Data Arsip Status Hukum</h2>
+          <div class="header-actions">
+            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
+              Refresh
+            </button>
+            <button class="btn-action btn-export" onclick="exportExcel('SHSK')">
+              Export
+            </button>
+          </div>
+        </div>
+        <div class="filter-card">
+          <div class="grid-filter">
+            <input
+              type="text"
+              id="searchSHSK"
+              placeholder="Cari..."
+              class="form-control"
+            />
+            <button onclick="applyFilter('SHSK')" class="btn-action btn-filter">
+              Cari
+            </button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="table-shsk">
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>NO URUT</th>
+                  <th>NAMA KAPAL</th>
+                  <th>TONASE</th>
+                  <th>TANDA PENDAFTARAN</th>
+                  <th>PEMILIK</th>
+                  <th>TEMPAT STKK</th>
+                  <th>TGL STKK</th>
+                  <th>NO URUT</th>
+                  <th>NO HAL</th>
+                  <th>NO BUKU</th>
+                  <th>STATUS</th>
+                  <th>TGL PENGUKUHAN</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-shsk"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pagination-controls">
+          <button onclick="prevPage('SHSK')"><</button
+          ><span id="page-info-SHSK">Hal 1</span
+          ><button onclick="nextPage('SHSK')">></button>
+        </div>
+      </div>
+
+      <div id="sec-sertifikasi-input" class="hidden">
+        <div class="section-header"><h2>Input Arsip Sertifikasi</h2></div>
+        <form
+          id="formSertifikasi"
+          onsubmit="event.preventDefault(); handleSubmit('SERTIFIKASI')"
+        >
+          <input type="hidden" name="noUrut" id="sert-noUrut" />
+          <input type="hidden" name="oldFolderUrl" id="sert-oldFolderUrl" />
+
+          <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Perusahaan
+                  <input
+                    type="text"
+                    name="perusahaan"
+                    class="form-control"
+                    required
+                    style="text-transform: uppercase"
+                /></label>
+                <label
+                  >Nama Kapal
+                  <input
+                    type="text"
+                    name="namaKapal"
+                    class="form-control"
+                    required
+                    style="text-transform: uppercase"
+                /></label>
+                <label
+                  >Ukuran (GT)
+                  <input type="text" name="ukuran" class="form-control"
+                /></label>
+                <label
+                  >Call Sign
+                  <input type="text" name="callSign" class="form-control"
+                /></label>
+                <label
+                  >Bahan <input type="text" name="bahan" class="form-control"
+                /></label>
+
+                <label
+                  >Daerah Pelayaran
+                  <select name="daerahPelayaran" class="form-control">
+                    <option value="">-- Pilih --</option>
+                    <option value="SEMUA LAUTAN">Semua Lautan</option>
+                    <option value="PERAIRAN INDONESIA">
+                      Perairan Indonesia
+                    </option>
+                    <option value="LOKAL">Lokal</option>
+                    <option value="TERBATAS">Terbatas</option>
+                    <option value="AREA PELABUHAN">Area Pelabuhan</option>
+                  </select>
+                </label>
+                <label
+                  >Keterangan
+                  <select name="keterangan" class="form-control">
+                    <option value="">(Kosong)</option>
+                    <option value="DOCKING">Docking</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>2. Data Sertifikat</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Jenis Sertifikat
+                  <select name="jenisSertifikat" class="form-control" required>
+                    <option value="">-- Pilih Jenis --</option>
+                    <option value="SEA TRIAL">SEA TRIAL</option>
+                    <option value="KONSTRUKSI">KONSTRUKSI</option>
+                    <option value="PERLENGKAPAN">PERLENGKAPAN</option>
+                    <option value="RADIO">RADIO</option>
+                    <option value="ENDORS KONSTRUKSI">ENDORS KONSTRUKSI</option>
+                    <option value="ENDORS PERLENGKAPAN">
+                      ENDORS PERLENGKAPAN
+                    </option>
+                    <option value="ENDORS RADIO">ENDORS RADIO</option>
+                    <option value="GARIS MUAT">GARIS MUAT</option>
+                    <option value="KESELAMATAN KLM">KESELAMATAN KLM</option>
+                    <option value="KESELAMATAN MOORING">
+                      KESELAMATAN MOORING
+                    </option>
+                    <option value="IMDG">IMDG</option>
+                    <option value="SNPP">SNPP</option>
+                    <option value="ENDORS SNPP">ENDORS SNPP</option>
+                    <option value="IOPP">IOPP</option>
+                    <option value="ENDORS IOPP">ENDORS IOPP</option>
+                    <option value="ISPP">ISPP</option>
+                    <option value="ENDORS ISPP">ENDORS ISPP</option>
+                    <option value="IAPP">IAPP</option>
+                    <option value="ENDORS IAPP">ENDORS IAPP</option>
+                    <option value="BALLAST WATER MANAGEMENT">
+                      BALLAST WATER MANAGEMENT
+                    </option>
+                    <option value="ANTIFOULING">ANTIFOULING</option>
+                    <option value="DOC">DOC</option>
+                    <option value="ENDORS DOC">ENDORS DOC</option>
+                    <option value="SMC">SMC</option>
+                    <option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option>
+                    <option value="PENEGASAH GAMBAR KAPAL">
+                      PENEGASAH GAMBAR KAPAL
+                    </option>
+                    <option value="LIFE RAFT">LIFE RAFT</option>
+                    <option value="FIRE EXTINGUISHER">FIRE EXTINGUISHER</option>
+                  </select>
+                </label>
+                <label
+                  >Tgl Terbit
+                  <input
+                    type="date"
+                    name="tglTerbit"
+                    class="form-control"
+                    required
+                /></label>
+                <label
+                  >Masa Berlaku
+                  <input type="date" name="tglBerlaku" class="form-control"
+                /></label>
+                <label
+                  >No. Sertifikat
+                  <input type="text" name="noSertifikat" class="form-control"
+                /></label>
+                <label
+                  >Kode Billing
+                  <input type="text" name="kodeBilling" class="form-control"
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>3. Pemeriksa</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Nama Pemeriksa
+                  <select name="pemeriksa" class="form-control" required>
+                    <option value="">-- Pilih Pemeriksa --</option>
+                    <option value="BUSTANUL ARIFIN, S.A.P.">
+                      BUSTANUL ARIFIN, S.A.P.
+                    </option>
+                    <option value="HARNO SIAGIAN, A.Md">
+                      HARNO SIAGIAN, A.Md
+                    </option>
+                    <option value="ANTON SUJARWADI, S.Si.T, M.M.">
+                      ANTON SUJARWADI, S.Si.T, M.M.
+                    </option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="grid-form">
+                <label
+                  >Permohonan
+                  <input
+                    type="file"
+                    name="permohonan"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Evaluasi
+                  <input
+                    type="file"
+                    name="evaluasi"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Laporan Pemeriksaan
+                  <input
+                    type="file"
+                    name="laporan_pemeriksaan"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Sertifikat
+                  <input
+                    type="file"
+                    name="sertifikat"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Surat Tugas
+                  <input
+                    type="file"
+                    name="surat_tugas"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >PNBP
+                  <input
+                    type="file"
+                    name="pnbp"
+                    accept=".pdf,.doc,.docx,image/*"
+                /></label>
+                <label
+                  >Foto/Dokumentasi
+                  <input
+                    type="file"
+                    name="foto"
+                    accept="image/*,.pdf,.doc,.docx"
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <div id="btn-container-SERTIFIKASI" class="form-actions">
+            <button
+              type="submit"
+              class="btn-gold-save"
+              id="btn-save-SERTIFIKASI"
+            >
+              <i class="fa fa-save"></i> SIMPAN DATA
+            </button>
+            <button
+              type="button"
+              class="btn-edit-mode hidden"
+              id="btn-unlock-SERTIFIKASI"
+              onclick="enableEditMode('SERTIFIKASI')"
+            >
+              <i class="fa fa-pencil-alt"></i> UBAH DATA
+            </button>
+            <button
+              type="button"
+              class="btn-cancel-edit hidden"
+              id="btn-cancel-SERTIFIKASI"
+              onclick="cancelEdit('SERTIFIKASI')"
+            >
+              BATAL
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="sec-sertifikasi-data" class="hidden">
+        <div class="section-header">
+          <h2>Data Arsip Sertifikasi</h2>
+          <div class="header-actions">
+            <button
+              class="btn-action btn-refresh"
+              onclick="loadData('SERTIFIKASI')"
+            >
+              Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportExcel('SERTIFIKASI')"
+            >
+              Export
+            </button>
+          </div>
+        </div>
+        <div class="filter-card">
+          <div class="grid-filter">
+            <input
+              type="text"
+              id="searchSertifikasi"
+              placeholder="Cari..."
+              class="form-control"
+            />
+            <button
+              onclick="applyFilter('SERTIFIKASI')"
+              class="btn-action btn-filter"
+            >
+              Cari
+            </button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="table-sertifikasi">
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>NO URUT</th>
+                  <th>PERUSAHAAN</th>
+                  <th>NAMA KAPAL</th>
+                  <th>UKURAN</th>
+                  <th>CALL SIGN</th>
+                  <th>BAHAN</th>
+                  <th>KET</th>
+                  <th>JENIS</th>
+                  <th>TERBIT</th>
+                  <th>MASA BERLAKU</th>
+                  <th>DAERAH PELAYARAN</th>
+                  <th>NO SERT</th>
+                  <th>BILLING</th>
+                  <th>PEMERIKSA</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-sertifikasi"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pagination-controls">
+          <button onclick="prevPage('SERTIFIKASI')"><</button
+          ><span id="page-info-SERTIFIKASI">Hal 1</span
+          ><button onclick="nextPage('SERTIFIKASI')">></button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
