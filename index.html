@@ -159,7 +159,84 @@
         }
       };
 
-      // --- 3. SWITCH ROLE ---
+      // --- 3. HANDLE LOGIN WRAPPER (LOGIKA UTAMA) ---
+      async function handleLoginWrapper(e, role) {
+        e.preventDefault();
+
+        // Tentukan ID Input & Tombol berdasarkan Role
+        let btnId, inputUserId, inputPassId;
+        if (role === "PETUGAS") {
+          btnId = "btnSubmitPetugas";
+          inputUserId = "nip";
+          inputPassId = "passPetugas";
+        } else {
+          btnId = "btnSubmitPengguna";
+          inputUserId = "email";
+          inputPassId = "passPengguna";
+        }
+
+        const btn = document.getElementById(btnId);
+        const inputUser = document.getElementById(inputUserId);
+        const inputPass = document.getElementById(inputPassId);
+        const originalText = btn.innerHTML;
+
+        // Validasi Kosong
+        if (!inputUser.value.trim() || !inputPass.value.trim()) {
+            showPopup("Mohon isi semua data!", "error");
+            return;
+        }
+
+        // Simpan Remember Me
+        if (role === "PETUGAS") {
+          if (document.getElementById("checkPetugas").checked) localStorage.setItem("shsk_nip", inputUser.value);
+          else localStorage.removeItem("shsk_nip");
+        } else {
+          if (document.getElementById("checkPengguna").checked) localStorage.setItem("shsk_email", inputUser.value);
+          else localStorage.removeItem("shsk_email");
+        }
+
+        // TAMPILAN LOADING
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+
+        try {
+            // PANGGIL FUNGSI MURNI DARI SCRIPT.JS
+            const res = await handleLogin(role, inputUser.value.trim(), inputPass.value.trim());
+
+            if (res.status === "SUCCESS") {
+                // === SUKSES ===
+                localStorage.setItem("user", JSON.stringify(res.data));
+                showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
+                setTimeout(() => { 
+                    window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; 
+                }, 3000); // 3 Detik Redirect
+            } else {
+                // === GAGAL (RESET FORM) ===
+                showPopup("Login Gagal: " + res.message, "error");
+                
+                // RESET UI
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                
+                // KOSONGKAN PASSWORD & USERNAME
+                inputPass.value = "";
+                inputUser.value = "";
+                
+                // FOKUS KEMBALI KE INPUT PERTAMA
+                inputUser.focus();
+            }
+        } catch (err) {
+            // === ERROR KONEKSI ===
+            showPopup("Gagal koneksi ke server.", "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+      }
+
+      // --- 4. SWITCH ROLE ---
       function switchRole(role) {
         const card = document.getElementById("loginCard");
         const title = document.getElementById("titleText");
@@ -168,7 +245,7 @@
         const formPetugas = document.getElementById("formPetugas");
         const formPengguna = document.getElementById("formPengguna");
 
-        // Reset Form Password
+        // Reset Tampilan Password
         document.getElementById("passPetugas").type = "password";
         document.getElementById("passPengguna").type = "password";
         document.querySelectorAll(".password-icon").forEach((i) => {
@@ -198,12 +275,6 @@
           formPengguna.classList.remove("hidden");
         }
       }
-      
-      // CATATAN: Fungsi Login dipanggil langsung oleh onsubmit="handleLogin(event, role)"
-      // Pastikan di bagian HTML <form> atribut onsubmit-nya sudah diganti menjadi:
-      // onsubmit="handleLogin(event, 'PETUGAS')" 
-      // dan
-      // onsubmit="handleLogin(event, 'PENGGUNA')"
     </script>
   </body>
 </html>
