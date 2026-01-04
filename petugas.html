@@ -41,7 +41,7 @@
         <div class="modal-icon-danger"><i class="fa fa-trash-can"></i></div>
         <h3>Hapus Data?</h3>
         <p>
-          Data ini akan dihapus secara permanen dari sistem dan Google Drive.
+          Data ini akan dihapus dari sistem. Jika ini file terakhir di folder, folder juga akan dihapus.
         </p>
         <div class="modal-buttons">
           <button class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
@@ -232,182 +232,24 @@
       </div>
 
       <div id="sec-shsk-input" class="hidden">
-        <div class="section-header"><h2>Input Arsip Status Hukum</h2></div>
-        <form
-          id="formSHSK"
-          onsubmit="event.preventDefault(); handleSubmit('SHSK')"
-        >
-          <input type="hidden" name="noUrut" id="shsk-noUrut" />
-          <input type="hidden" name="oldFolderUrl" id="shsk-oldFolderUrl" />
-
-          <div class="accordion-item open">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i>
+        <div class="section-header">
+            <h2>Input Arsip Status Hukum</h2>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-weight:600; color:var(--navy);">Jumlah Data:</label>
+                <select id="bulkCountSHSK" class="form-control" style="width:70px; padding:5px;" onchange="renderBulkForm('SHSK')">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                </select>
             </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Nama Kapal
-                  <input
-                    type="text"
-                    name="namaKapal"
-                    class="form-control"
-                    required
-                    style="text-transform: uppercase"
-                /></label>
-                <label
-                  >Tonase
-                  <input
-                    type="text"
-                    name="tonase"
-                    class="form-control"
-                    required
-                /></label>
-                <label
-                  >Tanda Pendaftaran
-                  <input
-                    type="text"
-                    name="tandaPendaftaran"
-                    class="form-control"
-                    required
-                /></label>
-                <label
-                  >Pemilik
-                  <input
-                    type="text"
-                    name="pemilik"
-                    class="form-control"
-                    required
-                    style="text-transform: uppercase"
-                /></label>
-              </div>
+        </div>
+        
+        <form id="formSHSK" onsubmit="event.preventDefault(); handleBulkSubmit('SHSK')">
+            <div id="bulk-container-SHSK">
+               </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-gold-save" id="btn-save-SHSK"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
+                <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SHSK" onclick="cancelEdit('SHSK')">BATAL</button>
             </div>
-          </div>
-
-          <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Tempat Terbit
-                  <input type="text" name="tempatStkk" class="form-control"
-                /></label>
-                <label
-                  >Tanggal
-                  <input type="date" name="tglStkk" class="form-control"
-                /></label>
-                <label
-                  >No. Urut
-                  <input type="text" name="noUrutStkk" class="form-control"
-                /></label>
-                <label
-                  >No. Hal
-                  <input type="text" name="noHalStkk" class="form-control"
-                /></label>
-                <label
-                  >No. Buku
-                  <input type="text" name="noBukuStkk" class="form-control"
-                /></label>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>3. Pengukuhan</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Status
-                  <input
-                    type="text"
-                    name="statusPengukuhan"
-                    class="form-control"
-                    placeholder="PENGUKUHAN / HIPOTIK"
-                    required
-                    style="text-transform: uppercase"
-                /></label>
-                <label
-                  >Tanggal
-                  <input
-                    type="date"
-                    name="tglPengukuhan"
-                    class="form-control"
-                    required
-                /></label>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Permohonan
-                  <input
-                    type="file"
-                    name="permohonan"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >STKK
-                  <input
-                    type="file"
-                    name="stkk"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Grosse
-                  <input
-                    type="file"
-                    name="grosse"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Surat Ukur
-                  <input
-                    type="file"
-                    name="ukur"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >PNBP
-                  <input
-                    type="file"
-                    name="pnbp"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-              </div>
-            </div>
-          </div>
-
-          <div id="btn-container-SHSK" class="form-actions">
-            <button type="submit" class="btn-gold-save" id="btn-save-SHSK">
-              <i class="fa fa-save"></i> SIMPAN DATA
-            </button>
-            <button
-              type="button"
-              class="btn-edit-mode hidden"
-              id="btn-unlock-SHSK"
-              onclick="enableEditMode('SHSK')"
-            >
-              <i class="fa fa-pencil-alt"></i> UBAH DATA
-            </button>
-            <button
-              type="button"
-              class="btn-cancel-edit hidden"
-              id="btn-cancel-SHSK"
-              onclick="cancelEdit('SHSK')"
-            >
-              BATAL
-            </button>
-          </div>
         </form>
       </div>
 
@@ -415,34 +257,37 @@
         <div class="section-header">
           <h2>Data Arsip Status Hukum</h2>
           <div class="header-actions">
-            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
-              Refresh
-            </button>
-            <button class="btn-action btn-export" onclick="exportExcel('SHSK')">
-              Export
+            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">Refresh</button>
+            <button class="btn-action btn-export" onclick="exportTriple('SHSK')">
+               <i class="fa fa-file-excel"></i> Export Laporan
             </button>
           </div>
         </div>
-        <div class="filter-card">
-          <div class="grid-filter">
-            <input
-              type="text"
-              id="searchSHSK"
-              placeholder="Cari..."
-              class="form-control"
-            />
-            <button onclick="applyFilter('SHSK')" class="btn-action btn-filter">
-              Cari
-            </button>
+
+        <div class="filter-card" style="border-left: 5px solid var(--gold);">
+          <div class="grid-filter" style="grid-template-columns: 1fr 1fr 2fr auto; gap:10px;">
+             <select id="filterSHSKBulan" class="form-control">
+               <option value="">Semua Bulan</option>
+               <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+               <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+               <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+               <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+             </select>
+             <select id="filterSHSKTahun" class="form-control">
+               <option value="">Semua Tahun</option>
+               <script>for(let y=2020; y<=2030; y++) document.write(`<option value='${y}'>${y}</option>`);</script>
+             </select>
+             <input type="text" id="searchSHSK" placeholder="Cari Nama/Pemilik/No..." class="form-control"/>
+             <button onclick="applyFilter('SHSK')" class="btn-action btn-filter"><i class="fa fa-filter"></i> Terapkan</button>
           </div>
         </div>
+
         <div class="table-card">
           <div class="table-responsive">
             <table class="data-table" id="table-shsk">
               <thead>
                 <tr>
                   <th>NO</th>
-                  <th>NO URUT</th>
                   <th>NAMA KAPAL</th>
                   <th>TONASE</th>
                   <th>TANDA PENDAFTARAN</th>
@@ -462,262 +307,29 @@
           </div>
         </div>
         <div class="pagination-controls">
-          <button onclick="prevPage('SHSK')"><</button
-          ><span id="page-info-SHSK">Hal 1</span
-          ><button onclick="nextPage('SHSK')">></button>
+          <button onclick="prevPage('SHSK')"><</button><span id="page-info-SHSK">Hal 1</span><button onclick="nextPage('SHSK')">></button>
         </div>
       </div>
 
       <div id="sec-sertifikasi-input" class="hidden">
-        <div class="section-header"><h2>Input Arsip Sertifikasi</h2></div>
-        <form
-          id="formSertifikasi"
-          onsubmit="event.preventDefault(); handleSubmit('SERTIFIKASI')"
-        >
-          <input type="hidden" name="noUrut" id="sert-noUrut" />
-          <input type="hidden" name="oldFolderUrl" id="sert-oldFolderUrl" />
+        <div class="section-header">
+            <h2>Input Arsip Sertifikasi</h2>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-weight:600; color:var(--navy);">Jumlah Data:</label>
+                <select id="bulkCountSertifikasi" class="form-control" style="width:70px; padding:5px;" onchange="renderBulkForm('SERTIFIKASI')">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                </select>
+            </div>
+        </div>
 
-          <div class="accordion-item open">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Perusahaan
-                  <input
-                    type="text"
-                    name="perusahaan"
-                    class="form-control"
-                    required
-                    style="text-transform: uppercase"
-                /></label>
-                <label
-                  >Nama Kapal
-                  <input
-                    type="text"
-                    name="namaKapal"
-                    class="form-control"
-                    required
-                    style="text-transform: uppercase"
-                /></label>
-                <label
-                  >Ukuran (GT)
-                  <input type="text" name="ukuran" class="form-control"
-                /></label>
-                <label
-                  >Call Sign
-                  <input type="text" name="callSign" class="form-control"
-                /></label>
-                <label
-                  >Bahan <input type="text" name="bahan" class="form-control"
-                /></label>
+        <form id="formSertifikasi" onsubmit="event.preventDefault(); handleBulkSubmit('SERTIFIKASI')">
+            <div id="bulk-container-SERTIFIKASI">
+               </div>
 
-                <label
-                  >Daerah Pelayaran
-                  <select name="daerahPelayaran" class="form-control">
-                    <option value="">-- Pilih --</option>
-                    <option value="SEMUA LAUTAN">Semua Lautan</option>
-                    <option value="PERAIRAN INDONESIA">
-                      Perairan Indonesia
-                    </option>
-                    <option value="LOKAL">Lokal</option>
-                    <option value="TERBATAS">Terbatas</option>
-                    <option value="AREA PELABUHAN">Area Pelabuhan</option>
-                  </select>
-                </label>
-                <label
-                  >Keterangan
-                  <select name="keterangan" class="form-control">
-                    <option value="">(Kosong)</option>
-                    <option value="DOCKING">Docking</option>
-                  </select>
-                </label>
-              </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-gold-save" id="btn-save-SERTIFIKASI"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
+                <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERTIFIKASI" onclick="cancelEdit('SERTIFIKASI')">BATAL</button>
             </div>
-          </div>
-
-          <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>2. Data Sertifikat</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Jenis Sertifikat
-                  <select name="jenisSertifikat" class="form-control" required>
-                    <option value="">-- Pilih Jenis --</option>
-                    <option value="SEA TRIAL">SEA TRIAL</option>
-                    <option value="KONSTRUKSI">KONSTRUKSI</option>
-                    <option value="PERLENGKAPAN">PERLENGKAPAN</option>
-                    <option value="RADIO">RADIO</option>
-                    <option value="ENDORS KONSTRUKSI">ENDORS KONSTRUKSI</option>
-                    <option value="ENDORS PERLENGKAPAN">
-                      ENDORS PERLENGKAPAN
-                    </option>
-                    <option value="ENDORS RADIO">ENDORS RADIO</option>
-                    <option value="GARIS MUAT">GARIS MUAT</option>
-                    <option value="KESELAMATAN KLM">KESELAMATAN KLM</option>
-                    <option value="KESELAMATAN MOORING">
-                      KESELAMATAN MOORING
-                    </option>
-                    <option value="IMDG">IMDG</option>
-                    <option value="SNPP">SNPP</option>
-                    <option value="ENDORS SNPP">ENDORS SNPP</option>
-                    <option value="IOPP">IOPP</option>
-                    <option value="ENDORS IOPP">ENDORS IOPP</option>
-                    <option value="ISPP">ISPP</option>
-                    <option value="ENDORS ISPP">ENDORS ISPP</option>
-                    <option value="IAPP">IAPP</option>
-                    <option value="ENDORS IAPP">ENDORS IAPP</option>
-                    <option value="BALLAST WATER MANAGEMENT">
-                      BALLAST WATER MANAGEMENT
-                    </option>
-                    <option value="ANTIFOULING">ANTIFOULING</option>
-                    <option value="DOC">DOC</option>
-                    <option value="ENDORS DOC">ENDORS DOC</option>
-                    <option value="SMC">SMC</option>
-                    <option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option>
-                    <option value="PENEGASAH GAMBAR KAPAL">
-                      PENEGASAH GAMBAR KAPAL
-                    </option>
-                    <option value="LIFE RAFT">LIFE RAFT</option>
-                    <option value="FIRE EXTINGUISHER">FIRE EXTINGUISHER</option>
-                  </select>
-                </label>
-                <label
-                  >Tgl Terbit
-                  <input
-                    type="date"
-                    name="tglTerbit"
-                    class="form-control"
-                    required
-                /></label>
-                <label
-                  >Masa Berlaku
-                  <input type="date" name="tglBerlaku" class="form-control"
-                /></label>
-                <label
-                  >No. Sertifikat
-                  <input type="text" name="noSertifikat" class="form-control"
-                /></label>
-                <label
-                  >Kode Billing
-                  <input type="text" name="kodeBilling" class="form-control"
-                /></label>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>3. Pemeriksa</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Nama Pemeriksa
-                  <select name="pemeriksa" class="form-control" required>
-                    <option value="">-- Pilih Pemeriksa --</option>
-                    <option value="BUSTANUL ARIFIN, S.A.P.">
-                      BUSTANUL ARIFIN, S.A.P.
-                    </option>
-                    <option value="HARNO SIAGIAN, A.Md">
-                      HARNO SIAGIAN, A.Md
-                    </option>
-                    <option value="ANTON SUJARWADI, S.Si.T, M.M.">
-                      ANTON SUJARWADI, S.Si.T, M.M.
-                    </option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-              <span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i>
-            </div>
-            <div class="accordion-body">
-              <div class="grid-form">
-                <label
-                  >Permohonan
-                  <input
-                    type="file"
-                    name="permohonan"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Evaluasi
-                  <input
-                    type="file"
-                    name="evaluasi"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Laporan Pemeriksaan
-                  <input
-                    type="file"
-                    name="laporan_pemeriksaan"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Sertifikat
-                  <input
-                    type="file"
-                    name="sertifikat"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Surat Tugas
-                  <input
-                    type="file"
-                    name="surat_tugas"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >PNBP
-                  <input
-                    type="file"
-                    name="pnbp"
-                    accept=".pdf,.doc,.docx,image/*"
-                /></label>
-                <label
-                  >Foto/Dokumentasi
-                  <input
-                    type="file"
-                    name="foto"
-                    accept="image/*,.pdf,.doc,.docx"
-                /></label>
-              </div>
-            </div>
-          </div>
-
-          <div id="btn-container-SERTIFIKASI" class="form-actions">
-            <button
-              type="submit"
-              class="btn-gold-save"
-              id="btn-save-SERTIFIKASI"
-            >
-              <i class="fa fa-save"></i> SIMPAN DATA
-            </button>
-            <button
-              type="button"
-              class="btn-edit-mode hidden"
-              id="btn-unlock-SERTIFIKASI"
-              onclick="enableEditMode('SERTIFIKASI')"
-            >
-              <i class="fa fa-pencil-alt"></i> UBAH DATA
-            </button>
-            <button
-              type="button"
-              class="btn-cancel-edit hidden"
-              id="btn-cancel-SERTIFIKASI"
-              onclick="cancelEdit('SERTIFIKASI')"
-            >
-              BATAL
-            </button>
-          </div>
         </form>
       </div>
 
@@ -725,43 +337,42 @@
         <div class="section-header">
           <h2>Data Arsip Sertifikasi</h2>
           <div class="header-actions">
-            <button
-              class="btn-action btn-refresh"
-              onclick="loadData('SERTIFIKASI')"
-            >
-              Refresh
-            </button>
-            <button
-              class="btn-action btn-export"
-              onclick="exportExcel('SERTIFIKASI')"
-            >
-              Export
+            <button class="btn-action btn-refresh" onclick="loadData('SERTIFIKASI')">Refresh</button>
+            <button class="btn-action btn-export" onclick="exportTriple('SERTIFIKASI')">
+               <i class="fa fa-file-excel"></i> Export Laporan
             </button>
           </div>
         </div>
-        <div class="filter-card">
-          <div class="grid-filter">
-            <input
-              type="text"
-              id="searchSertifikasi"
-              placeholder="Cari..."
-              class="form-control"
-            />
-            <button
-              onclick="applyFilter('SERTIFIKASI')"
-              class="btn-action btn-filter"
-            >
-              Cari
-            </button>
+
+        <div class="filter-card" style="border-left: 5px solid var(--neon-blue);">
+          <div class="grid-filter" style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto; gap:10px;">
+             <select id="filterSertBulan" class="form-control">
+               <option value="">Semua Bulan</option>
+               <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+               <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+               <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+               <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+             </select>
+             <select id="filterSertTahun" class="form-control">
+               <option value="">Semua Tahun</option>
+               <script>for(let y=2020; y<=2030; y++) document.write(`<option value='${y}'>${y}</option>`);</script>
+             </select>
+             <select id="filterSertJenis" class="form-control">
+               <option value="">Semua Jenis</option>
+               </select>
+             <input type="text" id="filterSertDaerah" class="form-control" placeholder="Cari Daerah Pelayaran"/>
+             <input type="text" id="searchSertifikasi" placeholder="Cari Nama/Perusahaan..." class="form-control"/>
+             
+             <button onclick="applyFilter('SERTIFIKASI')" class="btn-action btn-filter"><i class="fa fa-filter"></i> Terapkan</button>
           </div>
         </div>
+
         <div class="table-card">
           <div class="table-responsive">
             <table class="data-table" id="table-sertifikasi">
               <thead>
                 <tr>
                   <th>NO</th>
-                  <th>NO URUT</th>
                   <th>PERUSAHAAN</th>
                   <th>NAMA KAPAL</th>
                   <th>UKURAN</th>
@@ -783,13 +394,10 @@
           </div>
         </div>
         <div class="pagination-controls">
-          <button onclick="prevPage('SERTIFIKASI')"><</button
-          ><span id="page-info-SERTIFIKASI">Hal 1</span
-          ><button onclick="nextPage('SERTIFIKASI')">></button>
+          <button onclick="prevPage('SERTIFIKASI')"><</button><span id="page-info-SERTIFIKASI">Hal 1</span><button onclick="nextPage('SERTIFIKASI')">></button>
         </div>
       </div>
     </div>
     <script src="script.js"></script>
   </body>
 </html>
-
