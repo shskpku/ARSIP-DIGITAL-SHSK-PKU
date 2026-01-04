@@ -128,115 +128,22 @@
       </div>
     </div>
 
-        <script src="script.js"></script>
+    <script src="script.js"></script>
 
     <script>
-      // --- 1. TOGGLE PASSWORD ---
+      // --- TOGGLE PASSWORD ---
       function togglePass(icon) {
         const input = icon.parentElement.querySelector("input");
         if (input.type === "password") {
           input.type = "text";
-          icon.classList.remove("fa-eye");
-          icon.classList.add("fa-eye-slash");
+          icon.classList.replace("fa-eye", "fa-eye-slash");
         } else {
           input.type = "password";
-          icon.classList.remove("fa-eye-slash");
-          icon.classList.add("fa-eye");
+          icon.classList.replace("fa-eye-slash", "fa-eye");
         }
       }
 
-      // --- 2. LOAD REMEMBER ME ---
-      window.onload = function () {
-        const savedNip = localStorage.getItem("shsk_nip");
-        if (savedNip) {
-          document.getElementById("nip").value = savedNip;
-          document.getElementById("checkPetugas").checked = true;
-        }
-        const savedEmail = localStorage.getItem("shsk_email");
-        if (savedEmail) {
-          document.getElementById("email").value = savedEmail;
-          document.getElementById("checkPengguna").checked = true;
-        }
-      };
-
-      // --- 3. HANDLE LOGIN WRAPPER (LOGIKA UTAMA) ---
-      async function handleLoginWrapper(e, role) {
-        e.preventDefault();
-
-        // Tentukan ID Input & Tombol berdasarkan Role
-        let btnId, inputUserId, inputPassId;
-        if (role === "PETUGAS") {
-          btnId = "btnSubmitPetugas";
-          inputUserId = "nip";
-          inputPassId = "passPetugas";
-        } else {
-          btnId = "btnSubmitPengguna";
-          inputUserId = "email";
-          inputPassId = "passPengguna";
-        }
-
-        const btn = document.getElementById(btnId);
-        const inputUser = document.getElementById(inputUserId);
-        const inputPass = document.getElementById(inputPassId);
-        const originalText = btn.innerHTML;
-
-        // Validasi Kosong
-        if (!inputUser.value.trim() || !inputPass.value.trim()) {
-            showPopup("Mohon isi semua data!", "error");
-            return;
-        }
-
-        // Simpan Remember Me
-        if (role === "PETUGAS") {
-          if (document.getElementById("checkPetugas").checked) localStorage.setItem("shsk_nip", inputUser.value);
-          else localStorage.removeItem("shsk_nip");
-        } else {
-          if (document.getElementById("checkPengguna").checked) localStorage.setItem("shsk_email", inputUser.value);
-          else localStorage.removeItem("shsk_email");
-        }
-
-        // TAMPILAN LOADING
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
-
-        try {
-            // PANGGIL FUNGSI MURNI DARI SCRIPT.JS
-            const res = await handleLogin(role, inputUser.value.trim(), inputPass.value.trim());
-
-            if (res.status === "SUCCESS") {
-                // === SUKSES ===
-                localStorage.setItem("user", JSON.stringify(res.data));
-                showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
-                setTimeout(() => { 
-                    window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; 
-                }, 3000); // 3 Detik Redirect
-            } else {
-                // === GAGAL (RESET FORM) ===
-                showPopup("Login Gagal: " + res.message, "error");
-                
-                // RESET UI
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                btn.style.opacity = "1";
-                
-                // KOSONGKAN PASSWORD & USERNAME
-                inputPass.value = "";
-                inputUser.value = "";
-                
-                // FOKUS KEMBALI KE INPUT PERTAMA
-                inputUser.focus();
-            }
-        } catch (err) {
-            // === ERROR KONEKSI ===
-            showPopup("Gagal koneksi ke server.", "error");
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            btn.style.opacity = "1";
-        }
-      }
-
-      // --- 4. SWITCH ROLE ---
+      // --- SWITCH ROLE ---
       function switchRole(role) {
         const card = document.getElementById("loginCard");
         const title = document.getElementById("titleText");
@@ -245,29 +152,24 @@
         const formPetugas = document.getElementById("formPetugas");
         const formPengguna = document.getElementById("formPengguna");
 
-        // Reset Tampilan Password
+        // Reset Form
         document.getElementById("passPetugas").type = "password";
         document.getElementById("passPengguna").type = "password";
         document.querySelectorAll(".password-icon").forEach((i) => {
-          i.classList.remove("fa-eye-slash");
-          i.classList.add("fa-eye");
+          i.classList.replace("fa-eye-slash", "fa-eye");
         });
 
         if (role === "PETUGAS") {
-          document.body.classList.remove("mode-pengguna");
-          document.body.classList.add("mode-petugas");
-          card.classList.remove("mode-pengguna");
-          card.classList.add("mode-petugas");
+          document.body.classList.replace("mode-pengguna", "mode-petugas");
+          card.classList.replace("mode-pengguna", "mode-petugas");
           title.innerText = "LOGIN PETUGAS";
           btnPetugas.classList.add("active");
           btnPengguna.classList.remove("active");
           formPetugas.classList.remove("hidden");
           formPengguna.classList.add("hidden");
         } else {
-          document.body.classList.remove("mode-petugas");
-          document.body.classList.add("mode-pengguna");
-          card.classList.remove("mode-petugas");
-          card.classList.add("mode-pengguna");
+          document.body.classList.replace("mode-petugas", "mode-pengguna");
+          card.classList.replace("mode-petugas", "mode-pengguna");
           title.innerText = "LOGIN PENGGUNA";
           btnPetugas.classList.remove("active");
           btnPengguna.classList.add("active");
@@ -275,6 +177,18 @@
           formPengguna.classList.remove("hidden");
         }
       }
+      
+      // LOAD REMEMBER ME
+      window.onload = function () {
+        if(localStorage.getItem("shsk_nip")) {
+            document.getElementById("nip").value = localStorage.getItem("shsk_nip");
+            document.getElementById("checkPetugas").checked = true;
+        }
+        if(localStorage.getItem("shsk_email")) {
+            document.getElementById("email").value = localStorage.getItem("shsk_email");
+            document.getElementById("checkPengguna").checked = true;
+        }
+      };
     </script>
   </body>
 </html>
