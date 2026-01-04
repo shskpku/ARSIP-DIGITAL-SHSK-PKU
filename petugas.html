@@ -40,9 +40,7 @@
       <div class="modal-box zoom-anim">
         <div class="modal-icon-danger"><i class="fa fa-trash-can"></i></div>
         <h3>Hapus Data?</h3>
-        <p>
-          Data ini akan dihapus dari sistem. Jika ini file terakhir di folder, folder juga akan dihapus.
-        </p>
+        <p>Data ini akan dihapus permanen dari sistem.</p>
         <div class="modal-buttons">
           <button class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
           <button class="btn-confirm-logout" onclick="executeDelete()">
@@ -52,11 +50,7 @@
       </div>
     </div>
 
-    <div
-      id="sidebar-overlay"
-      class="sidebar-overlay"
-      onclick="toggleSidebar()"
-    ></div>
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <nav class="navbar glass-nav">
       <div class="nav-left">
@@ -106,24 +100,15 @@
           </div>
         </div>
 
-        <div
-          class="menu-item has-submenu"
-          onclick="toggleSubmenu('sub-sertifikasi')"
-        >
+        <div class="menu-item has-submenu" onclick="toggleSubmenu('sub-sertifikasi')">
           <i class="fa fa-certificate"></i> Sertifikasi Kapal
           <i class="fa fa-chevron-down arrow-icon"></i>
         </div>
         <div id="sub-sertifikasi" class="submenu-container">
-          <div
-            class="submenu-item"
-            onclick="showSection('sertifikasi-input', this)"
-          >
+          <div class="submenu-item" onclick="showSection('sertifikasi-input', this)">
             <i class="fa fa-plus-circle"></i> Input Sertifikasi
           </div>
-          <div
-            class="submenu-item"
-            onclick="showSection('sertifikasi-data', this)"
-          >
+          <div class="submenu-item" onclick="showSection('sertifikasi-data', this)">
             <i class="fa fa-table"></i> Data Sertifikasi
           </div>
         </div>
@@ -141,21 +126,15 @@
           <div class="info-card">
             <div class="icon-box"><i class="fa fa-gavel"></i></div>
             <div>
-              <h3>Apa itu Status Hukum Kapal?</h3>
-              <p>
-                Bagian yang menangani legalitas kepemilikan, pendaftaran, dan
-                balik nama kapal serta penerbitan Pas Besar/Surat Laut.
-              </p>
+              <h3>Status Hukum Kapal</h3>
+              <p>Legalitas kepemilikan, pendaftaran, dan balik nama kapal.</p>
             </div>
           </div>
           <div class="info-card">
             <div class="icon-box"><i class="fa fa-file-contract"></i></div>
             <div>
-              <h3>Apa itu Sertifikasi Kapal?</h3>
-              <p>
-                Bagian yang menangani pemeriksaan teknis, keselamatan, dan
-                keamanan kapal untuk penerbitan sertifikat kelaiklautan.
-              </p>
+              <h3>Sertifikasi Kapal</h3>
+              <p>Pemeriksaan teknis dan keselamatan kapal.</p>
             </div>
           </div>
         </div>
@@ -163,26 +142,12 @@
         <div class="charts-container">
           <div class="chart-card">
             <div class="chart-header">
-              <h3>
-                <i class="fa fa-chart-bar" style="color: var(--gold)"></i>
-                Volume Arsip
-              </h3>
+              <h3><i class="fa fa-chart-bar" style="color: var(--gold)"></i> Volume Arsip</h3>
               <div class="chart-filter-group">
-                <button class="filter-btn" onclick="updateChartFilter('today')">
-                  Hari Ini
-                </button>
-                <button class="filter-btn" onclick="updateChartFilter('week')">
-                  Minggu Ini
-                </button>
-                <button class="filter-btn" onclick="updateChartFilter('month')">
-                  Bulan Ini
-                </button>
-                <button
-                  class="filter-btn active"
-                  onclick="updateChartFilter('year')"
-                >
-                  Tahun Ini
-                </button>
+                <button class="filter-btn" onclick="updateChartFilter('today')">Hari Ini</button>
+                <button class="filter-btn" onclick="updateChartFilter('week')">Minggu Ini</button>
+                <button class="filter-btn" onclick="updateChartFilter('month')">Bulan Ini</button>
+                <button class="filter-btn active" onclick="updateChartFilter('year')">Tahun Ini</button>
               </div>
             </div>
             <div style="height: 250px; position: relative">
@@ -190,43 +155,14 @@
             </div>
           </div>
           <div class="chart-card">
-            <h3>
-              <i class="fa fa-bullseye" style="color: var(--gold)"></i> Target
-              2025
-            </h3>
-            <div
-              style="
-                height: 200px;
-                display: flex;
-                justify-content: center;
-                position: relative;
-              "
-            >
+            <h3><i class="fa fa-bullseye" style="color: var(--gold)"></i> Target 2025</h3>
+            <div style="height: 200px; display: flex; justify-content: center; position: relative;">
               <canvas id="doughnutChart"></canvas>
-              <div
-                style="
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%);
-                  text-align: center;
-                "
-              >
-                <strong style="font-size: 20px; color: var(--navy)"
-                  >2040</strong
-                >
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <strong style="font-size: 20px; color: var(--navy)">2040</strong>
               </div>
             </div>
-            <div class="target-info">
-              <span
-                ><i class="fa fa-circle" style="color: #eee"></i> Sisa:
-                <b>2,040</b></span
-              >
-              <span
-                ><i class="fa fa-circle" style="color: #00c853"></i> Terbit:
-                <b>0</b></span
-              >
-            </div>
+            <div class="target-info"></div>
           </div>
         </div>
       </div>
@@ -243,10 +179,9 @@
         </div>
         
         <form id="formSHSK" onsubmit="event.preventDefault(); handleBulkSubmit('SHSK')">
-            <div id="bulk-container-SHSK">
-               </div>
+            <div id="bulk-container-SHSK"></div>
             
-            <div class="form-actions">
+            <div id="btn-container-SHSK" class="form-actions">
                 <button type="submit" class="btn-gold-save" id="btn-save-SHSK"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
                 <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SHSK" onclick="cancelEdit('SHSK')">BATAL</button>
             </div>
@@ -257,15 +192,13 @@
         <div class="section-header">
           <h2>Data Arsip Status Hukum</h2>
           <div class="header-actions">
-            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">Refresh</button>
-            <button class="btn-action btn-export" onclick="exportTriple('SHSK')">
-               <i class="fa fa-file-excel"></i> Export Laporan
-            </button>
+            <button class="btn-action btn-refresh" onclick="loadData('SHSK')"><i class="fa fa-sync"></i> Refresh</button>
+            <button class="btn-action btn-export" onclick="exportTriple('SHSK')"><i class="fa fa-file-excel"></i> Export Laporan</button>
           </div>
         </div>
 
         <div class="filter-card" style="border-left: 5px solid var(--gold);">
-          <div class="grid-filter" style="grid-template-columns: 1fr 1fr 2fr auto; gap:10px;">
+          <div class="grid-filter">
              <select id="filterSHSKBulan" class="form-control">
                <option value="">Semua Bulan</option>
                <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
@@ -323,10 +256,9 @@
         </div>
 
         <form id="formSertifikasi" onsubmit="event.preventDefault(); handleBulkSubmit('SERTIFIKASI')">
-            <div id="bulk-container-SERTIFIKASI">
-               </div>
+            <div id="bulk-container-SERTIFIKASI"></div>
 
-            <div class="form-actions">
+            <div id="btn-container-SERTIFIKASI" class="form-actions">
                 <button type="submit" class="btn-gold-save" id="btn-save-SERTIFIKASI"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
                 <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERTIFIKASI" onclick="cancelEdit('SERTIFIKASI')">BATAL</button>
             </div>
@@ -337,15 +269,13 @@
         <div class="section-header">
           <h2>Data Arsip Sertifikasi</h2>
           <div class="header-actions">
-            <button class="btn-action btn-refresh" onclick="loadData('SERTIFIKASI')">Refresh</button>
-            <button class="btn-action btn-export" onclick="exportTriple('SERTIFIKASI')">
-               <i class="fa fa-file-excel"></i> Export Laporan
-            </button>
+            <button class="btn-action btn-refresh" onclick="loadData('SERTIFIKASI')"><i class="fa fa-sync"></i> Refresh</button>
+            <button class="btn-action btn-export" onclick="exportTriple('SERTIFIKASI')"><i class="fa fa-file-excel"></i> Export Laporan</button>
           </div>
         </div>
 
         <div class="filter-card" style="border-left: 5px solid var(--neon-blue);">
-          <div class="grid-filter" style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto; gap:10px;">
+          <div class="grid-filter" style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto;">
              <select id="filterSertBulan" class="form-control">
                <option value="">Semua Bulan</option>
                <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
@@ -359,10 +289,9 @@
              </select>
              <select id="filterSertJenis" class="form-control">
                <option value="">Semua Jenis</option>
-               </select>
+             </select>
              <input type="text" id="filterSertDaerah" class="form-control" placeholder="Cari Daerah Pelayaran"/>
              <input type="text" id="searchSertifikasi" placeholder="Cari Nama/Perusahaan..." class="form-control"/>
-             
              <button onclick="applyFilter('SERTIFIKASI')" class="btn-action btn-filter"><i class="fa fa-filter"></i> Terapkan</button>
           </div>
         </div>
