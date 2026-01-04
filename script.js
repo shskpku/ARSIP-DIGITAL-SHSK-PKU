@@ -1,7 +1,6 @@
 /* ====================================================================
-   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - ACCORDION SIDEBAR FIX)
-   Fitur: Bulk Input, Triple Export, Filter, Edit Lock, User Profile, 
-   Auto Reset Login, & Sidebar Accordion (Satu Buka Lain Tutup).
+   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - LOGIN BUTTON & RESET FIX)
+   Fitur: Login UX Fix (Auto Clear, Button Reset, Timer Notif).
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP KAMU DI SINI
@@ -32,7 +31,7 @@ function showPopup(message, type = "info") {
   }
 
   setTimeout(() => popup.classList.add("show"), 10);
-  setTimeout(() => popup.classList.remove("show"), 3000);
+  setTimeout(() => popup.classList.remove("show"), 4000); // Diperlama jadi 4 detik
 }
 
 function formatDate(dateStr) {
@@ -70,11 +69,8 @@ function resetIdleTimer() { idleTime = 0; }
 function initAutoLogout() {
   setInterval(() => {
     idleTime++;
-    if (idleTime >= 60) { 
-      logout(); 
-    }
+    if (idleTime >= 60) { logout(); }
   }, 60000); 
-
   window.onmousemove = resetIdleTimer;
   window.onkeypress = resetIdleTimer;
   window.onclick = resetIdleTimer;
@@ -82,51 +78,101 @@ function initAutoLogout() {
 }
 
 // ====================================================================
-// 3. AUTHENTICATION (AUTO RESET FIX)
+// 3. AUTHENTICATION (LOGIN UX FIX)
 // ====================================================================
 
-async function handleLogin(e, role, passwordInput) {
+async function handleLogin(e, role) {
   if (e) e.preventDefault();
-  const inputIdElem = role === "PETUGAS" ? document.getElementById("nip") : document.getElementById("email");
-  const inputPassElem = document.getElementById("password");
-  let userId = inputIdElem.value;
   
-  if (!userId || !passwordInput) { showPopup("Data tidak lengkap.", "error"); return; }
+  // 1. Ambil Elemen Input (Biar bisa di-reset)
+  const inputIdElem = role === "PETUGAS" ? document.getElementById("nip") : document.getElementById("email");
+  const inputPassElem = role === "PETUGAS" ? document.getElementById("password-petugas") : document.getElementById("password-pengguna");
+  const btnElem = role === "PETUGAS" ? document.getElementById("btn-login-petugas") : document.getElementById("btn-login-pengguna");
+
+  const userId = inputIdElem ? inputIdElem.value : "";
+  const password = inputPassElem ? inputPassElem.value : "";
+  
+  if (!userId || !password) { showPopup("Data tidak lengkap.", "error"); return; }
+  
+  // 2. UI LOADING STATE (Tombol Muter)
+  const originalText = btnElem.innerHTML;
+  btnElem.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
+  btnElem.disabled = true;
+  btnElem.style.opacity = "0.7";
+
   showPopup("Sedang Masuk...", "info");
   
   try {
-    const res = await postData({ action: "login", role: role, id: userId, password: passwordInput });
+    const res = await postData({ action: "login", role: role, id: userId, password: password });
+    
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
       showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
-      setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 1500);
+      
+      // Redirect lebih lama (3 detik) biar sempat baca nama
+      setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 3000);
     } else { 
-      showPopup(res.message, "error"); 
+      // 3. LOGIKA GAGAL (RESET TOTAL)
+      showPopup(res.message, "error"); // Tampilkan pesan error
+      
+      // Reset Tombol ke Semula
+      btnElem.innerHTML = originalText;
+      btnElem.disabled = false;
+      btnElem.style.opacity = "1";
+
+      // KOSONGKAN INPUT
       if(inputIdElem) inputIdElem.value = "";
       if(inputPassElem) inputPassElem.value = "";
+      
+      // Fokus balik ke ID
       if(inputIdElem) inputIdElem.focus();
     }
   } catch (error) { 
-    showPopup("Gagal koneksi.", "error"); 
+    showPopup("Gagal koneksi server.", "error");
+    // Reset Tombol jika error koneksi
+    btnElem.innerHTML = originalText;
+    btnElem.disabled = false;
+    btnElem.style.opacity = "1";
   }
 }
 
-function logout() { 
-    document.getElementById("modal-logout").classList.remove("hidden"); 
-}
+function logout() { document.getElementById("modal-logout").classList.remove("hidden"); }
+function closeLogoutModal() { document.getElementById("modal-logout").classList.add("hidden"); }
+function confirmLogout() { localStorage.removeItem("user"); window.location.href = "index.html"; }
 
-function closeLogoutModal() { 
-    document.getElementById("modal-logout").classList.add("hidden"); 
+async function requestOTP() {
+  const email = document.getElementById("reset-email").value;
+  if (!email) { showPopup("Masukkan email dulu!", "error"); return; }
+  showPopup("Mengirim kode OTP...", "info");
+  const res = await postData({ action: "sendOTP", email: email });
+  if (res.status === "SUCCESS") {
+    showPopup("Kode OTP terkirim ke email!", "success");
+    document.getElementById("step-email").classList.add("hidden");
+    document.getElementById("step-otp").classList.remove("hidden");
+  } else { showPopup(res.message, "error"); }
 }
-
-function confirmLogout() { 
-    localStorage.removeItem("user"); 
-    window.location.href = "index.html"; 
+async function verifyOTP() {
+  const email = document.getElementById("reset-email").value;
+  const otp = document.getElementById("reset-otp").value;
+  if (!otp) { showPopup("Masukkan OTP!", "error"); return; }
+  const res = await postData({ action: "verifyOTP", email: email, otp: otp });
+  if (res.status === "SUCCESS") {
+    showPopup("OTP Benar!", "success");
+    document.getElementById("step-otp").classList.add("hidden");
+    document.getElementById("step-newpass").classList.remove("hidden");
+  } else { showPopup(res.message, "error"); }
 }
-
-async function requestOTP() { /* ...Sama... */ }
-async function verifyOTP() { /* ...Sama... */ }
-async function resetPasswordFinal() { /* ...Sama... */ }
+async function resetPasswordFinal() {
+  const email = document.getElementById("reset-email").value;
+  const newPass = document.getElementById("reset-newpass").value;
+  if (!newPass) { showPopup("Masukkan password baru!", "error"); return; }
+  showPopup("Menyimpan password...", "info");
+  const res = await postData({ action: "resetPasswordFinal", email: email, newPassword: newPass });
+  if (res.status === "SUCCESS") {
+    showPopup("Sukses! Silakan login.", "success");
+    setTimeout(() => window.location.reload(), 2000);
+  } else { showPopup(res.message, "error"); }
+}
 
 // ====================================================================
 // 4. INIT PAGE & SIDEBAR FIX
@@ -146,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// SIDEBAR TOGGLE (MOBILE)
 function toggleSidebar() { 
     const s = document.getElementById("sidebar"); 
     const o = document.getElementById("sidebar-overlay"); 
@@ -154,27 +199,13 @@ function toggleSidebar() {
     o.classList.toggle("active"); 
 }
 
-// NAVIGASI HALAMAN (AUTO CLOSE SIDEBAR DI HP)
 function showSection(id, el) { 
     document.querySelectorAll(".main-content > div").forEach(d => d.classList.add("hidden")); 
     document.getElementById(`sec-${id}`).classList.remove("hidden"); 
-    
-    // Reset active state menu utama
     document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
-    
-    // Highlight submenu jika ada (el = element yang diklik)
-    if(el) {
-        el.classList.add("active");
-        // Opsional: Highlight Parent Menu juga
-        const parentContainer = el.closest('.submenu-container');
-        if(parentContainer) {
-            // Logika untuk highlight parent menu item bisa ditambahkan disini jika perlu
-        }
-    }
-
+    if(el) el.classList.add("active");
     if(id.includes("data")) loadData(id.includes("shsk") ? "SHSK" : "SERTIFIKASI");
 
-    // TUTUP SIDEBAR OTOMATIS JIKA DI LAYAR KECIL (MOBILE)
     if (window.innerWidth <= 900) {
         const s = document.getElementById("sidebar");
         const o = document.getElementById("sidebar-overlay");
@@ -185,34 +216,24 @@ function showSection(id, el) {
     }
 }
 
-// --- FUNGSI SUBMENU ACCORDION (SATU BUKA, LAIN TUTUP) ---
 function toggleSubmenu(id) { 
-    const targetSubmenu = document.getElementById(id);
-    const isCurrentlyOpen = targetSubmenu.classList.contains("show");
-
-    // 1. TUTUP SEMUA SUBMENU DULU (RESET)
+    const target = document.getElementById(id);
+    const isOpen = target.classList.contains("show");
+    
+    // Reset semua submenu
     document.querySelectorAll(".submenu-container").forEach(el => el.classList.remove("show"));
-    // 2. RESET PANAH (Hapus class 'open' dari semua menu item yang punya submenu)
-    document.querySelectorAll(".menu-item.has-submenu").forEach(el => el.classList.remove("open"));
+    document.querySelectorAll(".menu-item").forEach(el => el.classList.remove("open"));
 
-    // 3. BUKA YANG DIKLIK (Kecuali jika tadi sudah terbuka, biarkan tertutup/toggle)
-    if (!isCurrentlyOpen) {
-        targetSubmenu.classList.add("show");
-        
-        // Cari Trigger Element (Menu Item diatasnya) untuk rotasi panah
-        // Struktur HTML: <div class="menu-item ..."> (Previous Sibling) -> <div id="submenu...">
-        let trigger = targetSubmenu.previousElementSibling;
-        
-        // Safety check: pastikan yang diambil adalah menu-item
-        while(trigger && !trigger.classList.contains('menu-item')) {
-            trigger = trigger.previousElementSibling;
-        }
-        
-        if (trigger) trigger.classList.add("open");
+    // Jika tadi tertutup, buka yg diklik
+    if(!isOpen) {
+        target.classList.add("show");
+        // Add arrow rotation to parent
+        // Note: HTML structure assumed prev sibling is menu item
+        const trigger = target.previousElementSibling;
+        if(trigger) trigger.classList.add("open");
     }
 }
 
-// FUNGSI ACCORDION FORM (GLOBAL)
 window.toggleAccordion = function(headerElement) {
     const item = headerElement.closest('.accordion-item');
     if (item) item.classList.toggle("open");
@@ -228,12 +249,12 @@ let currentFilter = "year";
 
 function updateChartFilter(period, btnElement) {
   currentFilter = period;
-  document.querySelectorAll(".filter-btn").forEach((btn) => btn.classList.remove("active"));
-  
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.classList.remove("active");
+  });
   if (btnElement) {
       btnElement.classList.add("active");
   } else {
-      // Fallback selector
       const targetBtn = Array.from(document.querySelectorAll(".filter-btn")).find(b => b.innerText.toLowerCase().includes(period === 'year' ? 'tahun' : period === 'month' ? 'bulan' : period === 'week' ? 'minggu' : 'hari'));
       if(targetBtn) targetBtn.classList.add("active");
   }
@@ -317,7 +338,7 @@ function loadProfilePetugas() {
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE (STRUKTUR LENGKAP)
+// 7. BULK INPUT ENGINE
 // ====================================================================
 
 function renderBulkForm(type) {
