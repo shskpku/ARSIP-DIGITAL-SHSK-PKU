@@ -207,15 +207,12 @@
     </div>
 
     <script src="script.js"></script>
-
     <script>
       function toggleMobileProfile(e) {
         e.stopPropagation();
         const dropdown = document.getElementById("mobileProfileDropdown");
         dropdown.classList.toggle("show");
       }
-
-      // Tutup dropdown jika klik di luar area
       window.addEventListener("click", function (e) {
         if (!e.target.closest(".mobile-profile-wrapper")) {
           const dropdown = document.getElementById("mobileProfileDropdown");
