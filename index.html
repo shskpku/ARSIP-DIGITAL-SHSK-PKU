@@ -172,6 +172,7 @@
         const formPetugas = document.getElementById("formPetugas");
         const formPengguna = document.getElementById("formPengguna");
 
+        // Reset Form Password
         document.getElementById("passPetugas").type = "password";
         document.getElementById("passPengguna").type = "password";
         document.querySelectorAll(".password-icon").forEach((i) => {
@@ -201,6 +202,12 @@
           formPengguna.classList.remove("hidden");
         }
       }
+      
+      // CATATAN: Fungsi Login dipanggil langsung oleh onsubmit="handleLogin(event, role)"
+      // Pastikan di bagian HTML <form> atribut onsubmit-nya sudah diganti menjadi:
+      // onsubmit="handleLogin(event, 'PETUGAS')" 
+      // dan
+      // onsubmit="handleLogin(event, 'PENGGUNA')"
     </script>
   </body>
 </html>
