@@ -1,6 +1,6 @@
 /* ====================================================================
    SCRIPT.JS - FRONTEND LOGIC (ULTIMATE MASTER FINAL)
-   Fitur: Bulk Input, Triple Export, Advanced Filter, Auto Logout, dll.
+   Fitur: Bulk Input (1-5), Triple Export, Filter Canggih, Multi-Select User.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
@@ -67,16 +67,15 @@ let idleTime = 0;
 function resetIdleTimer() { idleTime = 0; }
 
 function initAutoLogout() {
-  // Increment idle time every minute
+  // Cek setiap 1 menit
   setInterval(() => {
     idleTime++;
     if (idleTime >= 60) { // 60 menit = 1 jam
       alert("Sesi Anda telah berakhir karena tidak aktif.");
       confirmLogout();
     }
-  }, 60000); // 1 menit
+  }, 60000); 
 
-  // Reset timer on activity
   window.onmousemove = resetIdleTimer;
   window.onkeypress = resetIdleTimer;
   window.onclick = resetIdleTimer;
@@ -165,7 +164,6 @@ async function resetPasswordFinal() {
 // ====================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Cek Halaman
   if (document.querySelector(".dashboard-page")) {
       initPenggunaDashboard();
       initAutoLogout();
@@ -173,14 +171,14 @@ document.addEventListener("DOMContentLoaded", () => {
       loadProfilePetugas();
       updateChartFilter("year");
       setupAccordions();
-      renderBulkForm('SHSK'); // Init form bulk default
-      renderBulkForm('SERTIFIKASI'); // Init form bulk default
+      renderBulkForm('SHSK'); 
+      renderBulkForm('SERTIFIKASI'); 
       initAutoLogout();
   }
 });
 
 // ====================================================================
-// 5. BULK INPUT ENGINE (FITUR BARU)
+// 5. BULK INPUT ENGINE (DINAMIS 1-5 FORM)
 // ====================================================================
 
 function renderBulkForm(type) {
@@ -189,7 +187,7 @@ function renderBulkForm(type) {
     if(!container || !countSelect) return;
 
     const count = parseInt(countSelect.value);
-    container.innerHTML = ""; // Reset container
+    container.innerHTML = ""; 
 
     for(let i = 1; i <= count; i++) {
         let html = `
@@ -242,6 +240,9 @@ function renderBulkForm(type) {
                         <option value="LIFE RAFT">LIFE RAFT</option>
                         <option value="FIRE EXTINGUISHER">FIRE EXTINGUISHER</option>
                         <option value="SEA TRIAL">SEA TRIAL</option>
+                        <option value="DOC">DOC</option>
+                        <option value="SMC">SMC</option>
+                        <option value="IMDG">IMDG</option>
                         </select>
                 </label>
                 <label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
@@ -290,23 +291,21 @@ async function handleBulkSubmit(type) {
         ? ['permohonan', 'stkk', 'grosse', 'ukur', 'pnbp'] 
         : ['permohonan', 'laporan_pemeriksaan', 'sertifikat', 'surat_tugas', 'pnbp', 'evaluasi', 'foto'];
 
-    // Loop setiap form index
     for (let i = 1; i <= count; i++) {
         const itemData = {};
         const inputs = form.querySelectorAll(`[name$="_${i}"]`);
         
-        // Cek apakah form diisi (Minimal ada nama kapal)
         let hasData = false;
         
         inputs.forEach(input => {
-            const key = input.name.replace(`_${i}`, ''); // Hapus suffix _1
+            const key = input.name.replace(`_${i}`, ''); 
             if(input.type !== 'file') {
                 itemData[key] = input.value.toUpperCase();
                 if(key === 'namaKapal' && input.value.trim() !== "") hasData = true;
             }
         });
 
-        if(!hasData) continue; // Skip form kosong
+        if(!hasData) continue; 
 
         // Handle Files
         itemData.files = [];
@@ -338,18 +337,12 @@ async function handleBulkSubmit(type) {
         return;
     }
 
-    // Determine Action: Update or Upload?
-    // Kalau items.length > 1 -> Pasti Upload Bulk
-    // Kalau items.length == 1 -> Cek apakah ada noUrut (Edit Mode)
+    // Logic Update Single vs Upload Bulk
     let action = type === 'SHSK' ? 'uploadBulkSHSK' : 'uploadBulkSertifikasi';
     if(items.length === 1 && items[0].noUrut) {
         action = type === 'SHSK' ? 'updateSHSK' : 'updateSertifikasi';
-        // Flatten object for single update
-        Object.assign(items[0], {action: action}); // Add action to item
-        // Call single update logic is slightly different structure in backend, 
-        // but backend bulk handler handles array. 
-        // WAIT: Backend `updateSHSK` expects single object, not array.
-        // Let's call update API directly for single edit.
+        // Single update lewat action khusus
+        Object.assign(items[0], {action: action}); 
         const res = await postData(items[0]);
         handleResponse(res, type, form, originalText, btnSave, true);
         return;
@@ -367,7 +360,7 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
     if (res.status === "SUCCESS") {
         showPopup(isEdit ? "Data Diperbarui!" : "Data Berhasil Disimpan!", "success");
         form.reset();
-        renderBulkForm(type); // Reset form structure
+        renderBulkForm(type); 
         if(isEdit) cancelEdit(type);
         loadData(type);
         updateChartFilter(currentFilter);
@@ -405,7 +398,7 @@ let currentFilter = "year";
 function updateChartFilter(period) {
   currentFilter = period;
   document.querySelectorAll(".filter-btn").forEach((btn) => btn.classList.remove("active"));
-  // Simple toggle active class logic...
+  // (Tambahkan logika highlight tombol aktif disini jika perlu)
   initCharts(period);
 }
 
@@ -415,7 +408,6 @@ async function initCharts(period = "year") {
   let d = { year: new Date().getFullYear(), totalYear: 0, labels: [], counts: [] };
   if (res.status === "SUCCESS") d = res.data;
 
-  // Update Summary Text
   document.querySelector(".chart-card h3 i.fa-bullseye").parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
   const total = 2040;
   const sisa = total - d.totalYear;
@@ -428,7 +420,6 @@ async function initCharts(period = "year") {
       `;
   }
 
-  // Render Bar Chart
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -447,7 +438,6 @@ async function initCharts(period = "year") {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 
-  // Render Doughnut
   const ctxD = document.getElementById("doughnutChart").getContext("2d");
   if (doughnutChartInstance) doughnutChartInstance.destroy();
   doughnutChartInstance = new Chart(ctxD, {
@@ -479,8 +469,6 @@ async function loadData(type) {
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
     renderTable(type);
-    
-    // Populate Filter Jenis Sertifikat if applicable
     if(type === 'SERTIFIKASI') populateFilterOptions(rawData[type]);
   } else {
     tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`;
@@ -497,7 +485,6 @@ function populateFilterOptions(data) {
 }
 
 function applyFilter(type) {
-    // Collect Filter Values
     const filters = {};
     if(type === 'SHSK') {
         filters.bulan = document.getElementById('filterSHSKBulan').value;
@@ -511,23 +498,19 @@ function applyFilter(type) {
         filters.search = document.getElementById('searchSertifikasi').value.toUpperCase();
     }
 
-    // Client-Side Filtering
     filteredData[type] = rawData[type].filter(row => {
         let pass = true;
         
-        // Date Check
         const dateStr = type === 'SHSK' ? row['TANGGAL_PENGUKUHAN'] : row['TANGGAL_TERBIT'];
         const d = new Date(dateStr);
         if(filters.tahun && d.getFullYear().toString() !== filters.tahun) pass = false;
         if(filters.bulan && (d.getMonth()+1).toString() !== filters.bulan) pass = false;
 
-        // Specific Sertifikasi Check
         if(type === 'SERTIFIKASI') {
             if(filters.jenis && row['JENIS_SERTIFIKAT'] !== filters.jenis) pass = false;
             if(filters.daerah && !String(row['DAERAH_PELAYARAN']).toUpperCase().includes(filters.daerah)) pass = false;
         }
 
-        // General Search (Check all values)
         if(filters.search) {
             const rowText = Object.values(row).join(" ").toUpperCase();
             if(!rowText.includes(filters.search)) pass = false;
@@ -553,7 +536,6 @@ function renderTable(type) {
   }
 
   pageData.forEach((row, i) => {
-    const idData = row["NO_URUT"] || row["NO URUT"] || "-";
     const rowStr = encodeURIComponent(JSON.stringify(row));
     let tr = `<tr><td>${start + i + 1}</td>`;
     
@@ -584,25 +566,23 @@ function prevPage(t) { if (currentPage[t] > 1) { currentPage[t]--; renderTable(t
 function nextPage(t) { if (currentPage[t] * ROWS_PER_PAGE < filteredData[t].length) { currentPage[t]++; renderTable(t); } }
 
 // ====================================================================
-// 7. EDIT DATA (ADAPTED FOR BULK UI)
+// 7. EDIT DATA (EDIT SINGLE DALAM STRUKTUR BULK)
 // ====================================================================
 
 function editData(type, rowDataStr) {
     const rowData = JSON.parse(decodeURIComponent(rowDataStr));
     const formId = type === 'SHSK' ? 'formSHSK' : 'formSertifikasi';
     
-    // Switch to Input Tab
     showSection(`${type.toLowerCase()}-input`);
     
-    // Force Bulk Count to 1
+    // Force count 1
     const countSelect = document.getElementById(type === 'SHSK' ? 'bulkCountSHSK' : 'bulkCountSertifikasi');
     countSelect.value = "1";
-    renderBulkForm(type); // Re-render form structure for 1 item
+    renderBulkForm(type); 
 
-    // Fill the Form (Index 1)
     const form = document.getElementById(formId);
     
-    // Helper to fill input
+    // Helper fill
     const setVal = (name, val) => {
         const el = form.querySelector(`[name="${name}_1"]`);
         if(el) {
@@ -638,11 +618,9 @@ function editData(type, rowDataStr) {
         setVal('pemeriksa', rowData.NAMA_PEMERIKSA);
     }
 
-    // Show Edit Buttons
     document.getElementById(`btn-save-${type}`).classList.add("hidden");
     document.getElementById(`btn-cancel-${type}`).classList.remove("hidden");
     
-    // Create Update Button dynamic
     const btnContainer = document.querySelector(`#btn-container-${type}`) || form.querySelector('.form-actions');
     let btnUpdate = document.getElementById(`btn-update-${type}`);
     if(!btnUpdate) {
@@ -651,18 +629,17 @@ function editData(type, rowDataStr) {
         btnUpdate.className = 'btn-gold-save';
         btnUpdate.innerHTML = '<i class="fa fa-pencil-alt"></i> UPDATE DATA';
         btnUpdate.style.background = 'var(--neon-blue)';
-        btnUpdate.onclick = () => handleBulkSubmit(type); // Reuse handler
+        btnUpdate.onclick = () => handleBulkSubmit(type); 
         btnContainer.insertBefore(btnUpdate, btnContainer.firstChild);
     }
     btnUpdate.classList.remove('hidden');
-
     showPopup("Mode Edit Aktif", "info");
 }
 
 function cancelEdit(type) {
     const form = document.getElementById(type === 'SHSK' ? 'formSHSK' : 'formSertifikasi');
     form.reset();
-    renderBulkForm(type); // Reset to default
+    renderBulkForm(type); 
     
     document.getElementById(`btn-save-${type}`).classList.remove("hidden");
     const btnUpdate = document.getElementById(`btn-update-${type}`);
@@ -674,7 +651,7 @@ function cancelEdit(type) {
 
 
 // ====================================================================
-// 8. TRIPLE EXPORT HANDLER (FITUR BARU)
+// 8. TRIPLE EXPORT HANDLER
 // ====================================================================
 
 async function exportTriple(type) {
@@ -685,7 +662,6 @@ async function exportTriple(type) {
 
   showPopup("Menyiapkan 3 File Laporan...", "info");
 
-  // Gather Filters from UI
   const filters = {};
   if(type === 'SHSK') {
       filters.bulan = document.getElementById('filterSHSKBulan').value;
@@ -708,7 +684,6 @@ async function exportTriple(type) {
 
       if (res.status === "SUCCESS" && res.files) {
           showPopup("Laporan Siap! Mengunduh...", "success");
-          // Open All Links
           res.files.forEach(f => {
               if(f.url) window.open(f.url, '_blank');
           });
@@ -763,7 +738,7 @@ function closeLogoutModal(){ document.getElementById("modal-logout").classList.a
 function confirmLogout(){ localStorage.removeItem("user"); window.location.href="index.html"; }
 
 // ====================================================================
-// 11. USER DASHBOARD (PENGGUNA)
+// 11. USER DASHBOARD (PENGGUNA - MULTI SELECT FIX)
 // ====================================================================
 let penggunaFiles = [];
 function initPenggunaDashboard() {
@@ -811,13 +786,12 @@ window.filterType = function() {
     const m = document.getElementById("reqBulan").value;
     const sh = document.getElementById("reqKapal").value;
     const s = document.getElementById("reqJenis");
-    s.innerHTML = '<option value="">-- Pilih Dokumen --</option>'; s.disabled=true;
+    s.innerHTML = '<option value="">-- Pilih Dokumen (Bisa Banyak) --</option>'; s.disabled=true;
     if(!sh) return;
     
-    // FILTER KHUSUS: Hanya tampilkan "LAPORAN PEMERIKSAAN"
-    const docs = penggunaFiles.filter(i => 
-        i.tahun==y && i.bulan==m && i.kapal==sh && i.jenis.toUpperCase().includes("LAPORAN PEMERIKSAAN")
-    );
+    // TAMPILKAN SEMUA JENIS UNTUK KAPAL INI
+    // Backend yang akan memfilter "LAPORAN PEMERIKSAAN + [JENIS]"
+    const docs = penggunaFiles.filter(i => i.tahun==y && i.bulan==m && i.kapal==sh);
     
     docs.forEach(v => s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`);
     s.disabled = false;
@@ -826,17 +800,23 @@ window.filterType = function() {
 window.handleRequestSubmit = async function(e) {
     e.preventDefault();
     const btn = document.getElementById("btnKirimReq");
-    const link = document.getElementById("reqJenis").value;
-    const user = JSON.parse(localStorage.getItem("user"));
+    const select = document.getElementById("reqJenis");
     
-    if(!link) { showPopup("Pilih dokumen dulu!", "error"); return; }
+    // AMBIL MULTIPLE SELECTION
+    const selectedOpts = Array.from(select.selectedOptions);
+    if(selectedOpts.length === 0) { showPopup("Pilih minimal satu dokumen!", "error"); return; }
+
+    const types = selectedOpts.map(o => o.text); // Array Jenis (e.g. "KONSTRUKSI")
+    const link = select.value; // Ambil satu link folder saja (cukup)
+
+    const user = JSON.parse(localStorage.getItem("user"));
     
     btn.innerHTML = "MENGIRIM..."; btn.disabled=true;
     const res = await postData({
         action: "sendReportEmail",
         email: user.id, namaUser: user.nama, perusahaan: user.extra,
         kapal: document.getElementById("reqKapal").value,
-        jenis: document.getElementById("reqJenis").selectedOptions[0].innerText,
+        jenis: types, // Kirim Array ke Backend
         tahun: document.getElementById("reqTahun").value,
         bulan: getMonthName(document.getElementById("reqBulan").value),
         link: link
@@ -844,7 +824,7 @@ window.handleRequestSubmit = async function(e) {
     
     if(res.status==="SUCCESS") showPopup("Link terkirim ke email!", "success");
     else showPopup("Gagal kirim", "error");
-    btn.innerHTML = "KIRIM LINK"; btn.disabled=false;
+    btn.innerHTML = '<i class="fa fa-paper-plane"></i> KIRIM DOKUMEN'; btn.disabled=false;
 }
 
 function getMonthName(i){ const m=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"]; return m[i-1]||i; }
