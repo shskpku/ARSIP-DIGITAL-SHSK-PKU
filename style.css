@@ -753,7 +753,7 @@ body.petugas-page {
   transform: scale(1.1);
 }
 
-/* SIDEBAR */
+/* SIDEBAR - FIX HOVER YANG BERANTAKAN */
 .sidebar {
   position: fixed;
   top: 70px;
@@ -835,6 +835,7 @@ body.petugas-page {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
   border-left-color: var(--gold);
+  padding-left: 30px; /* Tambahan padding saat hover biar smooth */
 }
 .menu-item.active {
   background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
