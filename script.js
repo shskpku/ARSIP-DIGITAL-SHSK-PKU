@@ -1,6 +1,6 @@
 /* ====================================================================
-   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - LOGIN NAME FIX)
-   Fitur: Bulk Input, Triple Export, Filter, Edit Lock, User Profile Fix.
+   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - AUTO RESET LOGIN FIX)
+   Fitur: Bulk Input, Triple Export, Filter, Edit Lock, User Profile, Auto Reset.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP KAMU DI SINI
@@ -81,12 +81,17 @@ function initAutoLogout() {
 }
 
 // ====================================================================
-// 3. AUTHENTICATION (LOGIN NAME FIX)
+// 3. AUTHENTICATION (AUTO RESET FIX)
 // ====================================================================
 
 async function handleLogin(e, role, passwordInput) {
   if (e) e.preventDefault();
-  let userId = role === "PETUGAS" ? document.getElementById("nip").value : document.getElementById("email").value;
+  
+  // Ambil elemen input untuk keperluan reset nanti
+  const inputIdElem = role === "PETUGAS" ? document.getElementById("nip") : document.getElementById("email");
+  const inputPassElem = document.getElementById("password");
+  
+  let userId = inputIdElem.value;
   
   if (!userId || !passwordInput) { showPopup("Data tidak lengkap.", "error"); return; }
   
@@ -97,12 +102,18 @@ async function handleLogin(e, role, passwordInput) {
     
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
-      // FIX DISINI: Menampilkan Nama User di Notifikasi
       showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
-      
       setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 1500);
     } else { 
+      // === FITUR AUTO RESET SAAT GAGAL ===
       showPopup(res.message, "error"); 
+      
+      // Kosongkan form
+      if(inputIdElem) inputIdElem.value = "";
+      if(inputPassElem) inputPassElem.value = "";
+      
+      // Fokuskan kembali ke input ID agar user langsung bisa ketik ulang
+      if(inputIdElem) inputIdElem.focus();
     }
   } catch (error) { 
     showPopup("Gagal koneksi.", "error"); 
