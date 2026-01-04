@@ -1,9 +1,15 @@
 /* ====================================================================
-   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - LOGIN BUTTON & RESET FIX)
-   Fitur: Login UX Fix (Auto Clear, Button Reset, Timer Notif).
+   SCRIPT.JS - SHSK PEKANBARU (FULL VERSION - NO ABBREVIATION)
+   Fitur: 
+   1. Login UX (Auto Reset, Loading, Name Notification)
+   2. Sidebar Accordion (Satu buka, yang lain tutup)
+   3. Bulk Input Form Lengkap (Section & Dropdown)
+   4. Profil Pengguna & Petugas (Auto Load)
+   5. Chart & Filter Dashboard
+   6. Triple Export & Smart Filter
    ==================================================================== */
 
-// ⚠️ PASTE URL WEB APP KAMU DI SINI
+// ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
 const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec"; 
 
 // ====================================================================
@@ -30,8 +36,9 @@ function showPopup(message, type = "info") {
     if (iconEl) iconEl.className = "fa fa-info-circle";
   }
 
+  // Tampilkan popup selama 4 detik
   setTimeout(() => popup.classList.add("show"), 10);
-  setTimeout(() => popup.classList.remove("show"), 4000); // Diperlama jadi 4 detik
+  setTimeout(() => popup.classList.remove("show"), 4000);
 }
 
 function formatDate(dateStr) {
@@ -55,7 +62,7 @@ async function postData(data) {
     });
     return await response.json();
   } catch (e) {
-    return { status: "ERROR", message: "Koneksi Terputus" };
+    return { status: "ERROR", message: "Koneksi Terputus. Cek internet Anda." };
   }
 }
 
@@ -67,10 +74,16 @@ let idleTime = 0;
 function resetIdleTimer() { idleTime = 0; }
 
 function initAutoLogout() {
+  // Cek setiap 1 menit
   setInterval(() => {
     idleTime++;
-    if (idleTime >= 60) { logout(); }
+    if (idleTime >= 60) { // 60 menit = 1 jam
+      // Panggil fungsi logout yang memunculkan modal
+      logout(); 
+    }
   }, 60000); 
+
+  // Reset timer jika ada aktivitas
   window.onmousemove = resetIdleTimer;
   window.onkeypress = resetIdleTimer;
   window.onclick = resetIdleTimer;
@@ -78,120 +91,186 @@ function initAutoLogout() {
 }
 
 // ====================================================================
-// 3. AUTHENTICATION (LOGIN UX FIX)
+// 3. AUTHENTICATION (LOGIN, LOGOUT, OTP)
 // ====================================================================
 
 async function handleLogin(e, role) {
   if (e) e.preventDefault();
   
-  // 1. Ambil Elemen Input (Biar bisa di-reset)
-  const inputIdElem = role === "PETUGAS" ? document.getElementById("nip") : document.getElementById("email");
-  const inputPassElem = role === "PETUGAS" ? document.getElementById("password-petugas") : document.getElementById("password-pengguna");
-  const btnElem = role === "PETUGAS" ? document.getElementById("btn-login-petugas") : document.getElementById("btn-login-pengguna");
-
-  const userId = inputIdElem ? inputIdElem.value : "";
-  const password = inputPassElem ? inputPassElem.value : "";
+  // Definisi ID berdasarkan index.html kamu
+  let idInputId, passInputId, btnId;
   
-  if (!userId || !password) { showPopup("Data tidak lengkap.", "error"); return; }
-  
-  // 2. UI LOADING STATE (Tombol Muter)
-  const originalText = btnElem.innerHTML;
-  btnElem.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
-  btnElem.disabled = true;
-  btnElem.style.opacity = "0.7";
+  if (role === 'PETUGAS') {
+      idInputId = 'nip';
+      passInputId = 'passPetugas';
+      btnId = 'btnSubmitPetugas';
+  } else {
+      idInputId = 'email';
+      passInputId = 'passPengguna';
+      btnId = 'btnSubmitPengguna';
+  }
 
-  showPopup("Sedang Masuk...", "info");
+  const idInput = document.getElementById(idInputId);
+  const passInput = document.getElementById(passInputId);
+  const btn = document.getElementById(btnId);
+
+  // Validasi Input
+  if (!idInput || !passInput || !idInput.value || !passInput.value) { 
+      showPopup("Data login tidak lengkap.", "error"); 
+      return; 
+  }
+  
+  // Simpan state tombol asli
+  const originalText = btn.innerHTML; 
+  
+  // Ubah ke Loading State
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
+  btn.disabled = true;
+  btn.style.opacity = "0.7";
+
+  showPopup("Sedang memverifikasi...", "info");
   
   try {
-    const res = await postData({ action: "login", role: role, id: userId, password: password });
+    const res = await postData({ 
+        action: "login", 
+        role: role, 
+        id: idInput.value, 
+        password: passInput.value 
+    });
     
     if (res.status === "SUCCESS") {
+      // --- LOGIN SUKSES ---
       localStorage.setItem("user", JSON.stringify(res.data));
-      showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
+      showPopup(`Login Berhasil! Selamat datang, ${res.data.nama}`, "success");
       
-      // Redirect lebih lama (3 detik) biar sempat baca nama
-      setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 3000);
-    } else { 
-      // 3. LOGIKA GAGAL (RESET TOTAL)
-      showPopup(res.message, "error"); // Tampilkan pesan error
-      
-      // Reset Tombol ke Semula
-      btnElem.innerHTML = originalText;
-      btnElem.disabled = false;
-      btnElem.style.opacity = "1";
+      // Delay 3 Detik agar user sempat membaca pesan sukses
+      setTimeout(() => { 
+          window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; 
+      }, 3000);
 
-      // KOSONGKAN INPUT
-      if(inputIdElem) inputIdElem.value = "";
-      if(inputPassElem) inputPassElem.value = "";
+    } else { 
+      // --- LOGIN GAGAL ---
+      showPopup(res.message, "error"); 
       
-      // Fokus balik ke ID
-      if(inputIdElem) inputIdElem.focus();
+      // 1. Reset Tombol ke semula
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      btn.style.opacity = "1";
+
+      // 2. Kosongkan Password & ID
+      passInput.value = "";
+      idInput.value = ""; 
+      
+      // 3. Fokuskan kursor kembali ke ID
+      idInput.focus();
     }
+
   } catch (error) { 
-    showPopup("Gagal koneksi server.", "error");
-    // Reset Tombol jika error koneksi
-    btnElem.innerHTML = originalText;
-    btnElem.disabled = false;
-    btnElem.style.opacity = "1";
+    // --- ERROR KONEKSI ---
+    showPopup("Gagal terhubung ke server.", "error");
+    
+    // Reset Tombol
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    btn.style.opacity = "1";
   }
 }
 
-function logout() { document.getElementById("modal-logout").classList.remove("hidden"); }
-function closeLogoutModal() { document.getElementById("modal-logout").classList.add("hidden"); }
-function confirmLogout() { localStorage.removeItem("user"); window.location.href = "index.html"; }
+// Fungsi Logout (Munculkan Modal)
+function logout() { 
+    const modal = document.getElementById("modal-logout");
+    if(modal) modal.classList.remove("hidden"); 
+}
+
+// Tutup Modal Logout
+function closeLogoutModal() { 
+    const modal = document.getElementById("modal-logout");
+    if(modal) modal.classList.add("hidden"); 
+}
+
+// Konfirmasi Logout (Aksi Nyata)
+function confirmLogout() { 
+    localStorage.removeItem("user"); 
+    window.location.href = "index.html"; 
+}
+
+// --- OTP & Reset Password ---
 
 async function requestOTP() {
   const email = document.getElementById("reset-email").value;
-  if (!email) { showPopup("Masukkan email dulu!", "error"); return; }
+  if (!email) { showPopup("Masukkan email terlebih dahulu!", "error"); return; }
+  
   showPopup("Mengirim kode OTP...", "info");
   const res = await postData({ action: "sendOTP", email: email });
+  
   if (res.status === "SUCCESS") {
-    showPopup("Kode OTP terkirim ke email!", "success");
+    showPopup("Kode OTP berhasil dikirim ke email!", "success");
     document.getElementById("step-email").classList.add("hidden");
     document.getElementById("step-otp").classList.remove("hidden");
-  } else { showPopup(res.message, "error"); }
+  } else {
+    showPopup(res.message, "error");
+  }
 }
+
 async function verifyOTP() {
   const email = document.getElementById("reset-email").value;
   const otp = document.getElementById("reset-otp").value;
-  if (!otp) { showPopup("Masukkan OTP!", "error"); return; }
+  if (!otp) { showPopup("Masukkan kode OTP!", "error"); return; }
+  
   const res = await postData({ action: "verifyOTP", email: email, otp: otp });
+  
   if (res.status === "SUCCESS") {
-    showPopup("OTP Benar!", "success");
+    showPopup("OTP Valid! Silakan buat password baru.", "success");
     document.getElementById("step-otp").classList.add("hidden");
     document.getElementById("step-newpass").classList.remove("hidden");
-  } else { showPopup(res.message, "error"); }
+  } else {
+    showPopup(res.message, "error");
+  }
 }
+
 async function resetPasswordFinal() {
   const email = document.getElementById("reset-email").value;
   const newPass = document.getElementById("reset-newpass").value;
   if (!newPass) { showPopup("Masukkan password baru!", "error"); return; }
-  showPopup("Menyimpan password...", "info");
+  
+  showPopup("Menyimpan password baru...", "info");
   const res = await postData({ action: "resetPasswordFinal", email: email, newPassword: newPass });
+  
   if (res.status === "SUCCESS") {
-    showPopup("Sukses! Silakan login.", "success");
-    setTimeout(() => window.location.reload(), 2000);
-  } else { showPopup(res.message, "error"); }
+    showPopup("Password berhasil diubah! Silakan login.", "success");
+    setTimeout(() => window.location.href = "index.html", 2000); // Redirect ke login
+  } else {
+    showPopup(res.message, "error");
+  }
 }
 
 // ====================================================================
-// 4. INIT PAGE & SIDEBAR FIX
+// 4. PAGE INITIALIZATION & NAVIGATION
 // ====================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Cek kita ada di halaman mana
   if (document.querySelector(".dashboard-page")) {
+      // Halaman Pengguna
       initPenggunaDashboard();
       initAutoLogout();
   } else if (document.querySelector(".petugas-page")) {
+      // Halaman Petugas
       loadProfilePetugas();
+      
+      // Set default filter chart ke 'Tahun Ini'
       const defaultBtn = document.querySelector('.filter-btn.active');
       updateChartFilter("year", defaultBtn); 
+      
+      // Render Form Bulk Input
       renderBulkForm('SHSK'); 
       renderBulkForm('SERTIFIKASI'); 
+      
       initAutoLogout();
   }
 });
 
+// Toggle Sidebar Mobile
 function toggleSidebar() { 
     const s = document.getElementById("sidebar"); 
     const o = document.getElementById("sidebar-overlay"); 
@@ -199,13 +278,25 @@ function toggleSidebar() {
     o.classList.toggle("active"); 
 }
 
+// Navigasi Halaman Utama (Dashboard/SHSK/Sertifikasi)
 function showSection(id, el) { 
+    // Sembunyikan semua section
     document.querySelectorAll(".main-content > div").forEach(d => d.classList.add("hidden")); 
-    document.getElementById(`sec-${id}`).classList.remove("hidden"); 
+    
+    // Munculkan section yang dipilih
+    const target = document.getElementById(`sec-${id}`);
+    if(target) target.classList.remove("hidden"); 
+    
+    // Atur class active pada menu sidebar
     document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
     if(el) el.classList.add("active");
-    if(id.includes("data")) loadData(id.includes("shsk") ? "SHSK" : "SERTIFIKASI");
 
+    // Jika masuk ke halaman data, load datanya
+    if(id.includes("data")) {
+        loadData(id.includes("shsk") ? "SHSK" : "SERTIFIKASI");
+    }
+
+    // Auto Close Sidebar di Mobile setelah klik menu
     if (window.innerWidth <= 900) {
         const s = document.getElementById("sidebar");
         const o = document.getElementById("sidebar-overlay");
@@ -216,31 +307,38 @@ function showSection(id, el) {
     }
 }
 
+// Sidebar Accordion Logic (Satu Buka, Lain Tutup)
 function toggleSubmenu(id) { 
-    const target = document.getElementById(id);
-    const isOpen = target.classList.contains("show");
-    
-    // Reset semua submenu
-    document.querySelectorAll(".submenu-container").forEach(el => el.classList.remove("show"));
-    document.querySelectorAll(".menu-item").forEach(el => el.classList.remove("open"));
+    const targetSubmenu = document.getElementById(id);
+    const isCurrentlyOpen = targetSubmenu.classList.contains("show");
 
-    // Jika tadi tertutup, buka yg diklik
-    if(!isOpen) {
-        target.classList.add("show");
-        // Add arrow rotation to parent
-        // Note: HTML structure assumed prev sibling is menu item
-        const trigger = target.previousElementSibling;
-        if(trigger) trigger.classList.add("open");
+    // 1. Reset: Tutup semua submenu lain
+    document.querySelectorAll(".submenu-container").forEach(el => el.classList.remove("show"));
+    // 2. Reset: Hapus class 'open' (rotasi panah) dari semua menu item
+    document.querySelectorAll(".menu-item.has-submenu").forEach(el => el.classList.remove("open"));
+
+    // 3. Jika submenu target tadi tertutup, sekarang BUKA
+    if (!isCurrentlyOpen) {
+        targetSubmenu.classList.add("show");
+        
+        // Cari elemen pemicu (menu item di atasnya) untuk nambah class open
+        const trigger = targetSubmenu.previousElementSibling;
+        if (trigger && trigger.classList.contains('menu-item')) {
+            trigger.classList.add("open");
+        }
     }
 }
 
+// Global Accordion Function (Untuk Form Bulk Input)
 window.toggleAccordion = function(headerElement) {
     const item = headerElement.closest('.accordion-item');
-    if (item) item.classList.toggle("open");
+    if (item) {
+        item.classList.toggle("open");
+    }
 }
 
 // ====================================================================
-// 5. CHART UI
+// 5. CHART & DASHBOARD STATISTICS
 // ====================================================================
 
 let barChartInstance = null;
@@ -249,30 +347,42 @@ let currentFilter = "year";
 
 function updateChartFilter(period, btnElement) {
   currentFilter = period;
+  
+  // Hapus active dari semua tombol filter
   document.querySelectorAll(".filter-btn").forEach((btn) => {
       btn.classList.remove("active");
   });
+
+  // Tambahkan active ke tombol yang diklik
   if (btnElement) {
       btnElement.classList.add("active");
   } else {
+      // Fallback selector jika dipanggil manual
       const targetBtn = Array.from(document.querySelectorAll(".filter-btn")).find(b => b.innerText.toLowerCase().includes(period === 'year' ? 'tahun' : period === 'month' ? 'bulan' : period === 'week' ? 'minggu' : 'hari'));
       if(targetBtn) targetBtn.classList.add("active");
   }
+
+  // Load ulang chart
   initCharts(period);
 }
 
 async function initCharts(p = "year") {
   if (!document.getElementById("barChart")) return;
+  
   const res = await postData({ action: "getDashboardStats", period: p });
   let d = { year: new Date().getFullYear(), totalYear: 0, labels: [], counts: [] };
+  
   if (res.status === "SUCCESS") d = res.data;
 
+  // Update Judul Target
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
   if(titleEl && titleEl.parentNode) titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
   
-  const total = 2040;
-  const sisa = total - d.totalYear;
+  // Hitung Target
+  const totalTarget = 2040;
+  const sisa = totalTarget - d.totalYear;
   
+  // Update Info Text
   const targetInfo = document.querySelector(".target-info");
   if(targetInfo) {
       targetInfo.innerHTML = `
@@ -281,6 +391,7 @@ async function initCharts(p = "year") {
       `;
   }
 
+  // Render Bar Chart
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -299,6 +410,7 @@ async function initCharts(p = "year") {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 
+  // Render Doughnut Chart
   const ctxD = document.getElementById("doughnutChart").getContext("2d");
   if (doughnutChartInstance) doughnutChartInstance.destroy();
   doughnutChartInstance = new Chart(ctxD, {
@@ -316,7 +428,7 @@ async function initCharts(p = "year") {
 }
 
 // ====================================================================
-// 6. PROFILE PETUGAS
+// 6. PROFILE DATA (PETUGAS & PENGGUNA)
 // ====================================================================
 
 function loadProfilePetugas() {
@@ -325,6 +437,8 @@ function loadProfilePetugas() {
 
   if (document.getElementById("nav-name")) document.getElementById("nav-name").innerText = user.nama;
   if (document.getElementById("sidebar-name")) document.getElementById("sidebar-name").innerText = user.nama;
+  
+  // Tampilkan NIP (dari user.id)
   if (document.getElementById("sidebar-nip")) document.getElementById("sidebar-nip").innerText = "NIP. " + (user.id || "-");
   
   if (document.getElementById("dash-name")) document.getElementById("dash-name").innerText = user.nama.split(" ")[0];
@@ -337,8 +451,34 @@ function loadProfilePetugas() {
   }
 }
 
+let penggunaFiles = [];
+function initPenggunaDashboard() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) { window.location.href = "index.html"; return; }
+    
+    // Isi Data Profil Pengguna
+    if(document.getElementById("nav-user-name")) document.getElementById("nav-user-name").innerText = user.nama;
+    if(document.getElementById("nav-company-name")) document.getElementById("nav-company-name").innerText = user.extra || "PERUSAHAAN";
+    
+    if(document.getElementById("mob-user-name")) document.getElementById("mob-user-name").innerText = user.nama;
+    if(document.getElementById("mob-company-name")) document.getElementById("mob-company-name").innerText = user.extra || "PERUSAHAAN";
+    
+    if(document.getElementById("email-display-text")) document.getElementById("email-display-text").innerText = user.id; // Email ada di user.id
+    
+    // Ambil Data File untuk Dropdown
+    fetchPenggunaFiles(user.extra); 
+}
+
+async function fetchPenggunaFiles(company) {
+  const res = await postData({ action: "getDropdownData", perusahaan: company });
+  if (res.status === "SUCCESS") {
+      penggunaFiles = res.data; 
+      populateYear(); 
+  }
+}
+
 // ====================================================================
-// 7. BULK INPUT ENGINE
+// 7. BULK INPUT ENGINE (RENDER FORM LENGKAP)
 // ====================================================================
 
 function renderBulkForm(type) {
@@ -361,6 +501,7 @@ function renderBulkForm(type) {
         `;
 
         if(type === 'SHSK') {
+            // === FORM SHSK LENGKAP ===
             html += `
             <div class="accordion-item open">
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
@@ -408,6 +549,7 @@ function renderBulkForm(type) {
             </div>
             `;
         } else {
+            // === FORM SERTIFIKASI LENGKAP ===
             html += `
             <div class="accordion-item open">
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
@@ -527,6 +669,7 @@ async function handleBulkSubmit(type) {
     const btnSave = document.getElementById(`btn-save-${type}`);
     const originalText = btnSave.innerHTML;
     
+    // Loading State
     btnSave.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
     btnSave.disabled = true;
     showPopup("Sedang menyimpan data...", "info");
@@ -541,6 +684,7 @@ async function handleBulkSubmit(type) {
         const inputs = form.querySelectorAll(`[name$="_${i}"]`);
         
         let hasData = false;
+        
         inputs.forEach(input => {
             const key = input.name.replace(`_${i}`, ''); 
             if(input.type !== 'file') {
@@ -551,6 +695,7 @@ async function handleBulkSubmit(type) {
 
         if(!hasData) continue; 
 
+        // Handle Files
         itemData.files = [];
         for (const field of fileFields) {
             const fileInput = form.querySelector(`[name="${field}_${i}"]`);
@@ -580,15 +725,20 @@ async function handleBulkSubmit(type) {
         return;
     }
 
+    // Logic Update vs Upload
     let action = type === 'SHSK' ? 'uploadBulkSHSK' : 'uploadBulkSertifikasi';
+    
+    // Jika 1 item dan ada No Urut, berarti Update
     if(items.length === 1 && items[0].noUrut) {
         action = type === 'SHSK' ? 'updateSHSK' : 'updateSertifikasi';
         Object.assign(items[0], {action: action}); 
+        
         const res = await postData(items[0]);
         handleResponse(res, type, form, originalText, btnSave, true);
         return;
     }
 
+    // Bulk Upload
     const res = await postData({ action: action, items: items });
     handleResponse(res, type, form, originalText, btnSave, false);
 }
@@ -596,6 +746,7 @@ async function handleBulkSubmit(type) {
 function handleResponse(res, type, form, btnText, btnEl, isEdit) {
     btnEl.innerHTML = btnText;
     btnEl.disabled = false;
+
     if (res.status === "SUCCESS") {
         showPopup(isEdit ? "Data Diperbarui!" : "Data Berhasil Disimpan!", "success");
         form.reset();
@@ -609,7 +760,7 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
 }
 
 // ====================================================================
-// 8. EDIT DATA & LOCK MECHANISM
+// 8. EDIT DATA & LOCKING (EDIT TERKUNCI DULU)
 // ====================================================================
 
 function editData(type, rowDataStr) {
@@ -618,18 +769,20 @@ function editData(type, rowDataStr) {
     
     showSection(`${type.toLowerCase()}-input`);
     
+    // Reset jumlah form ke 1
     const countSelect = document.getElementById(type === 'SHSK' ? 'bulkCountSHSK' : 'bulkCountSertifikasi');
     countSelect.value = "1";
     renderBulkForm(type); 
 
     const form = document.getElementById(formId);
     
+    // Helper function untuk isi nilai
     const setVal = (name, val) => {
         const el = form.querySelector(`[name="${name}_1"]`);
         if(el) {
              if(el.type === 'date') el.value = formatDateForInput(val);
              else el.value = val;
-             el.disabled = true; 
+             el.disabled = true; // KUNCI INPUT SAAT PERTAMA LOAD
         }
     };
 
@@ -665,11 +818,14 @@ function editData(type, rowDataStr) {
         setVal('pemeriksa', rowData.NAMA_PEMERIKSA);
     }
 
+    // Kunci semua input select
     const allInputs = form.querySelectorAll('input, select');
     allInputs.forEach(i => i.disabled = true);
 
+    // Sembunyikan tombol simpan biasa
     document.getElementById(`btn-save-${type}`).classList.add("hidden");
     
+    // Tampilkan tombol UNLOCK
     let btnUnlock = document.getElementById(`btn-unlock-${type}`);
     if(!btnUnlock) {
         const btnContainer = document.querySelector(`#btn-container-${type}`) || form.querySelector('.form-actions');
@@ -682,8 +838,11 @@ function editData(type, rowDataStr) {
         btnContainer.insertBefore(btnUnlock, btnContainer.firstChild);
     }
     btnUnlock.classList.remove("hidden");
+    
+    // Tampilkan tombol Batal
     document.getElementById(`btn-cancel-${type}`).classList.remove("hidden");
     
+    // Sembunyikan tombol Update (sampai di-unlock)
     let btnUpdate = document.getElementById(`btn-update-${type}`);
     if(btnUpdate) btnUpdate.classList.add("hidden");
 
@@ -693,7 +852,7 @@ function editData(type, rowDataStr) {
 function enableEditMode(type) {
     const form = document.getElementById(type === 'SHSK' ? 'formSHSK' : 'formSertifikasi');
     const allInputs = form.querySelectorAll('input, select');
-    allInputs.forEach(i => i.disabled = false); 
+    allInputs.forEach(i => i.disabled = false); // BUKA KUNCI
 
     document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
     
@@ -730,9 +889,10 @@ function cancelEdit(type) {
 }
 
 // ====================================================================
-// 9. TRIPLE EXPORT, TABLE, PENGGUNA DASHBOARD
+// 9. DATA LOADING, FILTER & EXPORT
 // ====================================================================
 
+// --- EXPORT TRIPLE FILE ---
 async function exportTriple(type) {
   const btn = event.currentTarget;
   const originalHtml = btn.innerHTML;
@@ -765,7 +925,7 @@ async function exportTriple(type) {
   btn.disabled = false;
 }
 
-// TABLE LOGIC
+// --- TABLE & FILTERING ---
 let rawData = { SHSK: [], SERTIFIKASI: [] };
 let filteredData = { SHSK: [], SERTIFIKASI: [] };
 let currentPage = { SHSK: 1, SERTIFIKASI: 1 };
@@ -774,6 +934,7 @@ const ROWS_PER_PAGE = 10;
 async function loadData(type) {
   const tbody = document.getElementById(type === "SHSK" ? "tbody-shsk" : "tbody-sertifikasi");
   tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Sedang Memuat Data...</td></tr>';
+  
   const res = await postData({ action: type === "SHSK" ? "getDataSHSK" : "getDataSertifikasi" });
   if (res.status === "SUCCESS") {
     rawData[type] = res.data.reverse();
@@ -781,7 +942,9 @@ async function loadData(type) {
     currentPage[type] = 1;
     renderTable(type);
     if(type === 'SERTIFIKASI') populateFilterOptions(rawData[type]);
-  } else { tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`; }
+  } else { 
+    tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`; 
+  }
 }
 
 function populateFilterOptions(data) {
@@ -835,11 +998,13 @@ function renderTable(type) {
   tbody.innerHTML = "";
   const start = (currentPage[type] - 1) * ROWS_PER_PAGE;
   const pageData = filteredData[type].slice(start, start + ROWS_PER_PAGE);
+  
   if (pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Data Tidak Ditemukan</td></tr>'; return; }
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
     let tr = `<tr><td>${start + i + 1}</td>`;
+    
     if (type === "SHSK") {
       tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${row["TANDA_PENDAFTARAN"]}</td>
              <td>${row["PEMILIK"]}</td><td>${row["TEMPAT_STKK"]}</td><td>${formatDate(row["TANGGAL_STKK"])}</td>
@@ -852,6 +1017,7 @@ function renderTable(type) {
              <td>${formatDate(row["TANGGAL_MASA_BERLAKU"])}</td><td>${row["DAERAH_PELAYARAN"]||"-"}</td>
              <td>${row["NOMOR_SERTIFIKAT"]}</td><td>${row["KODE_BILLING"]}</td><td>${row["NAMA_PEMERIKSA"]}</td>`;
     }
+    
     tr += `<td><div style="display:flex; justify-content:center; gap:5px;">
              <button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button>
              <button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button>
@@ -861,31 +1027,96 @@ function renderTable(type) {
   });
   document.getElementById(`page-info-${type}`).innerText = `Hal ${currentPage[type]}`;
 }
+
 function prevPage(t) { if (currentPage[t] > 1) { currentPage[t]--; renderTable(t); } }
 function nextPage(t) { if (currentPage[t] * ROWS_PER_PAGE < filteredData[t].length) { currentPage[t]++; renderTable(t); } }
 
-// DELETE
+// --- DELETE ---
 let pendingDelete = null;
 function prepareDelete(t,s){ const r=JSON.parse(decodeURIComponent(s)); pendingDelete={type:t,noUrut:r.NO_URUT||r["NO URUT"]}; document.getElementById("modal-delete").classList.remove("hidden"); }
 function closeDeleteModal(){ document.getElementById("modal-delete").classList.add("hidden"); }
 async function executeDelete(){ if(!pendingDelete)return; await postData({action:pendingDelete.type==="SHSK"?"deleteSHSK":"deleteSertifikasi",noUrut:pendingDelete.noUrut}); closeDeleteModal(); loadData(pendingDelete.type); }
 
-// PENGGUNA DASHBOARD
-let penggunaFiles=[];
-function initPenggunaDashboard(){ 
-    const u=JSON.parse(localStorage.getItem("user")); 
-    if(!u){window.location.href="index.html";return;} 
-    if(document.getElementById("nav-user-name")) document.getElementById("nav-user-name").innerText=u.nama;
-    if(document.getElementById("nav-company-name")) document.getElementById("nav-company-name").innerText=u.extra||"PERUSAHAAN";
-    if(document.getElementById("mob-user-name")) document.getElementById("mob-user-name").innerText=u.nama;
-    if(document.getElementById("mob-company-name")) document.getElementById("mob-company-name").innerText=u.extra||"PERUSAHAAN";
-    if(document.getElementById("email-display-text")) document.getElementById("email-display-text").innerText=u.id;
-    fetchPenggunaFiles(u.extra); 
+// ====================================================================
+// 10. PENGGUNA DASHBOARD DROPDOWN LOGIC
+// ====================================================================
+
+function populateYear() {
+    const s = document.getElementById("reqTahun");
+    const y = [...new Set(penggunaFiles.map(i=>i.tahun))].sort().reverse();
+    s.innerHTML = '<option value="">-- Pilih --</option>';
+    y.forEach(v => { if(v) s.innerHTML += `<option value="${v}">${v}</option>`; });
 }
-async function fetchPenggunaFiles(c){ const r=await postData({action:"getDropdownData",perusahaan:c}); if(r.status==="SUCCESS"){penggunaFiles=r.data; populateYear();} }
-function populateYear(){ const s=document.getElementById("reqTahun"); const y=[...new Set(penggunaFiles.map(i=>i.tahun))].sort().reverse(); s.innerHTML='<option value="">-- Pilih --</option>'; y.forEach(v=>{if(v)s.innerHTML+=`<option value="${v}">${v}</option>`}); }
-window.filterMonth=function(){ const y=document.getElementById("reqTahun").value; const s=document.getElementById("reqBulan"); s.innerHTML='<option value="">-- Pilih --</option>'; if(!y)return; const m=[...new Set(penggunaFiles.filter(i=>i.tahun==y).map(i=>i.bulan))].sort((a,b)=>a-b); m.forEach(v=>s.innerHTML+=`<option value="${v}">${getMonthName(v)}</option>`); s.disabled=false; }
-window.filterShip=function(){ const y=document.getElementById("reqTahun").value; const m=document.getElementById("reqBulan").value; const s=document.getElementById("reqKapal"); s.innerHTML='<option value="">-- Pilih --</option>'; if(!m)return; const ships=[...new Set(penggunaFiles.filter(i=>i.tahun==y && i.bulan==m).map(i=>i.kapal))]; ships.forEach(v=>s.innerHTML+=`<option value="${v}">${v}</option>`); s.disabled=false; }
-window.filterType=function(){ const y=document.getElementById("reqTahun").value; const m=document.getElementById("reqBulan").value; const sh=document.getElementById("reqKapal").value; const s=document.getElementById("reqJenis"); s.innerHTML='<option value="">-- Pilih Dokumen --</option>'; if(!sh)return; const docs=penggunaFiles.filter(i=>i.tahun==y && i.bulan==m && i.kapal==sh); docs.forEach(v=>s.innerHTML+=`<option value="${v.link}">${v.jenis}</option>`); s.disabled=false; }
-window.handleRequestSubmit=async function(e){ e.preventDefault(); const s=document.getElementById("reqJenis"); const opts=Array.from(s.selectedOptions); if(opts.length===0){alert("Pilih dokumen!");return;} const t=opts.map(o=>o.text); const l=s.value; const u=JSON.parse(localStorage.getItem("user")); document.getElementById("btnKirimReq").innerText="MENGIRIM..."; await postData({action:"sendReportEmail",email:u.id,namaUser:u.nama,perusahaan:u.extra,kapal:document.getElementById("reqKapal").value,jenis:t,tahun:document.getElementById("reqTahun").value,bulan:getMonthName(document.getElementById("reqBulan").value),link:l}); showPopup("Terkirim!","success"); document.getElementById("btnKirimReq").innerText="KIRIM DOKUMEN"; }
-function getMonthName(i){const m=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];return m[i-1]||i;}
+
+window.filterMonth = function() {
+    const y = document.getElementById("reqTahun").value;
+    const s = document.getElementById("reqBulan");
+    s.innerHTML = '<option value="">-- Pilih --</option>'; 
+    if(!y) return;
+    
+    const m = [...new Set(penggunaFiles.filter(i=>i.tahun==y).map(i=>i.bulan))].sort((a,b)=>a-b);
+    m.forEach(v => s.innerHTML += `<option value="${v}">${getMonthName(v)}</option>`);
+    s.disabled = false;
+}
+
+window.filterShip = function() {
+    const y = document.getElementById("reqTahun").value;
+    const m = document.getElementById("reqBulan").value;
+    const s = document.getElementById("reqKapal");
+    s.innerHTML = '<option value="">-- Pilih --</option>';
+    if(!m) return;
+    
+    const ships = [...new Set(penggunaFiles.filter(i=>i.tahun==y && i.bulan==m).map(i=>i.kapal))];
+    ships.forEach(v => s.innerHTML += `<option value="${v}">${v}</option>`);
+    s.disabled = false;
+}
+
+window.filterType = function() {
+    const y = document.getElementById("reqTahun").value;
+    const m = document.getElementById("reqBulan").value;
+    const sh = document.getElementById("reqKapal").value;
+    const s = document.getElementById("reqJenis");
+    s.innerHTML = '<option value="">-- Pilih Dokumen --</option>';
+    if(!sh) return;
+    
+    // Ambil data sesuai filter
+    const docs = penggunaFiles.filter(i => i.tahun==y && i.bulan==m && i.kapal==sh);
+    docs.forEach(v => s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`);
+    s.disabled = false;
+}
+
+window.handleRequestSubmit = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById("btnKirimReq");
+    const select = document.getElementById("reqJenis");
+    const opts = Array.from(select.selectedOptions);
+    
+    if(opts.length === 0) { alert("Pilih minimal satu dokumen!"); return; }
+    
+    const jenisList = opts.map(o => o.text); 
+    const link = select.value; 
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    btn.innerHTML = "MENGIRIM..."; 
+    btn.disabled = true;
+    
+    const res = await postData({
+        action: "sendReportEmail",
+        email: user.id, 
+        namaUser: user.nama, 
+        perusahaan: user.extra,
+        kapal: document.getElementById("reqKapal").value,
+        jenis: jenisList,
+        tahun: document.getElementById("reqTahun").value,
+        bulan: getMonthName(document.getElementById("reqBulan").value),
+        link: link
+    });
+    
+    if(res.status === "SUCCESS") showPopup("Dokumen berhasil dikirim ke email!", "success");
+    else showPopup("Gagal mengirim.", "error");
+    
+    btn.innerHTML = "KIRIM DOKUMEN"; 
+    btn.disabled = false;
+}
+
+function getMonthName(i){ const m=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"]; return m[i-1]||i; }
