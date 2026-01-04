@@ -1,6 +1,6 @@
 /* ====================================================================
-   SCRIPT.JS - FRONTEND LOGIC (FIXED: LOGOUT, CHART UI, SIDEBAR, ACCORDION)
-   Fitur: Bulk Input, Triple Export, Filter, Edit Lock, User Profile.
+   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - LOGIN NAME FIX)
+   Fitur: Bulk Input, Triple Export, Filter, Edit Lock, User Profile Fix.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP KAMU DI SINI
@@ -69,8 +69,7 @@ function resetIdleTimer() { idleTime = 0; }
 function initAutoLogout() {
   setInterval(() => {
     idleTime++;
-    if (idleTime >= 60) { // 60 menit
-      // Panggil modal konfirmasi, bukan langsung logout
+    if (idleTime >= 60) { 
       logout(); 
     }
   }, 60000); 
@@ -82,25 +81,34 @@ function initAutoLogout() {
 }
 
 // ====================================================================
-// 3. AUTHENTICATION (LOGOUT FIX)
+// 3. AUTHENTICATION (LOGIN NAME FIX)
 // ====================================================================
 
 async function handleLogin(e, role, passwordInput) {
   if (e) e.preventDefault();
   let userId = role === "PETUGAS" ? document.getElementById("nip").value : document.getElementById("email").value;
+  
   if (!userId || !passwordInput) { showPopup("Data tidak lengkap.", "error"); return; }
+  
   showPopup("Sedang Masuk...", "info");
+  
   try {
     const res = await postData({ action: "login", role: role, id: userId, password: passwordInput });
+    
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
-      showPopup(`Login Berhasil!`, "success");
+      // FIX DISINI: Menampilkan Nama User di Notifikasi
+      showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
+      
       setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 1500);
-    } else { showPopup(res.message, "error"); }
-  } catch (error) { showPopup("Gagal koneksi.", "error"); }
+    } else { 
+      showPopup(res.message, "error"); 
+    }
+  } catch (error) { 
+    showPopup("Gagal koneksi.", "error"); 
+  }
 }
 
-// FUNGSI LOGOUT YANG BENAR (MUNCULKAN MODAL)
 function logout() { 
     document.getElementById("modal-logout").classList.remove("hidden"); 
 }
@@ -114,9 +122,39 @@ function confirmLogout() {
     window.location.href = "index.html"; 
 }
 
-async function requestOTP() { /* ...Sama... */ }
-async function verifyOTP() { /* ...Sama... */ }
-async function resetPasswordFinal() { /* ...Sama... */ }
+async function requestOTP() {
+  const email = document.getElementById("reset-email").value;
+  if (!email) { showPopup("Masukkan email dulu!", "error"); return; }
+  showPopup("Mengirim kode OTP...", "info");
+  const res = await postData({ action: "sendOTP", email: email });
+  if (res.status === "SUCCESS") {
+    showPopup("Kode OTP terkirim ke email!", "success");
+    document.getElementById("step-email").classList.add("hidden");
+    document.getElementById("step-otp").classList.remove("hidden");
+  } else { showPopup(res.message, "error"); }
+}
+async function verifyOTP() {
+  const email = document.getElementById("reset-email").value;
+  const otp = document.getElementById("reset-otp").value;
+  if (!otp) { showPopup("Masukkan OTP!", "error"); return; }
+  const res = await postData({ action: "verifyOTP", email: email, otp: otp });
+  if (res.status === "SUCCESS") {
+    showPopup("OTP Benar!", "success");
+    document.getElementById("step-otp").classList.add("hidden");
+    document.getElementById("step-newpass").classList.remove("hidden");
+  } else { showPopup(res.message, "error"); }
+}
+async function resetPasswordFinal() {
+  const email = document.getElementById("reset-email").value;
+  const newPass = document.getElementById("reset-newpass").value;
+  if (!newPass) { showPopup("Masukkan password baru!", "error"); return; }
+  showPopup("Menyimpan password...", "info");
+  const res = await postData({ action: "resetPasswordFinal", email: email, newPassword: newPass });
+  if (res.status === "SUCCESS") {
+    showPopup("Sukses! Silakan login.", "success");
+    setTimeout(() => window.location.reload(), 2000);
+  } else { showPopup(res.message, "error"); }
+}
 
 // ====================================================================
 // 4. INIT PAGE & SIDEBAR FIX
@@ -128,22 +166,19 @@ document.addEventListener("DOMContentLoaded", () => {
       initAutoLogout();
   } else if (document.querySelector(".petugas-page")) {
       loadProfilePetugas();
-      // Init Chart dengan tombol 'year' aktif default
       const defaultBtn = document.querySelector('.filter-btn.active');
       updateChartFilter("year", defaultBtn); 
-      
       renderBulkForm('SHSK'); 
       renderBulkForm('SERTIFIKASI'); 
       initAutoLogout();
   }
 });
 
-// FUNGSI SIDEBAR FIX
 function toggleSidebar() { 
     const s = document.getElementById("sidebar"); 
     const o = document.getElementById("sidebar-overlay"); 
     s.classList.toggle("show"); 
-    o.classList.toggle("active"); // Pastikan overlay muncul
+    o.classList.toggle("active"); 
 }
 
 function showSection(id, el) { 
@@ -153,7 +188,6 @@ function showSection(id, el) {
     if(el) el.classList.add("active");
     if(id.includes("data")) loadData(id.includes("shsk") ? "SHSK" : "SERTIFIKASI");
 
-    // AUTO CLOSE SIDEBAR DI MOBILE
     if (window.innerWidth <= 900) {
         const s = document.getElementById("sidebar");
         const o = document.getElementById("sidebar-overlay");
@@ -168,9 +202,7 @@ function toggleSubmenu(id) {
     document.getElementById(id).classList.toggle("show"); 
 }
 
-// FUNGSI ACCORDION FIX (GLOBAL)
 window.toggleAccordion = function(headerElement) {
-    // Cari parent element terdekat yang punya class 'accordion-item'
     const item = headerElement.closest('.accordion-item');
     if (item) {
         item.classList.toggle("open");
@@ -178,7 +210,7 @@ window.toggleAccordion = function(headerElement) {
 }
 
 // ====================================================================
-// 5. CHART UI FIX (WARNA FILTER BERGERAK)
+// 5. CHART UI
 // ====================================================================
 
 let barChartInstance = null;
@@ -187,22 +219,15 @@ let currentFilter = "year";
 
 function updateChartFilter(period, btnElement) {
   currentFilter = period;
-  
-  // 1. Hapus class active dari SEMUA tombol filter
   document.querySelectorAll(".filter-btn").forEach((btn) => {
       btn.classList.remove("active");
   });
-
-  // 2. Tambahkan class active ke tombol yang DIKLIK (btnElement)
   if (btnElement) {
       btnElement.classList.add("active");
   } else {
-      // Fallback jika dipanggil tanpa klik (misal saat load awal)
       const targetBtn = Array.from(document.querySelectorAll(".filter-btn")).find(b => b.innerText.toLowerCase().includes(period === 'year' ? 'tahun' : period === 'month' ? 'bulan' : period === 'week' ? 'minggu' : 'hari'));
       if(targetBtn) targetBtn.classList.add("active");
   }
-
-  // 3. Render ulang chart
   initCharts(period);
 }
 
@@ -212,7 +237,6 @@ async function initCharts(p = "year") {
   let d = { year: new Date().getFullYear(), totalYear: 0, labels: [], counts: [] };
   if (res.status === "SUCCESS") d = res.data;
 
-  // Update Judul Target
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
   if(titleEl && titleEl.parentNode) titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
   
@@ -227,7 +251,6 @@ async function initCharts(p = "year") {
       `;
   }
 
-  // Render Bar Chart
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -246,7 +269,6 @@ async function initCharts(p = "year") {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 
-  // Render Doughnut
   const ctxD = document.getElementById("doughnutChart").getContext("2d");
   if (doughnutChartInstance) doughnutChartInstance.destroy();
   doughnutChartInstance = new Chart(ctxD, {
@@ -264,18 +286,15 @@ async function initCharts(p = "year") {
 }
 
 // ====================================================================
-// 6. PROFILE PETUGAS FIX (NIP MUNCUL)
+// 6. PROFILE PETUGAS
 // ====================================================================
 
 function loadProfilePetugas() {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) { window.location.href = "index.html"; return; }
 
-  // FIX: Pastikan elemen ada sebelum diisi
   if (document.getElementById("nav-name")) document.getElementById("nav-name").innerText = user.nama;
   if (document.getElementById("sidebar-name")) document.getElementById("sidebar-name").innerText = user.nama;
-  
-  // FIX NIP: Ambil dari user.id (karena login pakai NIP)
   if (document.getElementById("sidebar-nip")) document.getElementById("sidebar-nip").innerText = "NIP. " + (user.id || "-");
   
   if (document.getElementById("dash-name")) document.getElementById("dash-name").innerText = user.nama.split(" ")[0];
@@ -289,12 +308,8 @@ function loadProfilePetugas() {
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE (NO CHANGE - SUDAH LENGKAP)
+// 7. BULK INPUT ENGINE
 // ====================================================================
-// (Bagian renderBulkForm dan handleBulkSubmit SAMA SEPERTI SEBELUMNYA)
-// Saya ringkas agar kode tidak terlalu panjang di chat, tapi pastikan
-// fungsi renderBulkForm yang ada Accordion/Section lengkap tadi TETAP DIPAKAI.
-// LOGIKA TOGGLE ACCORDION SUDAH DIPERBAIKI DI ATAS (window.toggleAccordion)
 
 function renderBulkForm(type) {
     const countSelect = document.getElementById(type === 'SHSK' ? 'bulkCountSHSK' : 'bulkCountSertifikasi');
@@ -363,7 +378,6 @@ function renderBulkForm(type) {
             </div>
             `;
         } else {
-            // SERTIFIKASI
             html += `
             <div class="accordion-item open">
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
@@ -585,7 +599,7 @@ function editData(type, rowDataStr) {
         if(el) {
              if(el.type === 'date') el.value = formatDateForInput(val);
              else el.value = val;
-             el.disabled = true; // LOCK
+             el.disabled = true; 
         }
     };
 
@@ -688,8 +702,6 @@ function cancelEdit(type) {
 // ====================================================================
 // 9. TRIPLE EXPORT, TABLE, PENGGUNA DASHBOARD
 // ====================================================================
-// (Bagian ini sama persis dengan yang sebelumnya, tidak ada perubahan logika, 
-//  tapi saya sertakan agar file lengkap)
 
 async function exportTriple(type) {
   const btn = event.currentTarget;
