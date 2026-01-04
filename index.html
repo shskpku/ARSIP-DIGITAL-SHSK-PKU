@@ -43,7 +43,7 @@
           </button>
         </div>
 
-        <form id="formPetugas" onsubmit="handleLoginWrapper(event, 'PETUGAS')">
+        <form id="formPetugas" onsubmit="handleLogin(event, 'PETUGAS')">
           <div class="input-group">
             <input
               type="text"
@@ -80,11 +80,7 @@
           </button>
         </form>
 
-        <form
-          id="formPengguna"
-          class="hidden"
-          onsubmit="handleLoginWrapper(event, 'PENGGUNA')"
-        >
+        <form id="formPengguna" class="hidden" onsubmit="handleLogin(event, 'PENGGUNA')">
           <div class="input-group">
             <input
               type="email"
