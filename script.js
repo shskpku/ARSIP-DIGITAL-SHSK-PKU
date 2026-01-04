@@ -1,6 +1,6 @@
 /* ====================================================================
-   SCRIPT.JS - FRONTEND LOGIC (ULTIMATE MASTER FINAL - FIXED PROFILE)
-   Fitur: Bulk Input, Triple Export, Filter, Edit Lock, User Profile Fix.
+   SCRIPT.JS - FRONTEND LOGIC (MASTER FINAL - GABUNGAN SEMUA FIX)
+   Fitur: Bulk Input (Struktur Lengkap), Triple Export, Filter, Edit Lock, User Profile.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP KAMU DI SINI
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ====================================================================
-// 5. BULK INPUT ENGINE
+// 5. BULK INPUT ENGINE (STRUKTUR LENGKAP SESUAI REQUEST)
 // ====================================================================
 
 function renderBulkForm(type) {
@@ -162,6 +162,7 @@ function renderBulkForm(type) {
     container.innerHTML = ""; 
 
     for(let i = 1; i <= count; i++) {
+        // WRAPPER PER DATA
         let html = `
         <div class="data-wrapper" style="margin-bottom:30px; border:2px solid var(--navy); border-radius:10px; overflow:hidden;">
             <div style="background:var(--navy); color:#fff; padding:10px 15px; font-weight:bold;">
@@ -173,6 +174,7 @@ function renderBulkForm(type) {
         `;
 
         if(type === 'SHSK') {
+            // === FORM SHSK ===
             html += `
             <div class="accordion-item open">
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
@@ -220,6 +222,7 @@ function renderBulkForm(type) {
             </div>
             `;
         } else {
+            // === FORM SERTIFIKASI (SESUAI REQUEST LENGKAP) ===
             html += `
             <div class="accordion-item open">
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
@@ -233,11 +236,11 @@ function renderBulkForm(type) {
                         <label>Daerah Pelayaran 
                             <select name="daerahPelayaran_${i}" class="form-control">
                                 <option value="">-- Pilih --</option>
-                                <option value="SEMUA LAUTAN">Semua Lautan</option>
-                                <option value="PERAIRAN INDONESIA">Perairan Indonesia</option>
-                                <option value="LOKAL">Lokal</option>
-                                <option value="TERBATAS">Terbatas</option>
-                                <option value="AREA PELABUHAN">Area Pelabuhan</option>
+                                <option value="SEMUA LAUTAN">SEMUA LAUTAN</option>
+                                <option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option>
+                                <option value="LOKAL">LOKAL</option>
+                                <option value="TERBATAS">TERBATAS</option>
+                                <option value="AREA PELABUHAN">AREA PELABUHAN</option>
                             </select>
                         </label>
                         <label>Keterangan 
@@ -328,7 +331,7 @@ function renderBulkForm(type) {
             `;
         }
 
-        html += `</div></div>`; 
+        html += `</div></div>`; // Close wrapper
         container.innerHTML += html;
     }
 }
@@ -430,18 +433,20 @@ function editData(type, rowDataStr) {
     
     showSection(`${type.toLowerCase()}-input`);
     
+    // Force count 1
     const countSelect = document.getElementById(type === 'SHSK' ? 'bulkCountSHSK' : 'bulkCountSertifikasi');
     countSelect.value = "1";
     renderBulkForm(type); 
 
     const form = document.getElementById(formId);
     
+    // Helper fill
     const setVal = (name, val) => {
         const el = form.querySelector(`[name="${name}_1"]`);
         if(el) {
              if(el.type === 'date') el.value = formatDateForInput(val);
              else el.value = val;
-             el.disabled = true; 
+             el.disabled = true; // LOCK INPUT
         }
     };
 
@@ -477,6 +482,7 @@ function editData(type, rowDataStr) {
         setVal('pemeriksa', rowData.NAMA_PEMERIKSA);
     }
 
+    // LOCK SEMUA INPUT DI FORM INI
     const allInputs = form.querySelectorAll('input, select');
     allInputs.forEach(i => i.disabled = true);
 
