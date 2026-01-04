@@ -1,5 +1,5 @@
 /* =========================================
-   STYLE.CSS - SHSK PEKANBARU (FULL MASTER)
+   STYLE.CSS - SHSK PEKANBARU (ULTIMATE MASTER FINAL)
    ========================================= */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -16,6 +16,11 @@
   --gold: #ffd700;
   --white: #ffffff;
   --bg-light: #f0f2f5;
+  
+  /* Status Colors */
+  --success: #00c853;
+  --danger: #ff3d00;
+  --warning: #ffab00;
 }
 
 * {
@@ -606,6 +611,23 @@ body.dashboard-page {
   background: #0a192f;
   color: #fff;
 }
+/* Multi-Select Enhancement */
+select[multiple].dash-control {
+  height: auto;
+  min-height: 120px;
+  background: rgba(0, 10, 20, 0.6);
+}
+select[multiple].dash-control option {
+  padding: 10px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+select[multiple].dash-control option:checked {
+  background: rgba(0, 243, 255, 0.2);
+  color: var(--neon-blue);
+  font-weight: bold;
+  border-left: 3px solid var(--neon-blue);
+}
 
 .btn-submit-req {
   width: 100%;
@@ -1167,14 +1189,19 @@ button:disabled {
   font-size: 13px;
   font-weight: 500;
 }
+
+/* --- TOMBOL REFRESH BARU (SESUAI REQUEST) --- */
 .btn-refresh {
-  background: #f1f2f6;
-  color: #2f3542;
-  border: 1px solid #ced6e0;
+  background: #fff;
+  color: var(--navy);
+  border: 1px solid var(--navy);
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 .btn-refresh:hover {
-  background: #dfe4ea;
-  border-color: #b2bec3;
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(10, 25, 47, 0.2);
 }
 
 .btn-export {
@@ -1263,6 +1290,8 @@ button:disabled {
 .data-table tr:hover {
   background: #f5f7fa;
 }
+
+/* --- FILTER PANEL YANG LEBIH BAGUS (RESPONSIVE) --- */
 .filter-card {
   background: #fff;
   padding: 20px;
@@ -1273,15 +1302,17 @@ button:disabled {
 }
 .grid-filter {
   display: grid;
-  grid-template-columns: 1fr 150px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
+  align-items: center;
 }
-.form-control-sm {
-  padding: 10px;
-  border: 1px solid #ddd;
+/* Memastikan tombol filter tidak terlalu kecil */
+.grid-filter .btn-filter {
+  height: 42px; /* Menyamakan tinggi dengan input */
   border-radius: 6px;
   width: 100%;
 }
+
 .pagination-controls {
   padding: 20px;
   display: flex;
@@ -1468,6 +1499,10 @@ button:disabled {
   .grid-form {
     grid-template-columns: 1fr;
   }
+  /* Fix Filter Grid on Mobile */
+  .grid-filter {
+    grid-template-columns: 1fr; /* Stack filter items */
+  }
 }
 @media (min-width: 901px) {
   .mobile-toggle {
@@ -1505,17 +1540,17 @@ button:disabled {
   }
   .brand-logo span {
     display: none;
-  } /* Sembunyikan Text Logo di HP */
+  } 
   .brand-logo i {
     font-size: 26px;
   }
 
   .desktop-profile-info {
     display: none;
-  } /* Sembunyikan Profil Desktop */
+  } 
   .mobile-profile-wrapper {
     display: block;
-  } /* Munculkan Icon Bulat */
+  } 
 
   .profile-dropdown {
     top: 60px;
