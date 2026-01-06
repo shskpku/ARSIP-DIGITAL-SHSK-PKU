@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SHSK Pekanbaru - Login</title>
-    <link href="logo-shsk.png" rel="icon">
+    <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
@@ -80,7 +80,11 @@
           </button>
         </form>
 
-        <form id="formPengguna" class="hidden" onsubmit="handleLogin(event, 'PENGGUNA')">
+        <form
+          id="formPengguna"
+          class="hidden"
+          onsubmit="handleLogin(event, 'PENGGUNA')"
+        >
           <div class="input-group">
             <input
               type="email"
@@ -177,16 +181,18 @@
           formPengguna.classList.remove("hidden");
         }
       }
-      
+
       // LOAD REMEMBER ME
       window.onload = function () {
-        if(localStorage.getItem("shsk_nip")) {
-            document.getElementById("nip").value = localStorage.getItem("shsk_nip");
-            document.getElementById("checkPetugas").checked = true;
+        if (localStorage.getItem("shsk_nip")) {
+          document.getElementById("nip").value =
+            localStorage.getItem("shsk_nip");
+          document.getElementById("checkPetugas").checked = true;
         }
-        if(localStorage.getItem("shsk_email")) {
-            document.getElementById("email").value = localStorage.getItem("shsk_email");
-            document.getElementById("checkPengguna").checked = true;
+        if (localStorage.getItem("shsk_email")) {
+          document.getElementById("email").value =
+            localStorage.getItem("shsk_email");
+          document.getElementById("checkPengguna").checked = true;
         }
       };
     </script>
