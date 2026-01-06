@@ -1,14 +1,14 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (FULL VERSION v3)
-   Fitur: Register, Login, Dashboard 3 Kategori, Dropdown Cerdas, 
-   Auto Email Footer, Bulk Input Service Station, Triple Export (Direct DL),
-   Smart Cert Numbering, Smart Company Datalist & Email Bundling.
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (JARVIS EDITION 🗣️)
+   Fitur: Text-to-Speech Welcome, Register, Login, Dashboard 3 Kategori, 
+   Dropdown Cerdas, Auto Email Footer, Bulk Input Service Station, 
+   Triple Export (Direct DL), Smart Cert Numbering & Email Bundling.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
 const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec"; 
 
-// --- DATABASE KODE SURAT (SESUAI REQUEST) ---
+// --- DATABASE KODE SURAT ---
 const CERT_CODES = {
   "KONSTRUKSI": "AL.501",
   "PERLENGKAPAN": "AL.501",
@@ -36,12 +36,41 @@ const CERT_CODES = {
   "SMC INTERMEDIATE": "AL.602"
 };
 
-// --- GLOBAL SET UNTUK MENAMPUNG NAMA PERUSAHAAN (AUTOCOMPLETE) ---
 let globalCompanySet = new Set(); 
 
 // ====================================================================
-// 1. UTILITIES & HELPER
+// 1. UTILITIES & HELPER (TERMASUK SUARA JARVIS)
 // ====================================================================
+
+// --- FUNGSI SUARA SELAMAT DATANG ---
+function speakWelcome(nama) {
+    // Cek apakah browser mendukung suara & apakah sudah pernah diputar sesi ini
+    if ('speechSynthesis' in window) {
+        if (sessionStorage.getItem("welcome_played")) return; // Jangan ngomong kalau cuma refresh
+
+        // Bersihkan antrian suara sebelumnya
+        window.speechSynthesis.cancel();
+
+        const text = `Selamat datang, ${nama}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        utterance.lang = 'id-ID'; // Set Bahasa Indonesia
+        utterance.rate = 0.9;     // Kecepatan (0.1 - 10), 0.9 biar natural
+        utterance.pitch = 1;      // Nada (0 - 2)
+        utterance.volume = 1;     // Volume (0 - 1)
+
+        // Coba cari suara Google Bahasa Indonesia (kalau ada)
+        const voices = window.speechSynthesis.getVoices();
+        const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
+        if (indoVoice) utterance.voice = indoVoice;
+
+        // MAINKAN SUARA
+        window.speechSynthesis.speak(utterance);
+        
+        // Tandai sudah diputar biar gak spam saat refresh
+        sessionStorage.setItem("welcome_played", "true");
+    }
+}
 
 function showPopup(message, type = "info") {
   const popup = document.getElementById("app-notification");
@@ -92,15 +121,11 @@ async function postData(data) {
   }
 }
 
-// --- CSS INJECTION UNTUK UI MOBILE (SERVICE STATION FIX) ---
 function injectCustomStyles() {
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Default: Side by Side */
         .service-options-container { display: flex; gap: 10px; }
         .tool-checkbox-card { flex: 1; }
-        
-        /* Mobile: Stack (Atas Bawah) */
         @media (max-width: 768px) {
             .service-options-container { flex-direction: column !important; }
             .tool-checkbox-card { width: 100% !important; margin-bottom: 10px; }
@@ -109,7 +134,6 @@ function injectCustomStyles() {
     document.head.appendChild(style);
 }
 
-// --- SMART AUTOCOMPLETE HELPER ---
 function initSmartSearch() {
     if (!document.getElementById('companyList')) {
         const dl = document.createElement('datalist');
@@ -133,7 +157,6 @@ function updateCompanyDatalist(dataArray, keyName) {
     }
 }
 
-// --- SMART CERT NUMBER HELPER ---
 window.autoFillCertNum = function(index) {
     const jenisEl = document.querySelector(`select[name="jenisSertifikat_${index}"]`);
     const noSertEl = document.querySelector(`input[name="noSertifikat_${index}"]`);
@@ -199,6 +222,10 @@ async function handleLogin(e, role) {
     const res = await postData({ action: "login", role: role, id: userId, password: password });
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
+      
+      // RESET STATUS SUARA BIAR NGOMONG PAS MASUK
+      sessionStorage.removeItem("welcome_played");
+
       showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
       setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 1500);
     } else {
@@ -246,7 +273,11 @@ async function handleRegisterSubmit(e) {
 
 function logout() { document.getElementById("modal-logout").classList.remove("hidden"); }
 function closeLogoutModal() { document.getElementById("modal-logout").classList.add("hidden"); }
-function confirmLogout() { localStorage.removeItem("user"); window.location.href = "index.html"; }
+function confirmLogout() { 
+    localStorage.removeItem("user"); 
+    sessionStorage.removeItem("welcome_played"); // Reset suara
+    window.location.href = "index.html"; 
+}
 
 async function requestOTP() {
   const email = document.getElementById("reset-email").value;
@@ -410,7 +441,7 @@ async function initCharts(p = "year") {
 }
 
 // ====================================================================
-// 6. PROFILE PETUGAS
+// 6. PROFILE PETUGAS (DENGAN SUARA SAMBUTAN)
 // ====================================================================
 function loadProfilePetugas() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -425,6 +456,9 @@ function loadProfilePetugas() {
     sbInitial.innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
     sbInitial.style.border = "2px solid var(--gold)";
   }
+
+  // --- TRIGGER SUARA JARVIS ---
+  speakWelcome(user.nama);
 }
 
 // ====================================================================
@@ -482,7 +516,7 @@ function renderBulkForm(type) {
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control"></label>
+                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control style="text-transform:uppercase""></label>
                         <label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label>
                         <label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label>
                         <label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label>
