@@ -561,10 +561,10 @@ function renderBulkForm(type) {
                 </div>
             </div>
             <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pengukuhan (Toggle STKK)</span> <i class="fa fa-chevron-down"></i></div>
+                <div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pengukuhan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>Toggle STKK 
+                        <label>STKK 
                             <select name="statusPengukuhan_${i}" class="form-control">
                                 <option value="">-- Pilih --</option>
                                 <option value="SURAT LAUT">SURAT LAUT</option>
