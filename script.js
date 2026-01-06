@@ -1,8 +1,8 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (FULL VERSION)
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (FULL VERSION v2)
    Fitur: Register, Login, Dashboard 3 Kategori, Dropdown Cerdas, 
    Auto Email Footer, Bulk Input Service Station, Triple Export,
-   Smart Cert Numbering & Smart Company Datalist.
+   Smart Cert Numbering, Smart Company Datalist & Email Bundling.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
@@ -34,7 +34,7 @@ const CERT_CODES = {
   "ENDORS DOC": "AL.602",
   "SMC": "AL.602",
   "SMC INTERMEDIATE": "AL.602"
-  // LIFE RAFT, FIRE EXT, PENGESAHAN GAMBAR = KOSONG (MANUAL)
+  // LIFE RAFT & FIRE EXT DIHAPUS DARI LIST INI (MANUAL)
 };
 
 // --- GLOBAL SET UNTUK MENAMPUNG NAMA PERUSAHAAN (AUTOCOMPLETE) ---
@@ -152,7 +152,7 @@ window.autoFillCertNum = function(index) {
         // Format: KODE///KSOP.PKU/TAHUN
         noSertEl.value = `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`;
     } else {
-        // Jika tidak ada di list (Life Raft, Fire Ext, Pengesahan), kosongkan atau biarkan
+        // Jika tidak ada di list (Pengesahan dll), kosongkan atau biarkan
         if(noSertEl.value.includes("KSOP.PKU")) noSertEl.value = ""; 
     }
 }
@@ -515,7 +515,7 @@ function renderBulkForm(type) {
                     <div class="grid-form">
                         <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label>
-                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control"></label>
+                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                     </div>
                 </div>
@@ -524,7 +524,7 @@ function renderBulkForm(type) {
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control"></label>
+                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label>
                         <label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label>
                         <label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label>
@@ -569,8 +569,8 @@ function renderBulkForm(type) {
                         <label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                         <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
-                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control"></label>
-                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control"></label>
+                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
+                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Daerah Pelayaran 
                              <select name="daerahPelayaran_${i}" class="form-control">
                                 <option value="">-- Pilih --</option>
@@ -623,9 +623,7 @@ function renderBulkForm(type) {
                                 <option value="SMC">SMC</option>
                                 <option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option>
                                 <option value="PENGESAHAN GAMBAR KAPAL">PENGESAHAN GAMBAR KAPAL</option>
-                                <option value="LIFE RAFT">LIFE RAFT</option>
-                                <option value="FIRE EXTINGUISHER">FIRE EXTINGUISHER</option>
-                            </select>
+                                </select>
                         </label>
                         <label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
                         <label>Masa Berlaku <input type="date" name="tglBerlaku_${i}" class="form-control"></label>
@@ -848,8 +846,6 @@ function editData(type, rowDataStr) {
   renderBulkForm(type);
 
   const form = document.getElementById(formId);
-  
-  // --- SET VALUE LOGIC ---
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
     if (el) {
@@ -911,38 +907,28 @@ function editData(type, rowDataStr) {
     form.querySelectorAll('[type="checkbox"]').forEach((c) => (c.disabled = true));
   }
 
-  // LOCK INPUTS
   const allInputs = form.querySelectorAll("input, select");
   allInputs.forEach((i) => (i.disabled = true));
 
-  // --- BUTTON LOGIC (FIXED) ---
-  // Sembunyikan Tombol Simpan Asli
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
   if(btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
 
-  // Logic Membuat Tombol UNLOCK
   let btnUnlock = document.getElementById(`btn-unlock-${type}`);
   if (!btnUnlock) {
-    // FIX: Cari parent dari tombol simpan asli, pasti ketemu!
     const btnContainer = btnSaveOriginal.parentNode; 
-    
     btnUnlock = document.createElement("button");
     btnUnlock.type = "button";
     btnUnlock.id = `btn-unlock-${type}`;
     btnUnlock.className = "btn-edit-mode";
     btnUnlock.innerHTML = '<i class="fa fa-pencil-alt"></i> UBAH DATA';
     btnUnlock.onclick = () => enableEditMode(type);
-    
-    // Masukkan tombol Unlock SEBELUM tombol Simpan Asli
     btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
 
-  // Logic Tombol Batal
   const btnCancel = document.getElementById(`btn-cancel-${type}`);
   if(btnCancel) btnCancel.classList.remove("hidden");
 
-  // Sembunyikan Tombol Update (jika ada sisa sebelumnya)
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
 
@@ -954,31 +940,22 @@ function enableEditMode(type) {
   const form = document.getElementById(formId);
   const allInputs = form.querySelectorAll("input, select");
   
-  // Buka Kunci Input
   allInputs.forEach((i) => (i.disabled = false));
-
-  // Sembunyikan Tombol Unlock
   document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
 
-  // Logic Membuat Tombol UPDATE (SIMPAN PERUBAHAN)
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (!btnUpdate) {
-    // Cari tombol Unlock tadi sebagai patokan
     const btnUnlock = document.getElementById(`btn-unlock-${type}`);
     const btnContainer = btnUnlock.parentNode;
-
     btnUpdate = document.createElement("button");
     btnUpdate.id = `btn-update-${type}`;
     btnUpdate.className = "btn-gold-save";
     btnUpdate.style.background = "var(--neon-blue)";
     btnUpdate.innerHTML = '<i class="fa fa-save"></i> SIMPAN PERUBAHAN';
     btnUpdate.onclick = () => handleBulkSubmit(type);
-    
-    // Masukkan di tempat tombol Unlock tadi berada
     btnContainer.insertBefore(btnUpdate, btnUnlock);
   }
   btnUpdate.classList.remove("hidden");
-  
   showPopup("Form Terbuka. Silakan edit.", "success");
 }
 
@@ -1067,7 +1044,6 @@ async function loadData(type) {
     currentPage[type] = 1;
     
     // --- POPULATE SMART SEARCH DATALIST ---
-    // SHSK -> PEMILIK | SERTIFIKASI -> NAMA_PERUSAHAAN | SERVICE -> NAMA_PENYEDIA_JASA
     let keyName = "";
     if(type === "SHSK") keyName = "PEMILIK";
     else if(type === "SERTIFIKASI") keyName = "NAMA_PERUSAHAAN";
@@ -1301,20 +1277,43 @@ window.filterType = function () {
   s.disabled = false;
 };
 
+// --- FUNGSI KIRIM EMAIL (MULTI-SELECT SUPPORT) ---
 window.handleRequestSubmit = async function (e) {
   e.preventDefault();
   const s = document.getElementById("reqJenis");
   const opts = Array.from(s.selectedOptions);
-  if (opts.length === 0 || s.value === "") { showPopup("Silakan pilih dokumen terlebih dahulu!", "error"); return; }
-  const t = opts.map((o) => o.text);
-  const l = s.value;
+  
+  if (opts.length === 0 || s.value === "") { 
+      showPopup("Silakan pilih minimal satu dokumen!", "error"); 
+      return; 
+  }
+
+  // Mengambil SEMUA file yang dipilih (bukan cuma satu)
+  const jenisList = opts.map(o => o.text);
+  
+  // Link diambil dari option pertama (sebenarnya backend akan memvalidasi ulang)
+  // Untuk keperluan validasi sederhana di frontend cukup cek value pertama
+  const sampleLink = s.value; 
+
   const u = JSON.parse(localStorage.getItem("user"));
   const btn = document.getElementById("btnKirimReq");
   const originalText = btn.innerText;
+  
   btn.innerText = "MENGIRIM...";
   btn.disabled = true;
 
-  await postData({ action: "sendReportEmail", email: u.id, namaUser: u.nama, perusahaan: u.extra, kapal: document.getElementById("reqKapal").value, jenis: t, tahun: document.getElementById("reqTahun").value, bulan: getMonthName(document.getElementById("reqBulan").value), link: l });
+  await postData({ 
+      action: "sendReportEmail", 
+      email: u.id, 
+      namaUser: u.nama, 
+      perusahaan: u.extra, 
+      kapal: document.getElementById("reqKapal").value, 
+      jenis: jenisList, // Kirim Array
+      tahun: document.getElementById("reqTahun").value, 
+      bulan: getMonthName(document.getElementById("reqBulan").value), 
+      link: sampleLink 
+  });
+
   showPopup("Link download telah dikirim ke email Anda!", "success");
   btn.innerText = originalText;
   btn.disabled = false;
