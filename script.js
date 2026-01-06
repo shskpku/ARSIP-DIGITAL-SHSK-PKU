@@ -417,9 +417,9 @@ async function initCharts(p = "year") {
   if (targetInfo) {
     targetInfo.innerHTML = `
         <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px;">
-            <span><i class="fa fa-circle" style="color: #ffd700"></i> SHSK: <b>${d.breakdown.shsk}</b></span>
+            <span><i class="fa fa-circle" style="color: #ffd700"></i> Status Hukum: <b>${d.breakdown.shsk}</b></span>
             <span><i class="fa fa-circle" style="color: #0a192f"></i> Sertifikasi: <b>${d.breakdown.sert}</b></span>
-            <span><i class="fa fa-circle" style="color: #00c853"></i> Service: <b>${d.breakdown.serv}</b></span>
+            <span><i class="fa fa-circle" style="color: #00c853"></i> ILR & PMK: <b>${d.breakdown.serv}</b></span>
         </div>
       `;
   }
@@ -444,7 +444,7 @@ async function initCharts(p = "year") {
   doughnutChartInstance = new Chart(ctxD, {
     type: "doughnut",
     data: {
-      labels: ["SHSK", "Sertifikasi", "Service", "Sisa Target"],
+      labels: ["Status Hukum", "Sertifikasi", "ILR & PMK", "Sisa Target"],
       datasets: [{ data: [d.breakdown.shsk, d.breakdown.sert, d.breakdown.serv, sisa < 0 ? 0 : sisa], backgroundColor: ["#ffd700", "#0a192f", "#00c853", "#eee"], borderWidth: 0 }],
     },
     options: { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { display: false } } },
