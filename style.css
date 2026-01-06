@@ -1341,13 +1341,20 @@ button:disabled {
   color: var(--gold);
 }
 
-/* --- SERVICE STATION INPUT STYLING (NEW) --- */
+/* --- SERVICE STATION INPUT STYLING (FINAL REVISION) --- */
 .service-selection-box {
   background: #f8fafc;
   border: 2px dashed #cbd5e0;
   padding: 20px;
   border-radius: 10px;
   margin-top: 15px;
+}
+.form-label-bold {
+  display: block;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 12px;
+  font-size: 14px;
 }
 .service-options-container {
   display: grid;
@@ -1358,50 +1365,65 @@ button:disabled {
 .tool-checkbox-card {
   cursor: pointer;
   position: relative;
+  display: block;
 }
+/* Hide Default Checkbox */
 .tool-checkbox-card input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
 }
+/* Custom Card Design */
 .tool-card-design {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
   padding: 15px;
   background: #fff;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #64748b;
 }
 .tool-card-design:hover {
   border-color: #bbf7d0;
   transform: translateY(-2px);
-}
-.tool-checkbox-card input:checked + .tool-card-design {
-  border-color: #00c853;
-  background: #f0fdf4;
-  color: #166534;
-  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.15);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 .tool-icon {
   font-size: 20px;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: #f1f5f9;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: 0.3s;
+  color: #94a3b8;
+}
+.tool-text {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Checked State */
+.tool-checkbox-card input:checked + .tool-card-design {
+  border-color: #00c853;
+  background: #f0fdf4;
+  color: #166534;
+  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.15);
 }
 .tool-checkbox-card input:checked + .tool-card-design .tool-icon {
   background: #00c853;
   color: #fff;
 }
-.tool-text {
-  font-weight: 600;
-  font-size: 14px;
+
+/* Mobile Responsive Fix */
+@media (max-width: 768px) {
+  .service-options-container {
+    grid-template-columns: 1fr; /* Stack Vertical */
+  }
 }
 
 /* --- GLOBAL ANIMATION & UTILS --- */
