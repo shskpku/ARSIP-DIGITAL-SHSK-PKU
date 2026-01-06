@@ -497,6 +497,7 @@ function renderBulkForm(type) {
                             <select name="keterangan_${i}" class="form-control">
                                 <option value="">(Kosong)</option>
                                 <option value="DOCKING">DOCKING</option>
+                                <option value="1 X PELAYARAN">1 X PELAYARAN</option>
                             </select>
                         </label>
                     </div>
@@ -510,7 +511,6 @@ function renderBulkForm(type) {
                         <label>Jenis Sertifikat 
                             <select name="jenisSertifikat_${i}" class="form-control">
                                 <option value="">-- Pilih Jenis --</option>
-                                <option value="SEA TRIAL">SEA TRIAL</option>
                                 <option value="KONSTRUKSI">KONSTRUKSI</option>
                                 <option value="PERLENGKAPAN">PERLENGKAPAN</option>
                                 <option value="RADIO">RADIO</option>
@@ -555,9 +555,9 @@ function renderBulkForm(type) {
                          <label>Nama Pemeriksa 
                             <select name="pemeriksa_${i}" class="form-control">
                                 <option value="">-- Pilih Pemeriksa --</option>
-                                <option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option>
-                                <option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option>
                                 <option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option>
+                                <option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option>
+                                <option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option>
                             </select>
                         </label>
                     </div>
