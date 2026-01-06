@@ -848,6 +848,8 @@ function editData(type, rowDataStr) {
   renderBulkForm(type);
 
   const form = document.getElementById(formId);
+  
+  // --- SET VALUE LOGIC ---
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
     if (el) {
@@ -909,25 +911,38 @@ function editData(type, rowDataStr) {
     form.querySelectorAll('[type="checkbox"]').forEach((c) => (c.disabled = true));
   }
 
+  // LOCK INPUTS
   const allInputs = form.querySelectorAll("input, select");
   allInputs.forEach((i) => (i.disabled = true));
 
-  document.getElementById(`btn-save-${type}`).classList.add("hidden");
+  // --- BUTTON LOGIC (FIXED) ---
+  // Sembunyikan Tombol Simpan Asli
+  const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
+  if(btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
 
+  // Logic Membuat Tombol UNLOCK
   let btnUnlock = document.getElementById(`btn-unlock-${type}`);
   if (!btnUnlock) {
-    const btnContainer = document.querySelector(`#btn-container-${type}`) || form.querySelector(".form-actions");
+    // FIX: Cari parent dari tombol simpan asli, pasti ketemu!
+    const btnContainer = btnSaveOriginal.parentNode; 
+    
     btnUnlock = document.createElement("button");
     btnUnlock.type = "button";
     btnUnlock.id = `btn-unlock-${type}`;
     btnUnlock.className = "btn-edit-mode";
     btnUnlock.innerHTML = '<i class="fa fa-pencil-alt"></i> UBAH DATA';
     btnUnlock.onclick = () => enableEditMode(type);
-    btnContainer.insertBefore(btnUnlock, btnContainer.firstChild);
+    
+    // Masukkan tombol Unlock SEBELUM tombol Simpan Asli
+    btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
 
-  document.getElementById(`btn-cancel-${type}`).classList.remove("hidden");
+  // Logic Tombol Batal
+  const btnCancel = document.getElementById(`btn-cancel-${type}`);
+  if(btnCancel) btnCancel.classList.remove("hidden");
+
+  // Sembunyikan Tombol Update (jika ada sisa sebelumnya)
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
 
@@ -938,22 +953,32 @@ function enableEditMode(type) {
   const formId = type === "SHSK" ? "formSHSK" : type === "SERTIFIKASI" ? "formSertifikasi" : "formService";
   const form = document.getElementById(formId);
   const allInputs = form.querySelectorAll("input, select");
+  
+  // Buka Kunci Input
   allInputs.forEach((i) => (i.disabled = false));
 
+  // Sembunyikan Tombol Unlock
   document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
 
+  // Logic Membuat Tombol UPDATE (SIMPAN PERUBAHAN)
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (!btnUpdate) {
-    const btnContainer = document.querySelector(`#btn-container-${type}`) || form.querySelector(".form-actions");
+    // Cari tombol Unlock tadi sebagai patokan
+    const btnUnlock = document.getElementById(`btn-unlock-${type}`);
+    const btnContainer = btnUnlock.parentNode;
+
     btnUpdate = document.createElement("button");
     btnUpdate.id = `btn-update-${type}`;
     btnUpdate.className = "btn-gold-save";
     btnUpdate.style.background = "var(--neon-blue)";
     btnUpdate.innerHTML = '<i class="fa fa-save"></i> SIMPAN PERUBAHAN';
     btnUpdate.onclick = () => handleBulkSubmit(type);
-    btnContainer.insertBefore(btnUpdate, btnContainer.firstChild);
+    
+    // Masukkan di tempat tombol Unlock tadi berada
+    btnContainer.insertBefore(btnUpdate, btnUnlock);
   }
   btnUpdate.classList.remove("hidden");
+  
   showPopup("Form Terbuka. Silakan edit.", "success");
 }
 
