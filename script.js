@@ -431,9 +431,9 @@ async function initCharts(p = "year") {
     data: {
       labels: d.labels,
       datasets: [
-        { label: "SHSK", data: d.datasets.shsk, backgroundColor: "rgba(255, 215, 0, 0.8)", borderColor: "rgba(255, 215, 0, 1)", borderWidth: 1, borderRadius: 3 },
+        { label: "Status Hukum", data: d.datasets.shsk, backgroundColor: "rgba(255, 215, 0, 0.8)", borderColor: "rgba(255, 215, 0, 1)", borderWidth: 1, borderRadius: 3 },
         { label: "Sertifikasi", data: d.datasets.sert, backgroundColor: "rgba(10, 25, 47, 0.8)", borderColor: "rgba(10, 25, 47, 1)", borderWidth: 1, borderRadius: 3 },
-        { label: "Service Station", data: d.datasets.serv, backgroundColor: "rgba(0, 200, 83, 0.8)", borderColor: "rgba(0, 200, 83, 1)", borderWidth: 1, borderRadius: 3 },
+        { label: "ILR & PMK", data: d.datasets.serv, backgroundColor: "rgba(0, 200, 83, 0.8)", borderColor: "rgba(0, 200, 83, 1)", borderWidth: 1, borderRadius: 3 },
       ],
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: "bottom", labels: { boxWidth: 12 } } }, scales: { x: { stacked: false }, y: { beginAtZero: true } } },
