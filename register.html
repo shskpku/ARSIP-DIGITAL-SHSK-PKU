@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daftar Akun - SHSK Pekanbaru</title>
-    <link href="logo-shsk.png" rel="icon">
+    <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
@@ -16,7 +16,6 @@
     />
   </head>
   <body class="register-page">
-    
     <div id="app-notification" class="popup">
       <i class="fa fa-info-circle"></i>
       <span id="popup-message">Notifikasi...</span>
@@ -25,15 +24,28 @@
     <div class="auth-container">
       <div class="auth-card theme-purple">
         <h2>DAFTAR AKUN BARU</h2>
-        <p style="text-align: center; color: #ccc; font-size: 13px; margin-bottom: 30px; margin-top: -15px;">
+        <p
+          style="
+            text-align: center;
+            color: #ccc;
+            font-size: 13px;
+            margin-bottom: 30px;
+            margin-top: -15px;
+          "
+        >
           Lengkapi formulir di bawah ini untuk akses sistem.
         </p>
 
         <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
-          
           <div class="input-group">
             <i class="fa fa-envelope input-icon-left"></i>
-            <input type="email" id="regEmail" required autocomplete="off" placeholder=" " />
+            <input
+              type="email"
+              id="reg-email"
+              required
+              autocomplete="off"
+              placeholder=" "
+            />
             <label>Email Perusahaan / Pribadi</label>
           </div>
 
@@ -41,14 +53,28 @@
             <div class="form-col">
               <div class="input-group">
                 <i class="fa fa-user input-icon-left"></i>
-                <input type="text" id="regNama" required autocomplete="off" style="text-transform: uppercase" placeholder=" " />
+                <input
+                  type="text"
+                  id="reg-nama"
+                  required
+                  autocomplete="off"
+                  style="text-transform: uppercase"
+                  placeholder=" "
+                />
                 <label>Nama Lengkap</label>
               </div>
             </div>
             <div class="form-col">
               <div class="input-group">
                 <i class="fa fa-building input-icon-left"></i>
-                <input type="text" id="regPerusahaan" required autocomplete="off" style="text-transform: uppercase" placeholder=" " />
+                <input
+                  type="text"
+                  id="reg-perusahaan"
+                  required
+                  autocomplete="off"
+                  style="text-transform: uppercase"
+                  placeholder=" "
+                />
                 <label>Nama Perusahaan</label>
               </div>
             </div>
@@ -58,22 +84,43 @@
             <div class="form-col">
               <div class="input-group">
                 <i class="fa fa-lock input-icon-left"></i>
-                <input type="password" id="regPassword" required minlength="6" placeholder=" " />
+                <input
+                  type="password"
+                  id="reg-password"
+                  required
+                  minlength="6"
+                  placeholder=" "
+                />
                 <label>Password</label>
-                <i class="fa-solid fa-eye password-icon" onclick="togglePass(this)"></i>
+                <i
+                  class="fa-solid fa-eye password-icon"
+                  onclick="togglePass(this)"
+                ></i>
               </div>
             </div>
             <div class="form-col">
               <div class="input-group">
                 <i class="fa fa-check-double input-icon-left"></i>
-                <input type="password" id="regConfirmPassword" required minlength="6" placeholder=" " />
+                <input
+                  type="password"
+                  id="reg-confirm-password"
+                  required
+                  minlength="6"
+                  placeholder=" "
+                />
                 <label>Ulangi Password</label>
-                <i class="fa-solid fa-eye password-icon" onclick="togglePass(this)"></i>
+                <i
+                  class="fa-solid fa-eye password-icon"
+                  onclick="togglePass(this)"
+                ></i>
               </div>
             </div>
           </div>
 
-          <div class="options-row" style="justify-content: flex-start; margin-top: -10px">
+          <div
+            class="options-row"
+            style="justify-content: flex-start; margin-top: -10px"
+          >
             <label class="remember-me">
               <input type="checkbox" id="agreeTerm" required />
               <span style="margin-left: 10px; font-size: 12px; color: #ddd">
@@ -82,22 +129,24 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-neon" id="btnDaftar">
+          <button type="submit" class="btn-neon" id="btn-register-submit">
             <i class="fa fa-paper-plane"></i> &nbsp;DAFTAR SEKARANG
           </button>
 
           <div class="auth-links">
             <span style="color: #bbb">Sudah punya akun?</span>
-            <a href="index.html">LOGIN DISINI <i class="fa fa-arrow-right"></i></a>
+            <a href="index.html"
+              >LOGIN DISINI <i class="fa fa-arrow-right"></i
+            ></a>
           </div>
         </form>
       </div>
     </div>
 
     <script src="script.js"></script>
-    
+
     <script>
-      // 1. TOGGLE PASSWORD VISIBILITY
+      // Helper kecil untuk Toggle Password (Visual saja)
       function togglePass(icon) {
         const input = icon.parentElement.querySelector("input");
         if (input.type === "password") {
@@ -108,82 +157,6 @@
           input.type = "password";
           icon.classList.remove("fa-eye-slash");
           icon.classList.add("fa-eye");
-        }
-      }
-
-      // 2. REGISTER LOGIC
-      async function handleRegisterSubmit(e) {
-        e.preventDefault();
-
-        // Ambil Data
-        const email = document.getElementById("regEmail").value;
-        const nama = document.getElementById("regNama").value.toUpperCase();
-        const perusahaan = document.getElementById("regPerusahaan").value.toUpperCase();
-        const pass = document.getElementById("regPassword").value;
-        const confirmPass = document.getElementById("regConfirmPassword").value;
-
-        // Validasi Password Sama
-        if (pass !== confirmPass) {
-          // Panggil fungsi dari script.js
-          if (typeof showPopup === "function") {
-             showPopup("Password konfirmasi tidak sama!", "error");
-          } else {
-             alert("Password konfirmasi tidak sama!");
-          }
-          return;
-        }
-
-        // Animasi Loading
-        const btn = document.getElementById("btnDaftar");
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
-
-        // Siapkan Data Kirim
-        const payload = {
-          action: "register",
-          email: email,
-          nama: nama,
-          perusahaan: perusahaan,
-          password: pass,
-        };
-
-        // Kirim ke Backend
-        try {
-          // Pastikan script.js sudah dimuat dan punya fungsi postData
-          if (typeof postData === "function") {
-            const response = await postData(payload);
-            
-            if (response.status === "SUCCESS") {
-              showPopup("Registrasi Berhasil! Silakan Login.", "success");
-              document.getElementById("registerForm").reset();
-              
-              // Redirect ke Login setelah 2 detik
-              setTimeout(() => {
-                window.location.href = "index.html";
-              }, 2000);
-            
-            } else {
-              showPopup(response.message || "Gagal Mendaftar.", "error");
-              // Reset Tombol
-              btn.innerHTML = originalText;
-              btn.disabled = false;
-              btn.style.opacity = "1";
-            }
-          } else {
-             // Fallback kalau script.js gagal load
-             alert("Error: Script Helper tidak ditemukan.");
-             btn.innerHTML = originalText;
-             btn.disabled = false;
-          }
-
-        } catch (error) {
-          console.error(error);
-          showPopup("Gagal menghubungi server. Cek koneksi internet.", "error");
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          btn.style.opacity = "1";
         }
       }
     </script>
