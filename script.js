@@ -1358,26 +1358,76 @@ function nextPage(t) {
   }
 }
 
-// DELETE
+// ====================================================================
+// DELETE HANDLER (DENGAN ANIMASI LOADING)
+// ====================================================================
 let pendingDelete = null;
-function prepareDelete(t, s) {
-  const r = JSON.parse(decodeURIComponent(s));
-  pendingDelete = { type: t, noUrut: r.NO_URUT || r["NO URUT"] };
+
+function prepareDelete(type, rowDataStr) {
+  const rowData = JSON.parse(decodeURIComponent(rowDataStr));
+  // Simpan data sementara
+  pendingDelete = { 
+      type: type, 
+      noUrut: rowData.NO_URUT || rowData["NO URUT"], 
+      folderUrl: rowData.LINK_FOLDER 
+  };
+  // Tampilkan Modal
   document.getElementById("modal-delete").classList.remove("hidden");
 }
+
 function closeDeleteModal() {
   document.getElementById("modal-delete").classList.add("hidden");
+  pendingDelete = null;
 }
+
 async function executeDelete() {
   if (!pendingDelete) return;
-  let act = "";
-  if (pendingDelete.type === "SHSK") act = "deleteSHSK";
-  else if (pendingDelete.type === "SERTIFIKASI") act = "deleteSertifikasi";
-  else if (pendingDelete.type === "SERVICE") act = "deleteService";
 
-  await postData({ action: act, noUrut: pendingDelete.noUrut });
+  // 1. Ambil Tombol Konfirmasi di Modal Delete
+  // (Pastikan class button di HTML modal delete adalah 'btn-confirm-logout' atau sesuaikan selector ini)
+  const btnConfirm = document.querySelector("#modal-delete .btn-confirm-logout");
+  
+  // Simpan teks asli ("Ya, Hapus" / "Ya, Keluar")
+  const originalHtml = btnConfirm.innerHTML; 
+
+  // 2. Ubah Tampilan Jadi Loading
+  btnConfirm.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENGHAPUS...';
+  btnConfirm.disabled = true;
+  btnConfirm.style.opacity = "0.7";
+  btnConfirm.style.cursor = "not-allowed";
+
+  // 3. Tentukan Action
+  let action = "";
+  if (pendingDelete.type === "SHSK") action = "deleteSHSK";
+  else if (pendingDelete.type === "SERTIFIKASI") action = "deleteSertifikasi";
+  else if (pendingDelete.type === "SERVICE") action = "deleteService";
+
+  try {
+      // 4. Kirim Request ke Backend
+      const res = await postData({ action: action, noUrut: pendingDelete.noUrut });
+
+      if (res.status === "SUCCESS") {
+          showPopup("Data Berhasil Dihapus Selamanya!", "success");
+          
+          // Refresh Tabel
+          loadData(pendingDelete.type);
+          
+          // Refresh Grafik Dashboard (Penting biar sinkron)
+          if(typeof updateChartFilter === "function") updateChartFilter(currentFilter);
+      } else {
+          showPopup("Gagal menghapus: " + res.message, "error");
+      }
+  } catch (error) {
+      showPopup("Gagal koneksi ke server.", "error");
+  }
+
+  // 5. Kembalikan Tampilan Tombol & Tutup Modal
+  btnConfirm.innerHTML = originalHtml;
+  btnConfirm.disabled = false;
+  btnConfirm.style.opacity = "1";
+  btnConfirm.style.cursor = "pointer";
+  
   closeDeleteModal();
-  loadData(pendingDelete.type);
 }
 
 // ====================================================================
