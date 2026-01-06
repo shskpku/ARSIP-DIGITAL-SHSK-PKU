@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Petugas - SHSK</title>
-    <link href="logo-shsk.png" rel="icon">
+    <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
@@ -50,7 +50,11 @@
       </div>
     </div>
 
-    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div
+      id="sidebar-overlay"
+      class="sidebar-overlay"
+      onclick="toggleSidebar()"
+    ></div>
 
     <nav class="navbar glass-nav">
       <div class="nav-left">
@@ -100,16 +104,44 @@
           </div>
         </div>
 
-        <div class="menu-item has-submenu" onclick="toggleSubmenu('sub-sertifikasi')">
+        <div
+          class="menu-item has-submenu"
+          onclick="toggleSubmenu('sub-sertifikasi')"
+        >
           <i class="fa fa-certificate"></i> Sertifikasi Kapal
           <i class="fa fa-chevron-down arrow-icon"></i>
         </div>
         <div id="sub-sertifikasi" class="submenu-container">
-          <div class="submenu-item" onclick="showSection('sertifikasi-input', this)">
+          <div
+            class="submenu-item"
+            onclick="showSection('sertifikasi-input', this)"
+          >
             <i class="fa fa-plus-circle"></i> Input Sertifikasi
           </div>
-          <div class="submenu-item" onclick="showSection('sertifikasi-data', this)">
+          <div
+            class="submenu-item"
+            onclick="showSection('sertifikasi-data', this)"
+          >
             <i class="fa fa-table"></i> Data Sertifikasi
+          </div>
+        </div>
+
+        <div
+          class="menu-item has-submenu"
+          onclick="toggleSubmenu('sub-service')"
+        >
+          <i class="fa fa-tools"></i> Service Station
+          <i class="fa fa-chevron-down arrow-icon"></i>
+        </div>
+        <div id="sub-service" class="submenu-container">
+          <div
+            class="submenu-item"
+            onclick="showSection('service-input', this)"
+          >
+            <i class="fa fa-plus-circle"></i> Input Arsip
+          </div>
+          <div class="submenu-item" onclick="showSection('service-data', this)">
+            <i class="fa fa-table"></i> Data Arsip
           </div>
         </div>
       </div>
@@ -137,17 +169,47 @@
               <p>Pemeriksaan teknis dan keselamatan kapal.</p>
             </div>
           </div>
+          <div class="info-card">
+            <div class="icon-box"><i class="fa fa-tools"></i></div>
+            <div>
+              <h3>Service Station</h3>
+              <p>Validasi alat keselamatan (Liferaft & Fire Extinguisher).</p>
+            </div>
+          </div>
         </div>
 
         <div class="charts-container">
           <div class="chart-card">
             <div class="chart-header">
-              <h3><i class="fa fa-chart-bar" style="color: var(--gold)"></i> Volume Arsip</h3>
+              <h3>
+                <i class="fa fa-chart-bar" style="color: var(--gold)"></i>
+                Volume Arsip
+              </h3>
               <div class="chart-filter-group">
-                <button class="filter-btn" onclick="updateChartFilter('today', this)">Hari Ini</button>
-                <button class="filter-btn" onclick="updateChartFilter('week', this)">Minggu Ini</button>
-                <button class="filter-btn" onclick="updateChartFilter('month', this)">Bulan Ini</button>
-                <button class="filter-btn active" onclick="updateChartFilter('year', this)">Tahun Ini</button>
+                <button
+                  class="filter-btn"
+                  onclick="updateChartFilter('today', this)"
+                >
+                  Hari Ini
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="updateChartFilter('week', this)"
+                >
+                  Minggu Ini
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="updateChartFilter('month', this)"
+                >
+                  Bulan Ini
+                </button>
+                <button
+                  class="filter-btn active"
+                  onclick="updateChartFilter('year', this)"
+                >
+                  Tahun Ini
+                </button>
               </div>
             </div>
             <div style="height: 250px; position: relative">
@@ -155,11 +217,31 @@
             </div>
           </div>
           <div class="chart-card">
-            <h3><i class="fa fa-bullseye" style="color: var(--gold)"></i> Target 2025</h3>
-            <div style="height: 200px; display: flex; justify-content: center; position: relative;">
+            <h3>
+              <i class="fa fa-bullseye" style="color: var(--gold)"></i> Target
+              2025
+            </h3>
+            <div
+              style="
+                height: 200px;
+                display: flex;
+                justify-content: center;
+                position: relative;
+              "
+            >
               <canvas id="doughnutChart"></canvas>
-              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                <strong style="font-size: 20px; color: var(--navy)">2040</strong>
+              <div
+                style="
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  text-align: center;
+                "
+              >
+                <strong style="font-size: 20px; color: var(--navy)"
+                  >2040</strong
+                >
               </div>
             </div>
             <div class="target-info"></div>
@@ -169,22 +251,45 @@
 
       <div id="sec-shsk-input" class="hidden">
         <div class="section-header">
-            <h2>Input Arsip Status Hukum</h2>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <label style="font-weight:600; color:var(--navy);">Jumlah Data:</label>
-                <select id="bulkCountSHSK" class="form-control" style="width:70px; padding:5px;" onchange="renderBulkForm('SHSK')">
-                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
-                </select>
-            </div>
+          <h2>Input Arsip Status Hukum</h2>
+          <div style="display: flex; align-items: center; gap: 10px">
+            <label style="font-weight: 600; color: var(--navy)"
+              >Jumlah Data:</label
+            >
+            <select
+              id="bulkCountSHSK"
+              class="form-control"
+              style="width: 70px; padding: 5px"
+              onchange="renderBulkForm('SHSK')"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
         </div>
-        
-        <form id="formSHSK" onsubmit="event.preventDefault(); handleBulkSubmit('SHSK')">
-            <div id="bulk-container-SHSK"></div>
-            
-            <div id="btn-container-SHSK" class="form-actions">
-                <button type="submit" class="btn-gold-save" id="btn-save-SHSK"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
-                <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SHSK" onclick="cancelEdit('SHSK')">BATAL</button>
-            </div>
+
+        <form
+          id="formSHSK"
+          onsubmit="event.preventDefault(); handleBulkSubmit('SHSK')"
+        >
+          <div id="bulk-container-SHSK"></div>
+
+          <div id="btn-container-SHSK" class="form-actions">
+            <button type="submit" class="btn-gold-save" id="btn-save-SHSK">
+              <i class="fa fa-save"></i> SIMPAN SEMUA DATA
+            </button>
+            <button
+              type="button"
+              class="btn-cancel-edit hidden"
+              id="btn-cancel-SHSK"
+              onclick="cancelEdit('SHSK')"
+            >
+              BATAL
+            </button>
+          </div>
         </form>
       </div>
 
@@ -192,26 +297,51 @@
         <div class="section-header">
           <h2>Data Arsip Status Hukum</h2>
           <div class="header-actions">
-            <button class="btn-action btn-refresh" onclick="loadData('SHSK')"><i class="fa fa-sync"></i> Refresh</button>
-            <button class="btn-action btn-export" onclick="exportTriple('SHSK')"><i class="fa fa-file-excel"></i> Export Laporan</button>
+            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('SHSK')"
+            >
+              <i class="fa fa-file-excel"></i> Export Laporan
+            </button>
           </div>
         </div>
 
-        <div class="filter-card" style="border-left: 5px solid var(--gold);">
+        <div class="filter-card" style="border-left: 5px solid var(--gold)">
           <div class="grid-filter">
-             <select id="filterSHSKBulan" class="form-control">
-               <option value="">Semua Bulan</option>
-               <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-               <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-               <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-               <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-             </select>
-             <select id="filterSHSKTahun" class="form-control">
-               <option value="">Semua Tahun</option>
-               <script>for(let y=2020; y<=2030; y++) document.write(`<option value='${y}'>${y}</option>`);</script>
-             </select>
-             <input type="text" id="searchSHSK" placeholder="Cari Nama/Pemilik/No..." class="form-control"/>
-             <button onclick="applyFilter('SHSK')" class="btn-action btn-filter"><i class="fa fa-filter"></i> Terapkan</button>
+            <select id="filterSHSKBulan" class="form-control">
+              <option value="">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select id="filterSHSKTahun" class="form-control">
+              <option value="">Semua Tahun</option>
+              <script>
+                for (let y = 2020; y <= 2030; y++)
+                  document.write(`<option value='${y}'>${y}</option>`);
+              </script>
+            </select>
+            <input
+              type="text"
+              id="searchSHSK"
+              placeholder="Cari Nama/Pemilik/No..."
+              class="form-control"
+            />
+            <button onclick="applyFilter('SHSK')" class="btn-action btn-filter">
+              <i class="fa fa-filter"></i> Terapkan
+            </button>
           </div>
         </div>
 
@@ -230,7 +360,7 @@
                   <th>NO URUT</th>
                   <th>NO HAL</th>
                   <th>NO BUKU</th>
-                  <th>STATUS</th>
+                  <th>STKK</th>
                   <th>TGL PENGUKUHAN</th>
                   <th>ACTION</th>
                 </tr>
@@ -240,28 +370,57 @@
           </div>
         </div>
         <div class="pagination-controls">
-          <button onclick="prevPage('SHSK')"><</button><span id="page-info-SHSK">Hal 1</span><button onclick="nextPage('SHSK')">></button>
+          <button onclick="prevPage('SHSK')"><</button
+          ><span id="page-info-SHSK">Hal 1</span
+          ><button onclick="nextPage('SHSK')">></button>
         </div>
       </div>
 
       <div id="sec-sertifikasi-input" class="hidden">
         <div class="section-header">
-            <h2>Input Arsip Sertifikasi</h2>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <label style="font-weight:600; color:var(--navy);">Jumlah Data:</label>
-                <select id="bulkCountSertifikasi" class="form-control" style="width:70px; padding:5px;" onchange="renderBulkForm('SERTIFIKASI')">
-                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
-                </select>
-            </div>
+          <h2>Input Arsip Sertifikasi</h2>
+          <div style="display: flex; align-items: center; gap: 10px">
+            <label style="font-weight: 600; color: var(--navy)"
+              >Jumlah Data:</label
+            >
+            <select
+              id="bulkCountSertifikasi"
+              class="form-control"
+              style="width: 70px; padding: 5px"
+              onchange="renderBulkForm('SERTIFIKASI')"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
         </div>
 
-        <form id="formSertifikasi" onsubmit="event.preventDefault(); handleBulkSubmit('SERTIFIKASI')">
-            <div id="bulk-container-SERTIFIKASI"></div>
+        <form
+          id="formSertifikasi"
+          onsubmit="event.preventDefault(); handleBulkSubmit('SERTIFIKASI')"
+        >
+          <div id="bulk-container-SERTIFIKASI"></div>
 
-            <div id="btn-container-SERTIFIKASI" class="form-actions">
-                <button type="submit" class="btn-gold-save" id="btn-save-SERTIFIKASI"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
-                <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERTIFIKASI" onclick="cancelEdit('SERTIFIKASI')">BATAL</button>
-            </div>
+          <div id="btn-container-SERTIFIKASI" class="form-actions">
+            <button
+              type="submit"
+              class="btn-gold-save"
+              id="btn-save-SERTIFIKASI"
+            >
+              <i class="fa fa-save"></i> SIMPAN SEMUA DATA
+            </button>
+            <button
+              type="button"
+              class="btn-cancel-edit hidden"
+              id="btn-cancel-SERTIFIKASI"
+              onclick="cancelEdit('SERTIFIKASI')"
+            >
+              BATAL
+            </button>
+          </div>
         </form>
       </div>
 
@@ -269,30 +428,72 @@
         <div class="section-header">
           <h2>Data Arsip Sertifikasi</h2>
           <div class="header-actions">
-            <button class="btn-action btn-refresh" onclick="loadData('SERTIFIKASI')"><i class="fa fa-sync"></i> Refresh</button>
-            <button class="btn-action btn-export" onclick="exportTriple('SERTIFIKASI')"><i class="fa fa-file-excel"></i> Export Laporan</button>
+            <button
+              class="btn-action btn-refresh"
+              onclick="loadData('SERTIFIKASI')"
+            >
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('SERTIFIKASI')"
+            >
+              <i class="fa fa-file-excel"></i> Export Laporan
+            </button>
           </div>
         </div>
 
-        <div class="filter-card" style="border-left: 5px solid var(--neon-blue);">
-          <div class="grid-filter" style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto;">
-             <select id="filterSertBulan" class="form-control">
-               <option value="">Semua Bulan</option>
-               <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-               <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-               <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-               <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-             </select>
-             <select id="filterSertTahun" class="form-control">
-               <option value="">Semua Tahun</option>
-               <script>for(let y=2020; y<=2030; y++) document.write(`<option value='${y}'>${y}</option>`);</script>
-             </select>
-             <select id="filterSertJenis" class="form-control">
-               <option value="">Semua Jenis</option>
-             </select>
-             <input type="text" id="filterSertDaerah" class="form-control" placeholder="Cari Daerah Pelayaran"/>
-             <input type="text" id="searchSertifikasi" placeholder="Cari Nama/Perusahaan..." class="form-control"/>
-             <button onclick="applyFilter('SERTIFIKASI')" class="btn-action btn-filter"><i class="fa fa-filter"></i> Terapkan</button>
+        <div
+          class="filter-card"
+          style="border-left: 5px solid var(--neon-blue)"
+        >
+          <div
+            class="grid-filter"
+            style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto"
+          >
+            <select id="filterSertBulan" class="form-control">
+              <option value="">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select id="filterSertTahun" class="form-control">
+              <option value="">Semua Tahun</option>
+              <script>
+                for (let y = 2020; y <= 2030; y++)
+                  document.write(`<option value='${y}'>${y}</option>`);
+              </script>
+            </select>
+            <select id="filterSertJenis" class="form-control">
+              <option value="">Semua Jenis</option>
+            </select>
+            <input
+              type="text"
+              id="filterSertDaerah"
+              class="form-control"
+              placeholder="Cari Daerah Pelayaran"
+            />
+            <input
+              type="text"
+              id="searchSertifikasi"
+              placeholder="Cari Nama/Perusahaan..."
+              class="form-control"
+            />
+            <button
+              onclick="applyFilter('SERTIFIKASI')"
+              class="btn-action btn-filter"
+            >
+              <i class="fa fa-filter"></i> Terapkan
+            </button>
           </div>
         </div>
 
@@ -323,7 +524,136 @@
           </div>
         </div>
         <div class="pagination-controls">
-          <button onclick="prevPage('SERTIFIKASI')"><</button><span id="page-info-SERTIFIKASI">Hal 1</span><button onclick="nextPage('SERTIFIKASI')">></button>
+          <button onclick="prevPage('SERTIFIKASI')"><</button
+          ><span id="page-info-SERTIFIKASI">Hal 1</span
+          ><button onclick="nextPage('SERTIFIKASI')">></button>
+        </div>
+      </div>
+
+      <div id="sec-service-input" class="hidden">
+        <div class="section-header">
+          <h2>Input Arsip Service Station</h2>
+          <div style="display: flex; align-items: center; gap: 10px">
+            <label style="font-weight: 600; color: var(--navy)"
+              >Jumlah Data:</label
+            >
+            <select
+              id="bulkCountService"
+              class="form-control"
+              style="width: 70px; padding: 5px"
+              onchange="renderBulkForm('SERVICE')"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+
+        <form
+          id="formService"
+          onsubmit="event.preventDefault(); handleBulkSubmit('SERVICE')"
+        >
+          <div id="bulk-container-SERVICE"></div>
+
+          <div id="btn-container-SERVICE" class="form-actions">
+            <button type="submit" class="btn-gold-save" id="btn-save-SERVICE">
+              <i class="fa fa-save"></i> SIMPAN SEMUA DATA
+            </button>
+            <button
+              type="button"
+              class="btn-cancel-edit hidden"
+              id="btn-cancel-SERVICE"
+              onclick="cancelEdit('SERVICE')"
+            >
+              BATAL
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="sec-service-data" class="hidden">
+        <div class="section-header">
+          <h2>Data Arsip Service Station</h2>
+          <div class="header-actions">
+            <button
+              class="btn-action btn-refresh"
+              onclick="loadData('SERVICE')"
+            >
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('SERVICE')"
+            >
+              <i class="fa fa-file-excel"></i> Export Laporan
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-card" style="border-left: 5px solid #00c853">
+          <div class="grid-filter">
+            <select id="filterServiceBulan" class="form-control">
+              <option value="">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select id="filterServiceTahun" class="form-control">
+              <option value="">Semua Tahun</option>
+              <script>
+                for (let y = 2020; y <= 2030; y++)
+                  document.write(`<option value='${y}'>${y}</option>`);
+              </script>
+            </select>
+            <input
+              type="text"
+              id="searchService"
+              placeholder="Cari Penyedia/Kapal..."
+              class="form-control"
+            />
+            <button
+              onclick="applyFilter('SERVICE')"
+              class="btn-action btn-filter"
+            >
+              <i class="fa fa-filter"></i> Terapkan
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="table-service">
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>PENYEDIA JASA</th>
+                  <th>NAMA KAPAL</th>
+                  <th>JENIS ALAT</th>
+                  <th>JUMLAH</th>
+                  <th>TGL VALIDASI</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-service"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pagination-controls">
+          <button onclick="prevPage('SERVICE')"><</button
+          ><span id="page-info-SERVICE">Hal 1</span
+          ><button onclick="nextPage('SERVICE')">></button>
         </div>
       </div>
     </div>
