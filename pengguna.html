@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Pengguna - SHSK</title>
-    <link href="logo-shsk.png" rel="icon">
+    <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
@@ -69,9 +69,24 @@
             <div class="separator-hor"></div>
             <small
               id="mob-company-name"
-              style="display: block; margin-bottom: 10px"
+              style="
+                display: block;
+                margin-bottom: 5px;
+                color: var(--neon-gold);
+              "
               >PERUSAHAAN</small
             >
+            <p
+              id="mob-email-text"
+              style="
+                font-size: 11px;
+                color: #aaa;
+                margin-bottom: 15px;
+                word-break: break-all;
+              "
+            >
+              -
+            </p>
             <button
               onclick="logout()"
               class="btn-logout"
@@ -128,8 +143,9 @@
             </div>
 
             <p style="color: #ccc; font-size: 14px; line-height: 1.5">
-              Silakan pilih kapal dan jenis laporan yang dibutuhkan. 
-              Sistem akan mengirimkan link download dokumen PDF secara otomatis ke email Anda.
+              Silakan pilih kapal dan jenis laporan yang dibutuhkan. Sistem akan
+              mengirimkan link download dokumen PDF secara otomatis ke email
+              Anda.
             </p>
           </div>
         </div>
@@ -174,11 +190,25 @@
 
           <div class="dash-group">
             <label>4. Pilih Dokumen (Bisa lebih dari satu)</label>
-            <select id="reqJenis" class="dash-control" multiple disabled style="height: 120px; padding: 10px; overflow-y: auto;">
+            <select
+              id="reqJenis"
+              class="dash-control"
+              multiple
+              disabled
+              style="height: 120px; padding: 10px; overflow-y: auto"
+            >
               <option value="">-- Pilih Kapal Terlebih Dahulu --</option>
             </select>
-            <small style="color: #8892b0; font-size: 11px; margin-top: 5px; display: block;">
-              * Tahan tombol <b>CTRL</b> (Windows) atau <b>Command</b> (Mac) untuk memilih beberapa dokumen sekaligus.
+            <small
+              style="
+                color: #8892b0;
+                font-size: 11px;
+                margin-top: 5px;
+                display: block;
+              "
+            >
+              * Tahan tombol <b>CTRL</b> (Windows) atau <b>Command</b> (Mac)
+              untuk memilih beberapa dokumen sekaligus.
             </small>
           </div>
 
@@ -208,17 +238,33 @@
 
     <script src="script.js"></script>
     <script>
+      // LOGIC UI MOBILE & AUTO EMAIL FILLER
       function toggleMobileProfile(e) {
         e.stopPropagation();
         const dropdown = document.getElementById("mobileProfileDropdown");
         dropdown.classList.toggle("show");
       }
+
       window.addEventListener("click", function (e) {
         if (!e.target.closest(".mobile-profile-wrapper")) {
           const dropdown = document.getElementById("mobileProfileDropdown");
           if (dropdown && dropdown.classList.contains("show")) {
             dropdown.classList.remove("show");
           }
+        }
+      });
+
+      // AUTO FILL EMAIL SAAT HALAMAN DIMUAT
+      document.addEventListener("DOMContentLoaded", () => {
+        const u = JSON.parse(localStorage.getItem("user"));
+        if (u) {
+          // Isi Email di Footer Form
+          const footerEmail = document.getElementById("email-display-text");
+          if (footerEmail) footerEmail.innerText = u.id;
+
+          // Isi Email di Dropdown Mobile
+          const mobEmail = document.getElementById("mob-email-text");
+          if (mobEmail) mobEmail.innerText = u.id;
         }
       });
     </script>
