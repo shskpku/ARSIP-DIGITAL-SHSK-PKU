@@ -1,7 +1,7 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (FULL VERSION v2)
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (FULL VERSION v3)
    Fitur: Register, Login, Dashboard 3 Kategori, Dropdown Cerdas, 
-   Auto Email Footer, Bulk Input Service Station, Triple Export,
+   Auto Email Footer, Bulk Input Service Station, Triple Export (Direct DL),
    Smart Cert Numbering, Smart Company Datalist & Email Bundling.
    ==================================================================== */
 
@@ -34,7 +34,6 @@ const CERT_CODES = {
   "ENDORS DOC": "AL.602",
   "SMC": "AL.602",
   "SMC INTERMEDIATE": "AL.602"
-  // LIFE RAFT & FIRE EXT DIHAPUS DARI LIST INI (MANUAL)
 };
 
 // --- GLOBAL SET UNTUK MENAMPUNG NAMA PERUSAHAAN (AUTOCOMPLETE) ---
@@ -112,7 +111,6 @@ function injectCustomStyles() {
 
 // --- SMART AUTOCOMPLETE HELPER ---
 function initSmartSearch() {
-    // Buat element datalist jika belum ada
     if (!document.getElementById('companyList')) {
         const dl = document.createElement('datalist');
         dl.id = 'companyList';
@@ -121,12 +119,9 @@ function initSmartSearch() {
 }
 
 function updateCompanyDatalist(dataArray, keyName) {
-    // Tambahkan data baru ke Set Global
     dataArray.forEach(item => {
         if(item[keyName]) globalCompanySet.add(item[keyName].trim().toUpperCase());
     });
-
-    // Render ulang datalist
     const dl = document.getElementById('companyList');
     if(dl) {
         dl.innerHTML = '';
@@ -142,17 +137,13 @@ function updateCompanyDatalist(dataArray, keyName) {
 window.autoFillCertNum = function(index) {
     const jenisEl = document.querySelector(`select[name="jenisSertifikat_${index}"]`);
     const noSertEl = document.querySelector(`input[name="noSertifikat_${index}"]`);
-    
     if(!jenisEl || !noSertEl) return;
     
     const jenis = jenisEl.value;
     const currentYear = new Date().getFullYear();
-    
     if(CERT_CODES[jenis]) {
-        // Format: KODE///KSOP.PKU/TAHUN
         noSertEl.value = `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`;
     } else {
-        // Jika tidak ada di list (Pengesahan dll), kosongkan atau biarkan
         if(noSertEl.value.includes("KSOP.PKU")) noSertEl.value = ""; 
     }
 }
@@ -167,9 +158,7 @@ function resetIdleTimer() { idleTime = 0; }
 function initAutoLogout() {
   setInterval(() => {
     idleTime++;
-    if (idleTime >= 60) { // 60 menit
-      logout();
-    }
+    if (idleTime >= 60) { logout(); }
   }, 60000); 
 
   window.onmousemove = resetIdleTimer;
@@ -195,34 +184,23 @@ async function handleLogin(e, role) {
   const inputIdElem = document.getElementById(inputIdStr);
   const inputPassElem = document.getElementById(inputPassStr);
   const btnElem = document.getElementById(btnIdStr);
-
   if (!inputIdElem || !inputPassElem || !btnElem) return;
 
   const userId = inputIdElem.value.trim();
   const password = inputPassElem.value.trim();
-
   if (!userId || !password) { showPopup("Data tidak lengkap.", "error"); return; }
 
   const originalText = btnElem.innerHTML;
   btnElem.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
   btnElem.disabled = true;
-
   showPopup("Sedang Masuk...", "info");
 
   try {
-    const res = await postData({
-      action: "login",
-      role: role,
-      id: userId,
-      password: password,
-    });
-
+    const res = await postData({ action: "login", role: role, id: userId, password: password });
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
       showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
-      setTimeout(() => {
-        window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html";
-      }, 1500);
+      setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 1500);
     } else {
       showPopup(res.message, "error");
       btnElem.innerHTML = originalText;
@@ -235,34 +213,22 @@ async function handleLogin(e, role) {
   }
 }
 
-// --- HANDLE REGISTER ---
 async function handleRegisterSubmit(e) {
   if (e) e.preventDefault();
-  
   const nama = document.getElementById("reg-nama").value;
   const email = document.getElementById("reg-email").value;
   const password = document.getElementById("reg-password").value;
   const perusahaan = document.getElementById("reg-perusahaan").value;
   const btn = document.getElementById("btn-register-submit");
 
-  if (!nama || !email || !password || !perusahaan) {
-    showPopup("Harap isi semua kolom!", "error");
-    return;
-  }
+  if (!nama || !email || !password || !perusahaan) { showPopup("Harap isi semua kolom!", "error"); return; }
 
   const originalText = btn.innerText;
   btn.innerText = "MEMPROSES...";
   btn.disabled = true;
 
   try {
-    const res = await postData({
-      action: "register",
-      nama: nama,
-      email: email,
-      password: password,
-      perusahaan: perusahaan
-    });
-
+    const res = await postData({ action: "register", nama: nama, email: email, password: password, perusahaan: perusahaan });
     if (res.status === "SUCCESS") {
       showPopup("Pendaftaran Berhasil! Mengalihkan...", "success");
       setTimeout(() => { window.location.href = "index.html"; }, 2000);
@@ -282,7 +248,6 @@ function logout() { document.getElementById("modal-logout").classList.remove("hi
 function closeLogoutModal() { document.getElementById("modal-logout").classList.add("hidden"); }
 function confirmLogout() { localStorage.removeItem("user"); window.location.href = "index.html"; }
 
-// --- OTP & RESET PASSWORD ---
 async function requestOTP() {
   const email = document.getElementById("reset-email").value;
   if (!email) { showPopup("Masukkan email dulu!", "error"); return; }
@@ -324,8 +289,8 @@ async function resetPasswordFinal() {
 // ====================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  injectCustomStyles(); // Inject CSS Mobile Fix
-  initSmartSearch();    // Init Datalist
+  injectCustomStyles(); 
+  initSmartSearch();    
 
   if (document.querySelector(".dashboard-page")) {
       initPenggunaDashboard();
@@ -334,7 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
       loadProfilePetugas();
       const defaultBtn = document.querySelector(".filter-btn.active");
       updateChartFilter("year", defaultBtn);
-      
       renderBulkForm('SHSK');
       renderBulkForm('SERTIFIKASI');
       renderBulkForm('SERVICE');
@@ -349,15 +313,11 @@ function showSection(id, el){
     document.getElementById(`sec-${id}`).classList.remove("hidden"); 
     document.querySelectorAll(".menu-item").forEach(m=>m.classList.remove("active"));
     if(el) el.classList.add("active");
-    
-    // Auto Load Data
     if(id.includes("data")) {
         if(id.includes("shsk")) loadData("SHSK");
         else if(id.includes("sertifikasi")) loadData("SERTIFIKASI");
         else if(id.includes("service")) loadData("SERVICE");
     }
-    
-    // Close sidebar on mobile
     if(window.innerWidth <= 900) {
        const s=document.getElementById("sidebar");
        const o=document.getElementById("sidebar-overlay");
@@ -390,7 +350,6 @@ function updateChartFilter(period, btnElement) {
   document.querySelectorAll(".filter-btn").forEach((btn) => btn.classList.remove("active"));
   if (btnElement) { btnElement.classList.add("active"); }
   else {
-    // Fallback selector logic
     const targetBtn = Array.from(document.querySelectorAll(".filter-btn")).find(
       (b) => b.innerText.toLowerCase().includes(
             period === "year" ? "tahun" : period === "month" ? "bulan" : period === "week" ? "minggu" : "hari"
@@ -407,7 +366,6 @@ async function initCharts(p = "year") {
   let d = { year: new Date().getFullYear(), totalYear: 0, breakdown: { shsk: 0, sert: 0, serv: 0 }, labels: [], datasets: { shsk: [], sert: [], serv: [] } };
   if (res.status === "SUCCESS") d = res.data;
 
-  // Update Title
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
   if (titleEl && titleEl.parentNode) titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
 
@@ -470,7 +428,7 @@ function loadProfilePetugas() {
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE (LOGIC UTAMA)
+// 7. BULK INPUT ENGINE
 // ====================================================================
 
 window.updateServiceQty = function (i) {
@@ -524,7 +482,7 @@ function renderBulkForm(type) {
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label>
+                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control"></label>
                         <label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label>
                         <label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label>
                         <label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label>
@@ -623,7 +581,7 @@ function renderBulkForm(type) {
                                 <option value="SMC">SMC</option>
                                 <option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option>
                                 <option value="PENGESAHAN GAMBAR KAPAL">PENGESAHAN GAMBAR KAPAL</option>
-                                </select>
+                            </select>
                         </label>
                         <label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
                         <label>Masa Berlaku <input type="date" name="tglBerlaku_${i}" class="form-control"></label>
@@ -978,7 +936,7 @@ function cancelEdit(type) {
 }
 
 // ====================================================================
-// 9. TRIPLE EXPORT, TABLE, PENGGUNA DASHBOARD
+// 9. TRIPLE EXPORT (DIRECT DOWNLOAD NO BLANK TAB)
 // ====================================================================
 
 async function exportTriple(type) {
@@ -1009,7 +967,22 @@ async function exportTriple(type) {
     const res = await postData({ action: "exportTripleFile", type: type, filters: filters });
     if (res.status === "SUCCESS" && res.files) {
       showPopup("Laporan Siap! Mengunduh...", "success");
-      res.files.forEach((f) => { if (f.url) window.open(f.url, "_blank"); });
+      
+      // LOGIKA BARU: DOWNLOAD TANPA NEW TAB (BYPASS POPUP BLOCKER)
+      res.files.forEach((f, index) => {
+        if (f.url) {
+           setTimeout(() => {
+             const a = document.createElement('a');
+             a.href = f.url;
+             a.setAttribute('download', ''); // Trigger Direct Download
+             a.style.display = 'none';
+             document.body.appendChild(a);
+             a.click();
+             document.body.removeChild(a);
+           }, index * 1500); // Jeda 1.5 detik per file biar ga dianggap spam
+        }
+      });
+
     } else { showPopup(res.message || "Gagal export", "error"); }
   } catch (e) { showPopup("Gagal koneksi", "error"); }
 
@@ -1050,8 +1023,7 @@ async function loadData(type) {
     else if(type === "SERVICE") keyName = "NAMA_PENYEDIA_JASA";
     
     if(keyName) updateCompanyDatalist(rawData[type], keyName);
-    // --------------------------------------
-
+    
     renderTable(type);
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else { tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`; }
@@ -1288,11 +1260,7 @@ window.handleRequestSubmit = async function (e) {
       return; 
   }
 
-  // Mengambil SEMUA file yang dipilih (bukan cuma satu)
   const jenisList = opts.map(o => o.text);
-  
-  // Link diambil dari option pertama (sebenarnya backend akan memvalidasi ulang)
-  // Untuk keperluan validasi sederhana di frontend cukup cek value pertama
   const sampleLink = s.value; 
 
   const u = JSON.parse(localStorage.getItem("user"));
@@ -1308,7 +1276,7 @@ window.handleRequestSubmit = async function (e) {
       namaUser: u.nama, 
       perusahaan: u.extra, 
       kapal: document.getElementById("reqKapal").value, 
-      jenis: jenisList, // Kirim Array
+      jenis: jenisList, 
       tahun: document.getElementById("reqTahun").value, 
       bulan: getMonthName(document.getElementById("reqBulan").value), 
       link: sampleLink 
