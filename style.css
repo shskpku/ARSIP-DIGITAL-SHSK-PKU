@@ -1554,17 +1554,34 @@ button:disabled {
   background: #e3f2fd;
 }
 
-/* Responsive Petugas */
+/* =========================================
+   PERBAIKAN RESPONSIVE (UPDATE INI DI STYLE.CSS)
+   GANTI BLOK @media (max-width: 900px) YANG LAMA DENGAN INI:
+   ========================================= */
+
 @media (max-width: 900px) {
+  /* Fix Navbar Padding */
   .navbar.glass-nav {
-    padding: 0 15px;
+    padding: 0 20px;       /* Padding kiri standar */
+    padding-right: 30px;   /* Padding kanan LEBIH BESAR biar tombol geser ke kiri */
   }
+
+  /* Sembunyikan elemen yang tidak perlu di HP */
   .system-status {
     display: none;
   }
   .user-info-nav {
     display: none;
   }
+
+  /* Reset Container Kanan (PENTING: Ini yang bikin terpotong sebelumnya) */
+  .nav-right {
+    min-width: auto;  /* Hapus batas minimal lebar 200px */
+    gap: 0;           /* Hapus jarak antar elemen krn cuma ada 1 tombol */
+    width: auto;      /* Sesuaikan lebar dengan isi konten */
+  }
+
+  /* Sidebar Mobile */
   .sidebar {
     left: -260px;
     top: 70px;
@@ -1573,21 +1590,25 @@ button:disabled {
   .sidebar.show {
     left: 0;
   }
+
+  /* Main Content adjustment */
   .main-content {
     margin-left: 0;
     padding: 15px;
+    padding-top: 30px; /* Tambah jarak atas sedikit */
   }
+
+  /* Toggle Button */
   .mobile-toggle {
     display: block !important;
     color: #fff;
     font-size: 24px;
     cursor: pointer;
   }
+
+  /* Grid Fixes */
   .charts-container,
-  .grid-form {
-    grid-template-columns: 1fr;
-  }
-  /* Fix Filter Grid on Mobile */
+  .grid-form,
   .grid-filter {
     grid-template-columns: 1fr;
   }
