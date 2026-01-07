@@ -1007,14 +1007,14 @@ body.petugas-page {
     font-style: italic;
 }
 .annual-filter-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto; 
     gap: 15px;
-    align-items: flex-end;
-    flex-wrap: wrap;
+    align-items: end; 
 }
+
 .annual-form-group {
-    flex: 1;
-    min-width: 150px;
+    width: 100%;
 }
 .annual-form-group label {
     display: block;
@@ -1616,8 +1616,8 @@ button:disabled {
 @media (max-width: 900px) {
   /* Fix Navbar Padding */
   .navbar.glass-nav {
-    padding: 0 20px;       /* Padding kiri standar */
-    padding-right: 30px;   /* Padding kanan LEBIH BESAR biar tombol geser ke kiri */
+    padding: 0 20px;     
+    padding-right: 30px;  
   }
 
   /* Sembunyikan elemen yang tidak perlu di HP */
@@ -1661,11 +1661,11 @@ button:disabled {
   }
 
   /* Grid Fixes */
-  .charts-container,
+.charts-container,
   .grid-form,
   .grid-filter,
   .service-options-container,
-  .annual-filter-row {
+  .annual-filter-row { 
     grid-template-columns: 1fr !important;
   }
   
