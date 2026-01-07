@@ -1,8 +1,8 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (NTR & OIL BARGE + SMART VOICE 🗣️)
-   Fitur: Multi-Cert Logic (NTR/Oil Barge), Multi-Photo, Smart Name TTS,
-   Register, Login, Dashboard 3 Kategori, Dropdown Cerdas, 
-   Triple Export (Direct DL), Smart Cert Numbering & Email Bundling.
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (NTR/OIL BARGE/SHSK RECAP/TTS 🗣️)
+   Fitur: Dropdown SHSK Baru, Multi-Cert Logic, Multi-Photo, Smart TTS,
+   Register, Login, Dashboard 3 Kategori, Triple Export (Direct DL),
+   Smart Cert Numbering & Email Bundling.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
@@ -53,9 +53,6 @@ function speakWelcome(namaLengkap) {
         window.speechSynthesis.cancel(); // Reset antrian suara
 
         // LOGIKA SMART NAME: Ambil nama depan saja
-        // 1. Hapus gelar (pisahkan koma)
-        // 2. Ambil kata pertama (pisahkan spasi)
-        // 3. Ubah jadi Huruf Besar Awal saja biar enak didengar (Rendy bukan RENDY)
         let rawName = namaLengkap.split(',')[0].trim().split(' ')[0];
         let nickName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
 
@@ -176,62 +173,50 @@ window.handleCertTypeChange = function(index) {
     let html = "";
 
     if (jenis === "NTR") {
-        // --- MODE NTR (3 ITEM) ---
         html = `
             <div class="special-section">
                 <span class="special-label"><i class="fa fa-layer-group"></i> PAKET NTR (3 SERTIFIKAT)</span>
-                
                 <div style="margin-bottom:8px;">
                     <label style="font-size:12px;">1. No. Konstruksi</label>
                     <input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
                     <input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;">
                 </div>
-                
                 <div style="margin-bottom:8px;">
                     <label style="font-size:12px;">2. No. Perlengkapan</label>
                     <input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
                     <input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;">
                 </div>
-
                 <div>
                     <label style="font-size:12px;">3. No. Radio</label>
                     <input type="text" name="noSertifikat_RADIO_${index}" class="form-control" value="AL.502///KSOP.PKU/${currentYear}">
                     <input type="file" name="sertifikat_RADIO_${index}" style="margin-top:2px;">
                 </div>
-            </div>
-        `;
+            </div>`;
     } else if (jenis === "OIL BARGE") {
-        // --- MODE OIL BARGE (2 ITEM) ---
         html = `
             <div class="special-section" style="border-color: var(--gold);">
                 <span class="special-label"><i class="fa fa-ship"></i> PAKET OIL BARGE (2 SERTIFIKAT)</span>
-                
                 <div style="margin-bottom:8px;">
                     <label style="font-size:12px;">1. No. Konstruksi</label>
                     <input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
                     <input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;">
                 </div>
-                
                 <div>
                     <label style="font-size:12px;">2. No. Perlengkapan</label>
                     <input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
                     <input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;">
                 </div>
-            </div>
-        `;
+            </div>`;
     } else {
-        // --- MODE STANDARD ---
         let autoVal = "";
         if(CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL") {
             autoVal = `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`;
         }
-        
         html = `
             <label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label>
             <label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>
         `;
     }
-
     dynamicContainer.innerHTML = html;
 };
 
@@ -517,7 +502,6 @@ function loadProfilePetugas() {
     sbInitial.innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
     sbInitial.style.border = "2px solid var(--gold)";
   }
-  // CALL FUNGSI SUARA SETELAH PROFIL DI-LOAD
   speakWelcome(user.nama);
 }
 
@@ -588,12 +572,28 @@ function renderBulkForm(type) {
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pengukuhan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>STKK 
+                        <label>Jenis Dokumen / STKK 
                             <select name="statusPengukuhan_${i}" class="form-control">
                                 <option value="">-- Pilih --</option>
-                                <option value="SURAT LAUT">SURAT LAUT</option>
+                                <option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option>
+                                <option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option>
+                                <option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option>
+                                <option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option>
+                                <option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option>
+                                <option value="DAFTAR UKUR">DAFTAR UKUR</option>
                                 <option value="PAS BESAR">PAS BESAR</option>
+                                <option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option>
+                                <option value="PAS BESAR ENDORSMENT">PAS BESAR ENDORSMENT</option>
+                                <option value="SURAT LAUT ENDORSMENT">SURAT LAUT ENDORSMENT</option>
                                 <option value="PAS KECIL">PAS KECIL</option>
+                                <option value="PAS KECIL ENDORSMENT">PAS KECIL ENDORSMENT</option>
+                                <option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option>
+                                <option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option>
+                                <option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option>
+                                <option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option>
+                                <option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option>
+                                <option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option>
+                                <option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option>
                             </select>
                         </label>
                         <label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label>
