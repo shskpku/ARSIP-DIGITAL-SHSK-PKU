@@ -1,6 +1,6 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (NTR & OIL BARGE EDITION 🛢️)
-   Fitur: Multi-Cert Logic (NTR/Oil Barge), Multi-Photo, Text-to-Speech,
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (NTR & OIL BARGE + SMART VOICE 🗣️)
+   Fitur: Multi-Cert Logic (NTR/Oil Barge), Multi-Photo, Smart Name TTS,
    Register, Login, Dashboard 3 Kategori, Dropdown Cerdas, 
    Triple Export (Direct DL), Smart Cert Numbering & Email Bundling.
    ==================================================================== */
@@ -42,24 +42,37 @@ const CERT_CODES = {
 let globalCompanySet = new Set(); 
 
 // ====================================================================
-// 1. UTILITIES & HELPER (TERMASUK SUARA JARVIS)
+// 1. UTILITIES & HELPER (TERMASUK SUARA JARVIS PINTAR)
 // ====================================================================
 
-// --- FUNGSI SUARA SELAMAT DATANG ---
-function speakWelcome(nama) {
+// --- FUNGSI SUARA SELAMAT DATANG (PANGGIL NAMA DEPAN SAJA) ---
+function speakWelcome(namaLengkap) {
     if ('speechSynthesis' in window) {
         if (sessionStorage.getItem("welcome_played")) return; 
-        window.speechSynthesis.cancel();
-        const text = `Selamat datang, ${nama}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
+        
+        window.speechSynthesis.cancel(); // Reset antrian suara
+
+        // LOGIKA SMART NAME: Ambil nama depan saja
+        // 1. Hapus gelar (pisahkan koma)
+        // 2. Ambil kata pertama (pisahkan spasi)
+        // 3. Ubah jadi Huruf Besar Awal saja biar enak didengar (Rendy bukan RENDY)
+        let rawName = namaLengkap.split(',')[0].trim().split(' ')[0];
+        let nickName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
+
+        const text = `Selamat datang, ${nickName}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
+        
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'id-ID'; 
         utterance.rate = 0.9;      
         utterance.pitch = 1;      
         utterance.volume = 1;     
+        
         const voices = window.speechSynthesis.getVoices();
         const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
         if (indoVoice) utterance.voice = indoVoice;
+        
         window.speechSynthesis.speak(utterance);
+        
         sessionStorage.setItem("welcome_played", "true");
     }
 }
@@ -504,6 +517,7 @@ function loadProfilePetugas() {
     sbInitial.innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
     sbInitial.style.border = "2px solid var(--gold)";
   }
+  // CALL FUNGSI SUARA SETELAH PROFIL DI-LOAD
   speakWelcome(user.nama);
 }
 
@@ -809,7 +823,6 @@ async function handleBulkSubmit(type) {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       inputs.forEach((input) => {
         const key = input.name.replace(`_${i}`, "");
-        // Ambil semua input kecuali file dan checkbox service
         if (input.type !== "file" && !key.startsWith("check_") && !key.startsWith("jumlah_")) {
           itemData[key] = input.value.toUpperCase();
           if (key === "namaKapal" && input.value.trim() !== "") hasData = true;
