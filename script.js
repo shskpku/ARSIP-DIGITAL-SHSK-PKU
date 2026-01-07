@@ -1,93 +1,79 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (FINAL v5.0)
-   Fitur: Annual Report Dashboard, SHSK Dropdown, NTR/Oil Barge Logic, 
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (FINAL v5.4 - CSS FIX)
+   Fitur: Annual Report Dashboard (2-Row Grid), SHSK Dropdown, NTR/Oil Barge, 
    Multi-Photo, Smart TTS, Direct DL, Smart Cert & Email Bundling.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec"; 
 
 // --- DATABASE KODE SURAT ---
 const CERT_CODES = {
-  KONSTRUKSI: "AL.501",
-  PERLENGKAPAN: "AL.501",
-  RADIO: "AL.502",
+  "KONSTRUKSI": "AL.501",
+  "PERLENGKAPAN": "AL.501",
+  "RADIO": "AL.502",
   "ENDORS KONSTRUKSI": "AL.501",
   "ENDORS PERLENGKAPAN": "AL.501",
   "ENDORS RADIO": "AL.502",
   "GARIS MUAT": "AL.509",
   "KESELAMATAN KLM": "AL.501",
   "KESELAMATAN MOORING": "AL.501",
-  IMDG: "AL.503",
-  SNPP: "AL.601",
+  "IMDG": "AL.503",
+  "SNPP": "AL.601",
   "ENDORS SNPP": "AL.601",
-  IOPP: "AL.602",
+  "IOPP": "AL.602",
   "ENDORS IOPP": "AL.602",
-  ISPP: "AL.602",
+  "ISPP": "AL.602",
   "ENDORS ISPP": "AL.602",
-  IAPP: "AL.602",
+  "IAPP": "AL.602",
   "ENDORS IAPP": "AL.602",
   "BALLAST WATER MANAGEMENT": "AL.601",
-  ANTIFOULING: "AL.601",
-  DOC: "AL.602",
+  "ANTIFOULING": "AL.601",
+  "DOC": "AL.602",
   "ENDORS DOC": "AL.602",
-  SMC: "AL.602",
+  "SMC": "AL.602",
   "SMC INTERMEDIATE": "AL.602",
   // LOGIKA KHUSUS
-  NTR: "SPECIAL",
-  "OIL BARGE": "SPECIAL",
+  "NTR": "SPECIAL", 
+  "OIL BARGE": "SPECIAL"
 };
 
-let globalCompanySet = new Set();
+let globalCompanySet = new Set(); 
 
 // ====================================================================
 // 1. UTILITIES & HELPER
 // ====================================================================
 
 function speakWelcome(namaLengkap) {
-  if ("speechSynthesis" in window) {
-    if (sessionStorage.getItem("welcome_played")) return;
-    window.speechSynthesis.cancel();
-    let rawName = namaLengkap.split(",")[0].trim().split(" ")[0];
-    let nickName =
-      rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
-    const text = `Selamat datang, ${nickName}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "id-ID";
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const indoVoice = voices.find(
-      (v) => v.lang === "id-ID" || v.name.includes("Indonesia")
-    );
-    if (indoVoice) utterance.voice = indoVoice;
-    window.speechSynthesis.speak(utterance);
-    sessionStorage.setItem("welcome_played", "true");
-  }
+    if ('speechSynthesis' in window) {
+        if (sessionStorage.getItem("welcome_played")) return; 
+        window.speechSynthesis.cancel(); 
+        let rawName = namaLengkap.split(',')[0].trim().split(' ')[0];
+        let nickName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
+        const text = `Selamat datang, ${nickName}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID'; 
+        utterance.rate = 0.9;      
+        utterance.pitch = 1;      
+        utterance.volume = 1;     
+        const voices = window.speechSynthesis.getVoices();
+        const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
+        if (indoVoice) utterance.voice = indoVoice;
+        window.speechSynthesis.speak(utterance);
+        sessionStorage.setItem("welcome_played", "true");
+    }
 }
 
 function showPopup(message, type = "info") {
   const popup = document.getElementById("app-notification");
-  if (!popup) {
-    alert(message);
-    return;
-  }
+  if (!popup) { alert(message); return; }
   const msgEl = document.getElementById("popup-message");
   const iconEl = popup.querySelector("i");
   msgEl.innerText = message;
   popup.className = "popup";
-  if (type === "success") {
-    popup.classList.add("success");
-    if (iconEl) iconEl.className = "fa fa-check-circle";
-  } else if (type === "error") {
-    popup.classList.add("error");
-    if (iconEl) iconEl.className = "fa fa-times-circle";
-  } else {
-    popup.classList.add("info");
-    if (iconEl) iconEl.className = "fa fa-info-circle";
-  }
+  if (type === "success") { popup.classList.add("success"); if (iconEl) iconEl.className = "fa fa-check-circle"; } 
+  else if (type === "error") { popup.classList.add("error"); if (iconEl) iconEl.className = "fa fa-times-circle"; } 
+  else { popup.classList.add("info"); if (iconEl) iconEl.className = "fa fa-info-circle"; }
   popup.classList.add("show");
   setTimeout(() => popup.classList.remove("show"), 3000);
 }
@@ -118,99 +104,96 @@ async function postData(data) {
 }
 
 function injectCustomStyles() {
-  const style = document.createElement("style");
-  style.innerHTML = `
+    const style = document.createElement('style');
+    // PERBAIKAN DI SINI: CSS Grid 2 Baris sudah ditanam langsung agar tidak konflik
+    style.innerHTML = `
         .service-options-container { display: flex; gap: 10px; }
         .tool-checkbox-card { flex: 1; }
         .special-section { background: #f0f8ff; padding: 10px; border-left: 4px solid var(--neon-blue); border-radius: 4px; margin-bottom: 10px; }
         .special-label { font-weight: bold; color: var(--navy); display: block; margin-bottom: 5px; font-size: 13px; }
         
-        /* STYLE UNTUK CARD LAPORAN TAHUNAN */
+        /* STYLE UNTUK CARD LAPORAN TAHUNAN (2-ROW LAYOUT FIXED) */
         .annual-report-card {
             background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 25px; margin-bottom: 30px; border-top: 4px solid var(--gold);
         }
         .annual-title { font-size: 18px; font-weight: bold; color: var(--navy); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .annual-subtitle { font-size: 13px; color: #666; margin-bottom: 20px; font-style: italic; }
-        .annual-filter-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
-        .annual-form-group { flex: 1; min-width: 150px; }
+        
+        /* GRID 2 BARIS UNTUK DESKTOP */
+        .annual-filter-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Baris 1: Bulan Awal | Bulan Akhir */
+            gap: 15px; 
+            align-items: end; 
+        }
+        .annual-form-group { width: 100%; }
         .annual-form-group label { display: block; font-size: 12px; font-weight: bold; color: #444; margin-bottom: 5px; }
+        
         .btn-annual-export {
             background: var(--navy); color: var(--gold); border: none; padding: 10px 20px;
             border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s;
-            display: flex; align-items: center; gap: 8px; height: 42px;
+            display: flex; align-items: center; justify-content: center; gap: 8px; height: 42px; width: 100%;
         }
         .btn-annual-export:hover { background: #0f2d50; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
+        /* RESPONSIVE MOBILE: 1 KOLOM */
         @media (max-width: 768px) {
             .service-options-container { flex-direction: column !important; }
             .tool-checkbox-card { width: 100% !important; margin-bottom: 10px; }
-            .annual-filter-row { flex-direction: column; }
+            .annual-filter-row { grid-template-columns: 1fr !important; } /* Stack 1 kolom */
             .annual-form-group { width: 100%; }
-            .btn-annual-export { width: 100%; justify-content: center; }
+            .btn-annual-export { width: 100%; }
         }
     `;
-  document.head.appendChild(style);
+    document.head.appendChild(style);
 }
 
 function initSmartSearch() {
-  if (!document.getElementById("companyList")) {
-    const dl = document.createElement("datalist");
-    dl.id = "companyList";
-    document.body.appendChild(dl);
-  }
+    if (!document.getElementById('companyList')) {
+        const dl = document.createElement('datalist');
+        dl.id = 'companyList';
+        document.body.appendChild(dl);
+    }
 }
 
 function updateCompanyDatalist(dataArray, keyName) {
-  dataArray.forEach((item) => {
-    if (item[keyName]) globalCompanySet.add(item[keyName].trim().toUpperCase());
-  });
-  const dl = document.getElementById("companyList");
-  if (dl) {
-    dl.innerHTML = "";
-    globalCompanySet.forEach((name) => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      dl.appendChild(opt);
-    });
-  }
+    dataArray.forEach(item => { if(item[keyName]) globalCompanySet.add(item[keyName].trim().toUpperCase()); });
+    const dl = document.getElementById('companyList');
+    if(dl) {
+        dl.innerHTML = '';
+        globalCompanySet.forEach(name => { const opt = document.createElement('option'); opt.value = name; dl.appendChild(opt); });
+    }
 }
 
-window.handleCertTypeChange = function (index) {
-  const jenisEl = document.querySelector(
-    `select[name="jenisSertifikat_${index}"]`
-  );
-  const dynamicContainer = document.getElementById(
-    `dynamic-cert-fields-${index}`
-  );
-  if (!jenisEl || !dynamicContainer) return;
-  const jenis = jenisEl.value;
-  const currentYear = new Date().getFullYear();
-  let html = "";
+window.handleCertTypeChange = function(index) {
+    const jenisEl = document.querySelector(`select[name="jenisSertifikat_${index}"]`);
+    const dynamicContainer = document.getElementById(`dynamic-cert-fields-${index}`);
+    if(!jenisEl || !dynamicContainer) return;
+    const jenis = jenisEl.value;
+    const currentYear = new Date().getFullYear();
+    let html = "";
 
-  if (jenis === "NTR") {
-    html = `
+    if (jenis === "NTR") {
+        html = `
             <div class="special-section">
                 <span class="special-label"><i class="fa fa-layer-group"></i> PAKET NTR (3 SERTIFIKAT)</span>
                 <div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div>
                 <div style="margin-bottom:8px;"><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div>
                 <div><label style="font-size:12px;">3. No. Radio</label><input type="text" name="noSertifikat_RADIO_${index}" class="form-control" value="AL.502///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_RADIO_${index}" style="margin-top:2px;"></div>
             </div>`;
-  } else if (jenis === "OIL BARGE") {
-    html = `
+    } else if (jenis === "OIL BARGE") {
+        html = `
             <div class="special-section" style="border-color: var(--gold);">
                 <span class="special-label"><i class="fa fa-ship"></i> PAKET OIL BARGE (2 SERTIFIKAT)</span>
                 <div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div>
                 <div><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div>
             </div>`;
-  } else {
-    let autoVal =
-      CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL"
-        ? `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`
-        : "";
-    html = `<label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>`;
-  }
-  dynamicContainer.innerHTML = html;
+    } else {
+        let autoVal = (CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL") ? `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}` : "";
+        html = `<label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>`;
+    }
+    dynamicContainer.innerHTML = html;
 };
 
 // ====================================================================
@@ -218,11 +201,11 @@ window.handleCertTypeChange = function (index) {
 // ====================================================================
 
 function initAnnualReportUI() {
-  const container = document.querySelector(".chart-grid");
-  if (!container) return; // Hanya jalan di halaman dashboard
+    const container = document.querySelector(".chart-grid"); 
+    if(!container) return; // Hanya jalan di halaman dashboard
 
-  // Inject Container Laporan Tahunan di bawah Chart
-  const annualHTML = `
+    // Inject Container Laporan Tahunan di bawah Chart (2-Row Layout)
+    const annualHTML = `
         <div class="annual-report-card" style="grid-column: 1 / -1;">
             <div class="annual-title"><i class="fa fa-chart-line"></i> REKAPITULASI TAHUNAN</div>
             <div class="annual-subtitle">IKK 54 Persentase Pelayanan Dibidang Kelaiklautan Kapal</div>
@@ -247,75 +230,76 @@ function initAnnualReportUI() {
                         <option value="10">Oktober</option><option value="11">November</option>
                     </select>
                 </div>
+                
                 <div class="annual-form-group">
                     <label>Tahun</label>
                     <select id="repYear" class="form-control"></select>
                 </div>
-                <div class="annual-form-group" style="flex:0;">
-                    <button class="btn-annual-export" onclick="handleAnnualReport(this)">
-                        <i class="fa fa-file-export"></i> EXPORT LAPORAN TAHUNAN
+                <div class="annual-form-group">
+                    <label>&nbsp;</label> <button class="btn-annual-export" onclick="handleAnnualReport(this)">
+                        <i class="fa fa-file-export"></i> EXPORT LAPORAN
                     </button>
                 </div>
             </div>
         </div>
     `;
-  container.insertAdjacentHTML("afterend", annualHTML);
+    container.insertAdjacentHTML('afterend', annualHTML);
 
-  // Populate Year Dropdown
-  const yearSelect = document.getElementById("repYear");
-  const currentYear = new Date().getFullYear();
-  for (let y = currentYear; y >= 2020; y--) {
-    const opt = document.createElement("option");
-    opt.value = y;
-    opt.text = y;
-    yearSelect.appendChild(opt);
-  }
+    // Populate Year Dropdown
+    const yearSelect = document.getElementById("repYear");
+    const currentYear = new Date().getFullYear();
+    for(let y = currentYear; y >= 2020; y--) {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.text = y;
+        yearSelect.appendChild(opt);
+    }
 }
 
 async function handleAnnualReport(btn) {
-  const startM = document.getElementById("repStartMonth").value;
-  const endM = document.getElementById("repEndMonth").value;
-  const year = document.getElementById("repYear").value;
+    const startM = document.getElementById("repStartMonth").value;
+    const endM = document.getElementById("repEndMonth").value;
+    const year = document.getElementById("repYear").value;
 
-  if (parseInt(startM) > parseInt(endM)) {
-    showPopup("Bulan Awal tidak boleh lebih besar dari Bulan Akhir!", "error");
-    return;
-  }
-
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> PROCESSING...';
-  btn.disabled = true;
-  showPopup("Sedang mengkalkulasi data tahunan...", "info");
-
-  try {
-    const res = await postData({
-      action: "exportAnnualReport",
-      startMonth: startM,
-      endMonth: endM,
-      year: year,
-    });
-
-    if (res.status === "SUCCESS" && res.url) {
-      showPopup("Laporan Tahunan Siap! Mengunduh...", "success");
-      // Direct Download Injection
-      setTimeout(() => {
-        const a = document.createElement("a");
-        a.href = res.url;
-        a.setAttribute("download", "");
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }, 1000);
-    } else {
-      showPopup(res.message || "Gagal membuat laporan.", "error");
+    if(parseInt(startM) > parseInt(endM)) {
+        showPopup("Bulan Awal tidak boleh lebih besar dari Bulan Akhir!", "error");
+        return;
     }
-  } catch (e) {
-    showPopup("Terjadi kesalahan koneksi.", "error");
-  }
 
-  btn.innerHTML = originalText;
-  btn.disabled = false;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> PROCESSING...';
+    btn.disabled = true;
+    showPopup("Sedang mengkalkulasi data tahunan...", "info");
+
+    try {
+        const res = await postData({ 
+            action: "exportAnnualReport", 
+            startMonth: startM, 
+            endMonth: endM, 
+            year: year 
+        });
+
+        if (res.status === "SUCCESS" && res.url) {
+            showPopup("Laporan Tahunan Siap! Mengunduh...", "success");
+            // Direct Download Injection
+            setTimeout(() => {
+                const a = document.createElement('a');
+                a.href = res.url;
+                a.setAttribute('download', '');
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }, 1000);
+        } else {
+            showPopup(res.message || "Gagal membuat laporan.", "error");
+        }
+    } catch (e) {
+        showPopup("Terjadi kesalahan koneksi.", "error");
+    }
+
+    btn.innerHTML = originalText;
+    btn.disabled = false;
 }
 // ====================================================================
 // 2. AUTO LOGOUT & SESSION
