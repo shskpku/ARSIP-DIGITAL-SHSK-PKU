@@ -1,7 +1,7 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (JARVIS EDITION 🗣️)
-   Fitur: Text-to-Speech Welcome, Register, Login, Dashboard 3 Kategori, 
-   Dropdown Cerdas, Auto Email Footer, Bulk Input Service Station, 
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (NTR & OIL BARGE EDITION 🛢️)
+   Fitur: Multi-Cert Logic (NTR/Oil Barge), Multi-Photo, Text-to-Speech,
+   Register, Login, Dashboard 3 Kategori, Dropdown Cerdas, 
    Triple Export (Direct DL), Smart Cert Numbering & Email Bundling.
    ==================================================================== */
 
@@ -33,7 +33,10 @@ const CERT_CODES = {
   "DOC": "AL.602",
   "ENDORS DOC": "AL.602",
   "SMC": "AL.602",
-  "SMC INTERMEDIATE": "AL.602"
+  "SMC INTERMEDIATE": "AL.602",
+  // LOGIKA KHUSUS
+  "NTR": "SPECIAL", 
+  "OIL BARGE": "SPECIAL"
 };
 
 let globalCompanySet = new Set(); 
@@ -44,30 +47,19 @@ let globalCompanySet = new Set();
 
 // --- FUNGSI SUARA SELAMAT DATANG ---
 function speakWelcome(nama) {
-    // Cek apakah browser mendukung suara & apakah sudah pernah diputar sesi ini
     if ('speechSynthesis' in window) {
-        if (sessionStorage.getItem("welcome_played")) return; // Jangan ngomong kalau cuma refresh
-
-        // Bersihkan antrian suara sebelumnya
+        if (sessionStorage.getItem("welcome_played")) return; 
         window.speechSynthesis.cancel();
-
         const text = `Selamat datang, ${nama}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
         const utterance = new SpeechSynthesisUtterance(text);
-        
-        utterance.lang = 'id-ID'; // Set Bahasa Indonesia
-        utterance.rate = 0.9;     // Kecepatan (0.1 - 10), 0.9 biar natural
-        utterance.pitch = 1;      // Nada (0 - 2)
-        utterance.volume = 1;     // Volume (0 - 1)
-
-        // Coba cari suara Google Bahasa Indonesia (kalau ada)
+        utterance.lang = 'id-ID'; 
+        utterance.rate = 0.9;      
+        utterance.pitch = 1;      
+        utterance.volume = 1;     
         const voices = window.speechSynthesis.getVoices();
         const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
         if (indoVoice) utterance.voice = indoVoice;
-
-        // MAINKAN SUARA
         window.speechSynthesis.speak(utterance);
-        
-        // Tandai sudah diputar biar gak spam saat refresh
         sessionStorage.setItem("welcome_played", "true");
     }
 }
@@ -126,6 +118,8 @@ function injectCustomStyles() {
     style.innerHTML = `
         .service-options-container { display: flex; gap: 10px; }
         .tool-checkbox-card { flex: 1; }
+        .special-section { background: #f0f8ff; padding: 10px; border-left: 4px solid var(--neon-blue); border-radius: 4px; margin-bottom: 10px; }
+        .special-label { font-weight: bold; color: var(--navy); display: block; margin-bottom: 5px; font-size: 13px; }
         @media (max-width: 768px) {
             .service-options-container { flex-direction: column !important; }
             .tool-checkbox-card { width: 100% !important; margin-bottom: 10px; }
@@ -157,19 +151,76 @@ function updateCompanyDatalist(dataArray, keyName) {
     }
 }
 
-window.autoFillCertNum = function(index) {
+// --- LOGIKA FORM DINAMIS (NTR & OIL BARGE) ---
+window.handleCertTypeChange = function(index) {
     const jenisEl = document.querySelector(`select[name="jenisSertifikat_${index}"]`);
-    const noSertEl = document.querySelector(`input[name="noSertifikat_${index}"]`);
-    if(!jenisEl || !noSertEl) return;
+    const dynamicContainer = document.getElementById(`dynamic-cert-fields-${index}`);
+    
+    if(!jenisEl || !dynamicContainer) return;
     
     const jenis = jenisEl.value;
     const currentYear = new Date().getFullYear();
-    if(CERT_CODES[jenis]) {
-        noSertEl.value = `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`;
+    let html = "";
+
+    if (jenis === "NTR") {
+        // --- MODE NTR (3 ITEM) ---
+        html = `
+            <div class="special-section">
+                <span class="special-label"><i class="fa fa-layer-group"></i> PAKET NTR (3 SERTIFIKAT)</span>
+                
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px;">1. No. Konstruksi</label>
+                    <input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
+                    <input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;">
+                </div>
+                
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px;">2. No. Perlengkapan</label>
+                    <input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
+                    <input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;">
+                </div>
+
+                <div>
+                    <label style="font-size:12px;">3. No. Radio</label>
+                    <input type="text" name="noSertifikat_RADIO_${index}" class="form-control" value="AL.502///KSOP.PKU/${currentYear}">
+                    <input type="file" name="sertifikat_RADIO_${index}" style="margin-top:2px;">
+                </div>
+            </div>
+        `;
+    } else if (jenis === "OIL BARGE") {
+        // --- MODE OIL BARGE (2 ITEM) ---
+        html = `
+            <div class="special-section" style="border-color: var(--gold);">
+                <span class="special-label"><i class="fa fa-ship"></i> PAKET OIL BARGE (2 SERTIFIKAT)</span>
+                
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px;">1. No. Konstruksi</label>
+                    <input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
+                    <input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;">
+                </div>
+                
+                <div>
+                    <label style="font-size:12px;">2. No. Perlengkapan</label>
+                    <input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}">
+                    <input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;">
+                </div>
+            </div>
+        `;
     } else {
-        if(noSertEl.value.includes("KSOP.PKU")) noSertEl.value = ""; 
+        // --- MODE STANDARD ---
+        let autoVal = "";
+        if(CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL") {
+            autoVal = `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`;
+        }
+        
+        html = `
+            <label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label>
+            <label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>
+        `;
     }
-}
+
+    dynamicContainer.innerHTML = html;
+};
 
 // ====================================================================
 // 2. AUTO LOGOUT & SESSION
@@ -222,10 +273,7 @@ async function handleLogin(e, role) {
     const res = await postData({ action: "login", role: role, id: userId, password: password });
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
-      
-      // RESET STATUS SUARA BIAR NGOMONG PAS MASUK
       sessionStorage.removeItem("welcome_played");
-
       showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
       setTimeout(() => { window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html"; }, 1500);
     } else {
@@ -275,7 +323,7 @@ function logout() { document.getElementById("modal-logout").classList.remove("hi
 function closeLogoutModal() { document.getElementById("modal-logout").classList.add("hidden"); }
 function confirmLogout() { 
     localStorage.removeItem("user"); 
-    sessionStorage.removeItem("welcome_played"); // Reset suara
+    sessionStorage.removeItem("welcome_played");
     window.location.href = "index.html"; 
 }
 
@@ -441,7 +489,7 @@ async function initCharts(p = "year") {
 }
 
 // ====================================================================
-// 6. PROFILE PETUGAS (DENGAN SUARA SAMBUTAN)
+// 6. PROFILE PETUGAS
 // ====================================================================
 function loadProfilePetugas() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -456,13 +504,11 @@ function loadProfilePetugas() {
     sbInitial.innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
     sbInitial.style.border = "2px solid var(--gold)";
   }
-
-  // --- TRIGGER SUARA JARVIS ---
   speakWelcome(user.nama);
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE
+// 7. BULK INPUT ENGINE (UPDATED FOR NTR & OIL BARGE)
 // ====================================================================
 
 window.updateServiceQty = function (i) {
@@ -507,7 +553,7 @@ function renderBulkForm(type) {
                     <div class="grid-form">
                         <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label>
-                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label>
+                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control"></label>
                         <label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                     </div>
                 </div>
@@ -516,7 +562,7 @@ function renderBulkForm(type) {
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control style="text-transform:uppercase""></label>
+                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control"></label>
                         <label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label>
                         <label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label>
                         <label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label>
@@ -561,8 +607,8 @@ function renderBulkForm(type) {
                         <label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                         <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
-                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label>
+                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control"></label>
+                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control"></label>
                         <label>Daerah Pelayaran 
                              <select name="daerahPelayaran_${i}" class="form-control">
                                 <option value="">-- Pilih --</option>
@@ -588,11 +634,13 @@ function renderBulkForm(type) {
                 <div class="accordion-body">
                     <div class="grid-form">
                         <label>Jenis Sertifikat 
-                            <select name="jenisSertifikat_${i}" class="form-control" onchange="autoFillCertNum(${i})">
+                            <select name="jenisSertifikat_${i}" class="form-control" onchange="handleCertTypeChange(${i})">
                                 <option value="">-- Pilih Jenis --</option>
                                 <option value="KONSTRUKSI">KONSTRUKSI</option>
                                 <option value="PERLENGKAPAN">PERLENGKAPAN</option>
                                 <option value="RADIO">RADIO</option>
+                                <option value="NTR">NTR (PAKET 3 ITEM)</option>
+                                <option value="OIL BARGE">OIL BARGE (PAKET 2 ITEM)</option>
                                 <option value="ENDORS KONSTRUKSI">ENDORS KONSTRUKSI</option>
                                 <option value="ENDORS PERLENGKAPAN">ENDORS PERLENGKAPAN</option>
                                 <option value="ENDORS RADIO">ENDORS RADIO</option>
@@ -619,9 +667,14 @@ function renderBulkForm(type) {
                         </label>
                         <label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
                         <label>Masa Berlaku <input type="date" name="tglBerlaku_${i}" class="form-control"></label>
-                        <label>No Sertifikat <input type="text" name="noSertifikat_${i}" class="form-control"></label>
                         <label>Kode Billing <input type="text" name="kodeBilling_${i}" class="form-control"></label>
                     </div>
+                    
+                    <div id="dynamic-cert-fields-${i}" style="margin-top:15px;">
+                        <label>No Sertifikat <input type="text" name="noSertifikat_${i}" class="form-control"></label>
+                        <label>Upload Sertifikat <input type="file" name="sertifikat_${i}"></label>
+                    </div>
+
                 </div>
             </div>
             <div class="accordion-item">
@@ -646,10 +699,9 @@ function renderBulkForm(type) {
                         <label>Permohonan <input type="file" name="permohonan_${i}"></label>
                         <label>Evaluasi <input type="file" name="evaluasi_${i}"></label>
                         <label>Laporan Pemeriksaan <input type="file" name="laporan_pemeriksaan_${i}"></label>
-                        <label>Sertifikat <input type="file" name="sertifikat_${i}"></label>
                         <label>Surat Tugas <input type="file" name="surat_tugas_${i}"></label>
                         <label>PNBP <input type="file" name="pnbp_${i}"></label>
-                        <label>Foto/Dokumentasi <input type="file" name="foto_${i}"></label>
+                        <label>Foto/Dokumentasi <input type="file" name="foto_${i}" multiple></label>
                     </div>
                 </div>
             </div>`;
@@ -723,7 +775,7 @@ async function handleBulkSubmit(type) {
   let fileFields = [];
 
   if (type === "SHSK") fileFields = ["permohonan", "stkk", "grosse", "ukur", "pnbp"];
-  else if (type === "SERTIFIKASI") fileFields = ["permohonan", "evaluasi", "laporan_pemeriksaan", "sertifikat", "surat_tugas", "pnbp", "foto"];
+  else if (type === "SERTIFIKASI") fileFields = ["permohonan", "evaluasi", "laporan_pemeriksaan", "surat_tugas", "pnbp", "foto"];
   else if (type === "SERVICE") fileFields = ["permohonan", "stkk", "sertifikat"];
 
   for (let i = 1; i <= count; i++) {
@@ -757,6 +809,7 @@ async function handleBulkSubmit(type) {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       inputs.forEach((input) => {
         const key = input.name.replace(`_${i}`, "");
+        // Ambil semua input kecuali file dan checkbox service
         if (input.type !== "file" && !key.startsWith("check_") && !key.startsWith("jumlah_")) {
           itemData[key] = input.value.toUpperCase();
           if (key === "namaKapal" && input.value.trim() !== "") hasData = true;
@@ -767,20 +820,86 @@ async function handleBulkSubmit(type) {
     if (!hasData) continue;
 
     itemData.files = [];
+    
+    // --- 1. HANDLE STANDARD FILES (Permohonan, Evaluasi, dll) ---
     for (const field of fileFields) {
       const fileInput = form.querySelector(`[name="${field}_${i}"]`);
       if (fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        await new Promise((resolve) => {
-          reader.onload = (e) => {
-            itemData.files.push({ jenis: field, ext: file.name.split(".").pop(), data: e.target.result });
-            resolve();
-          };
-          reader.readAsDataURL(file);
-        });
+        
+        // SUPPORT MULTI-FILE (FOTO)
+        if(field === "foto") {
+            for(let f=0; f<fileInput.files.length; f++) {
+                const file = fileInput.files[f];
+                const reader = new FileReader();
+                await new Promise((resolve) => {
+                  reader.onload = (e) => {
+                    itemData.files.push({ jenis: `FOTO ${f+1}`, ext: file.name.split(".").pop(), data: e.target.result });
+                    resolve();
+                  };
+                  reader.readAsDataURL(file);
+                });
+            }
+        } else {
+            // SINGLE FILE STANDARD
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            await new Promise((resolve) => {
+              reader.onload = (e) => {
+                itemData.files.push({ jenis: field, ext: file.name.split(".").pop(), data: e.target.result });
+                resolve();
+              };
+              reader.readAsDataURL(file);
+            });
+        }
       }
     }
+
+    // --- 2. HANDLE SPECIAL CERTIFICATES (NTR / OIL BARGE / STANDARD) ---
+    if(type === "SERTIFIKASI") {
+        const jenisSert = itemData.jenisSertifikat; // Sudah diambil di loop inputs atas
+        
+        if (jenisSert === "NTR") {
+            // Ambil 3 File & 3 Nomor Sertifikat
+            const subTypes = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
+            for(const sub of subTypes) {
+                const fInput = form.querySelector(`[name="sertifikat_${sub}_${i}"]`);
+                if(fInput && fInput.files.length > 0) {
+                    const file = fInput.files[0];
+                    const reader = new FileReader();
+                    await new Promise(r => { 
+                        reader.onload = e => { itemData.files.push({ jenis: `sertifikat_${sub}`, ext: file.name.split(".").pop(), data: e.target.result }); r(); }; 
+                        reader.readAsDataURL(file); 
+                    });
+                }
+            }
+        } else if (jenisSert === "OIL BARGE") {
+            // Ambil 2 File
+            const subTypes = ["KONSTRUKSI", "PERLENGKAPAN"];
+            for(const sub of subTypes) {
+                const fInput = form.querySelector(`[name="sertifikat_${sub}_${i}"]`);
+                if(fInput && fInput.files.length > 0) {
+                    const file = fInput.files[0];
+                    const reader = new FileReader();
+                    await new Promise(r => { 
+                        reader.onload = e => { itemData.files.push({ jenis: `sertifikat_${sub}`, ext: file.name.split(".").pop(), data: e.target.result }); r(); }; 
+                        reader.readAsDataURL(file); 
+                    });
+                }
+            }
+        } else {
+            // Standard Single Sertifikat
+            const fInput = form.querySelector(`[name="sertifikat_${i}"]`);
+            if (fInput && fInput.files.length > 0) {
+                const file = fInput.files[0];
+                const reader = new FileReader();
+                await new Promise(r => { 
+                    reader.onload = e => { itemData.files.push({ jenis: "sertifikat", ext: file.name.split(".").pop(), data: e.target.result }); r(); }; 
+                    reader.readAsDataURL(file); 
+                });
+            }
+        }
+    }
+
     items.push(itemData);
   }
 
@@ -1002,7 +1121,6 @@ async function exportTriple(type) {
     if (res.status === "SUCCESS" && res.files) {
       showPopup("Laporan Siap! Mengunduh...", "success");
       
-      // LOGIKA BARU: DOWNLOAD TANPA NEW TAB (BYPASS POPUP BLOCKER)
       res.files.forEach((f, index) => {
         if (f.url) {
            setTimeout(() => {
@@ -1013,7 +1131,7 @@ async function exportTriple(type) {
              document.body.appendChild(a);
              a.click();
              document.body.removeChild(a);
-           }, index * 1500); // Jeda 1.5 detik per file biar ga dianggap spam
+           }, index * 1500); 
         }
       });
 
