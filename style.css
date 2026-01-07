@@ -1,6 +1,6 @@
 /* =========================================
-   STYLE.CSS - SHSK PEKANBARU (FINAL REVISION v5.4)
-   Fitur: 2-Row Grid Layout Annual Report, Responsive Fixes & Clean UI
+   STYLE.CSS - SHSK PEKANBARU (FINAL REVISION v5.6)
+   Fitur: Mobile Chart Fixes (Center & Stack), Annual Report 2-Row Grid
    ========================================= */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -953,69 +953,69 @@ body.petugas-page {
   color: #555;
 }
 
-/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW - 2 ROW GRID) --- */
+/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (2-ROW LAYOUT FIXED) --- */
 .annual-report-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  padding: 25px;
-  margin-top: 30px;
-  margin-bottom: 30px;
-  border-top: 4px solid var(--gold);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-bottom: 30px;
+    margin-top: 30px; /* Jarak atas ke chart */
+    border-top: 4px solid var(--gold);
 }
 .annual-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--navy);
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 .annual-subtitle {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 20px;
-  font-style: italic;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
 }
 .annual-filter-row {
-  display: grid;
-  /* 2 Kolom Seimbang: Baris 1 (Bulan), Baris 2 (Tahun + Tombol) */
-  grid-template-columns: 1fr 1fr; 
-  gap: 15px;
-  align-items: end;
+    display: grid;
+    /* 2 Kolom Seimbang: Baris 1 (Bulan), Baris 2 (Tahun + Tombol) */
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px;
+    align-items: end;
 }
 .annual-form-group {
-  width: 100%;
+    width: 100%;
 }
 .annual-form-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: bold;
-  color: #444;
-  margin-bottom: 5px;
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 5px;
 }
 .btn-annual-export {
-  background: var(--navy);
-  color: var(--gold);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 42px;
-  width: 100%; /* Tombol Full Width di Kolomnya */
-  justify-content: center;
-  white-space: nowrap;
+    background: var(--navy);
+    color: var(--gold);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    width: 100%; /* Tombol Full Width di Kolomnya */
+    justify-content: center;
+    white-space: nowrap;
 }
 .btn-annual-export:hover {
-  background: #0f2d50;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background: #0f2d50;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .section-header {
@@ -1595,6 +1595,37 @@ button:disabled {
   .btn-annual-export {
     width: 100%;
     justify-content: center;
+  }
+  
+  /* FIX CHART HEADER (Volume Arsip) */
+  .chart-header {
+      flex-direction: column; /* Stack vertically */
+      align-items: center;    /* Center align */
+      gap: 15px;              /* Space between title and buttons */
+  }
+
+  /* FIX FILTER BUTTONS GROUP */
+  .chart-filter-group {
+      width: 100%;
+      justify-content: center; /* Center buttons */
+      flex-wrap: wrap;         /* Allow wrapping on very small screens */
+  }
+  
+  /* FIX CHART TITLES (Target 2026, etc) */
+  .chart-card h3 {
+      text-align: center;
+      justify-content: center;
+  }
+
+  /* FIX CANVAS CONTAINER */
+  .chart-card canvas {
+      max-width: 100% !important;
+      height: auto !important;
+  }
+  
+  /* Ensure doughnut chart container is centered */
+  .chart-card > div[style*="height: 200px"] {
+       margin: 0 auto; /* Center the div holding the doughnut */
   }
 }
 
