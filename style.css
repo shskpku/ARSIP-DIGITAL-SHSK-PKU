@@ -1,6 +1,6 @@
 /* =========================================
    STYLE.CSS - SHSK PEKANBARU (FINAL REVISION v5.3)
-   Fitur: Grid Layout Fixed Width (Rapi), Responsive Fixes
+   Fitur: Compact Layout Annual Report, Responsive Fixes & Clean UI
    ========================================= */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -953,7 +953,7 @@ body.petugas-page {
   color: #555;
 }
 
-/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW CSS GRID) --- */
+/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW - COMPACT FIXED GRID) --- */
 .annual-report-card {
   background: #fff;
   border-radius: 12px;
@@ -979,9 +979,9 @@ body.petugas-page {
 }
 .annual-filter-row {
   display: grid;
-  /* Atur lebar kolom dropdown agar tidak melebar */
-  grid-template-columns: 180px 180px 120px auto; 
-  gap: 15px;
+  /* KUNCI LEBAR KOLOM DISINI BIAR RAMPING */
+  grid-template-columns: 140px 140px 100px auto; 
+  gap: 10px; /* Gap lebih rapat */
   align-items: end;
 }
 .annual-form-group {
