@@ -1,6 +1,6 @@
 /* =========================================
-   STYLE.CSS - SHSK PEKANBARU (FINAL REVISION v5.3)
-   Fitur: Compact Layout Annual Report, Responsive Fixes & Clean UI
+   STYLE.CSS - SHSK PEKANBARU (FINAL REVISION v5.4)
+   Fitur: 2-Row Grid Layout Annual Report, Responsive Fixes & Clean UI
    ========================================= */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -953,7 +953,7 @@ body.petugas-page {
   color: #555;
 }
 
-/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW - COMPACT FIXED GRID) --- */
+/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW - 2 ROW GRID) --- */
 .annual-report-card {
   background: #fff;
   border-radius: 12px;
@@ -979,9 +979,9 @@ body.petugas-page {
 }
 .annual-filter-row {
   display: grid;
-  /* KUNCI LEBAR KOLOM DISINI BIAR RAMPING */
-  grid-template-columns: 140px 140px 100px auto; 
-  gap: 10px; /* Gap lebih rapat */
+  /* 2 Kolom Seimbang: Baris 1 (Bulan), Baris 2 (Tahun + Tombol) */
+  grid-template-columns: 1fr 1fr; 
+  gap: 15px;
   align-items: end;
 }
 .annual-form-group {
@@ -1007,6 +1007,8 @@ body.petugas-page {
   align-items: center;
   gap: 8px;
   height: 42px;
+  width: 100%; /* Tombol Full Width di Kolomnya */
+  justify-content: center;
   white-space: nowrap;
 }
 .btn-annual-export:hover {
@@ -1581,7 +1583,7 @@ button:disabled {
   .grid-form,
   .grid-filter,
   .service-options-container,
-  .annual-filter-row { 
+  .annual-filter-row { /* Grid untuk card tahunan juga di-stack */
     grid-template-columns: 1fr !important;
   }
   
