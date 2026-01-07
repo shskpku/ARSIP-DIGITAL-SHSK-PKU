@@ -790,7 +790,7 @@ function renderBulkForm(type) {
                     <div class="grid-form">
                         <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label>
-                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control"></label>
+                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                     </div>
                 </div>
@@ -799,7 +799,7 @@ function renderBulkForm(type) {
                 <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div>
                 <div class="accordion-body">
                     <div class="grid-form">
-                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control"></label>
+                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label>
                         <label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label>
                         <label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label>
@@ -860,8 +860,8 @@ function renderBulkForm(type) {
                         <label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                         <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
-                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control"></label>
-                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control"></label>
+                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
+                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label>
                         <label>Daerah Pelayaran 
                              <select name="daerahPelayaran_${i}" class="form-control">
                                 <option value="">-- Pilih --</option>
