@@ -1,5 +1,6 @@
 /* =========================================
-   STYLE.CSS - SHSK PEKANBARU (ULTIMATE MASTER FINAL)
+   STYLE.CSS - SHSK PEKANBARU (ULTIMATE MASTER FINAL v5.0)
+   Fitur: Annual Report Dashboard, Responsive Fixes, & Modern UI
    ========================================= */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -981,6 +982,67 @@ body.petugas-page {
   color: #555;
 }
 
+/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW) --- */
+.annual-report-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 30px;
+    border-top: 4px solid var(--gold);
+}
+.annual-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.annual-subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+.annual-filter-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.annual-form-group {
+    flex: 1;
+    min-width: 150px;
+}
+.annual-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 5px;
+}
+.btn-annual-export {
+    background: var(--navy);
+    color: var(--gold);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+}
+.btn-annual-export:hover {
+    background: #0f2d50;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
 /* FORMS */
 .section-header {
   margin-bottom: 20px;
@@ -1419,13 +1481,6 @@ button:disabled {
   color: #fff;
 }
 
-/* Mobile Responsive Fix */
-@media (max-width: 768px) {
-  .service-options-container {
-    grid-template-columns: 1fr; /* Stack Vertical */
-  }
-}
-
 /* --- GLOBAL ANIMATION & UTILS --- */
 @keyframes slideDown {
   from {
@@ -1555,8 +1610,7 @@ button:disabled {
 }
 
 /* =========================================
-   PERBAIKAN RESPONSIVE (UPDATE INI DI STYLE.CSS)
-   GANTI BLOK @media (max-width: 900px) YANG LAMA DENGAN INI:
+   PERBAIKAN RESPONSIVE 
    ========================================= */
 
 @media (max-width: 900px) {
@@ -1574,11 +1628,11 @@ button:disabled {
     display: none;
   }
 
-  /* Reset Container Kanan (PENTING: Ini yang bikin terpotong sebelumnya) */
+  /* Reset Container Kanan */
   .nav-right {
-    min-width: auto;  /* Hapus batas minimal lebar 200px */
-    gap: 0;           /* Hapus jarak antar elemen krn cuma ada 1 tombol */
-    width: auto;      /* Sesuaikan lebar dengan isi konten */
+    min-width: auto;  
+    gap: 0;           
+    width: auto;      
   }
 
   /* Sidebar Mobile */
@@ -1609,15 +1663,28 @@ button:disabled {
   /* Grid Fixes */
   .charts-container,
   .grid-form,
-  .grid-filter {
-    grid-template-columns: 1fr;
+  .grid-filter,
+  .service-options-container,
+  .annual-filter-row {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .annual-form-group {
+    width: 100%;
+  }
+  
+  .btn-annual-export {
+    width: 100%;
+    justify-content: center;
   }
 }
+
 @media (min-width: 901px) {
   .mobile-toggle {
     display: none !important;
   }
 }
+
 /* --- TAMBAHAN STYLE KHUSUS MOBILE PENGGUNA --- */
 .status-indicator-wrapper {
   display: inline-flex;
