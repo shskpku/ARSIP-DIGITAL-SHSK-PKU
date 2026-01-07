@@ -1,24 +1,19 @@
 /* =========================================
-   STYLE.CSS - SHSK PEKANBARU (ULTIMATE MASTER FINAL v5.0)
-   Fitur: Annual Report Dashboard, Responsive Fixes, & Modern UI
+   STYLE.CSS - SHSK PEKANBARU (FINAL REVISION v5.2)
+   Fitur: Grid Layout Annual Report, Responsive Fixes & Clean UI
    ========================================= */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
 :root {
-  /* Warna Neon (Login/Register/Pengguna) */
   --neon-gold: #ffd700;
   --neon-blue: #00f3ff;
   --neon-purple: #bd00ff;
   --neon-pink: #d600ff;
-
-  /* Warna Dashboard Petugas (Admin) */
   --navy: #0a192f;
   --navy-light: #112240;
   --gold: #ffd700;
   --white: #ffffff;
   --bg-light: #f0f2f5;
-
-  /* Status Colors */
   --success: #00c853;
   --danger: #ff3d00;
   --warning: #ffab00;
@@ -31,7 +26,6 @@
   font-family: "Poppins", sans-serif;
 }
 
-/* Utility Class */
 .hidden {
   display: none !important;
 }
@@ -90,7 +84,6 @@ body.login-page {
   color: var(--neon-blue);
 }
 
-/* Switch Button */
 .role-switch {
   display: flex;
   background: rgba(0, 0, 0, 0.3);
@@ -136,7 +129,6 @@ body.login-page {
   background: var(--neon-blue);
 }
 
-/* Input Group Login */
 .input-group {
   position: relative;
   margin-bottom: 25px;
@@ -191,7 +183,6 @@ body.login-page {
   color: #fff;
 }
 
-/* Options & Button Login */
 .options-row {
   display: flex;
   justify-content: space-between;
@@ -377,14 +368,11 @@ body.register-page {
 }
 
 /* =========================================
-   4. DASHBOARD PENGGUNA STYLES (PENGGUNA.HTML)
+   4. DASHBOARD PENGGUNA STYLES
    ========================================= */
 body.dashboard-page {
   background: #0a192f;
-  background-image: linear-gradient(
-      rgba(10, 25, 47, 0.8),
-      rgba(10, 25, 47, 0.9)
-    ),
+  background-image: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.9)),
     url("https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=1920");
   background-size: cover;
   background-attachment: fixed;
@@ -397,7 +385,6 @@ body.dashboard-page {
   padding: 0 20px;
 }
 
-/* Navbar Glass */
 .navbar-glass {
   position: fixed;
   top: 0;
@@ -422,7 +409,6 @@ body.dashboard-page {
   gap: 10px;
 }
 
-/* Profile Area (Desktop vs Mobile) */
 .profile-area {
   display: flex;
   align-items: center;
@@ -449,7 +435,6 @@ body.dashboard-page {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Profile Mobile (Hidden Default) */
 .mobile-profile-wrapper {
   display: none;
   position: relative;
@@ -472,7 +457,6 @@ body.dashboard-page {
   color: #000;
 }
 
-/* Dropdown Mobile */
 .profile-dropdown {
   position: absolute;
   top: 55px;
@@ -527,7 +511,6 @@ body.dashboard-page {
   color: #000;
 }
 
-/* Request Card */
 .req-card {
   background: rgba(15, 20, 35, 0.6);
   backdrop-filter: blur(5px);
@@ -538,7 +521,6 @@ body.dashboard-page {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
-/* HEADER FLEXBOX MAGIC */
 .req-header {
   display: flex;
   justify-content: space-between;
@@ -583,7 +565,6 @@ body.dashboard-page {
   animation: blink 1.5s infinite;
 }
 
-/* Form Styles */
 .dash-group {
   margin-bottom: 25px;
 }
@@ -612,7 +593,6 @@ body.dashboard-page {
   background: #0a192f;
   color: #fff;
 }
-/* Multi-Select Enhancement */
 select[multiple].dash-control {
   height: auto;
   min-height: 120px;
@@ -650,7 +630,7 @@ select[multiple].dash-control option:checked {
 }
 
 /* =========================================
-   6. DASHBOARD PETUGAS STYLES (PETUGAS.HTML)
+   6. DASHBOARD PETUGAS STYLES
    ========================================= */
 body.petugas-page {
   background-color: #f4f6f9;
@@ -706,13 +686,6 @@ body.petugas-page {
   color: #00ff00;
   font-weight: bold;
 }
-.blink-dot-green {
-  width: 8px;
-  height: 8px;
-  background: #00ff00;
-  border-radius: 50%;
-  animation: blink 1.5s infinite;
-}
 .nav-right {
   display: flex;
   align-items: center;
@@ -754,7 +727,6 @@ body.petugas-page {
   transform: scale(1.1);
 }
 
-/* SIDEBAR - FIX HOVER YANG BERANTAKAN */
 .sidebar {
   position: fixed;
   top: 70px;
@@ -889,7 +861,6 @@ body.petugas-page {
   display: block;
 }
 
-/* CONTENT PETUGAS */
 .main-content {
   margin-left: 260px;
   margin-top: 70px;
@@ -982,68 +953,67 @@ body.petugas-page {
   color: #555;
 }
 
-/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW) --- */
+/* --- STYLE UNTUK CARD LAPORAN TAHUNAN (NEW CSS GRID) --- */
 .annual-report-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    padding: 25px;
-    margin-bottom: 30px;
-    border-top: 4px solid var(--gold);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  margin-bottom: 30px;
+  border-top: 4px solid var(--gold);
 }
 .annual-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .annual-subtitle {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 20px;
-    font-style: italic;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+  font-style: italic;
 }
 .annual-filter-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto; 
-    gap: 15px;
-    align-items: end; 
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto; 
+  gap: 15px;
+  align-items: end;
 }
-
 .annual-form-group {
-    width: 100%;
+  width: 100%;
 }
 .annual-form-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    color: #444;
-    margin-bottom: 5px;
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 5px;
 }
 .btn-annual-export {
-    background: var(--navy);
-    color: var(--gold);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 42px;
+  background: var(--navy);
+  color: var(--gold);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  white-space: nowrap;
 }
 .btn-annual-export:hover {
-    background: #0f2d50;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  background: #0f2d50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* FORMS */
 .section-header {
   margin-bottom: 20px;
   display: flex;
@@ -1126,11 +1096,6 @@ input[type="file"] {
   cursor: pointer;
 }
 
-/* =========================================
-   7. BUTTON STYLES (NEW - GRADIENT & MODERN)
-   ========================================= */
-
-/* GLOBAL BUTTON */
 button {
   cursor: pointer;
   font-family: "Poppins", sans-serif;
@@ -1150,14 +1115,12 @@ button:disabled {
   box-shadow: none !important;
 }
 
-/* FORM ACTION BUTTONS */
 .form-actions {
   display: flex;
   gap: 15px;
   margin-top: 25px;
 }
 
-/* Tombol Simpan (Gold) */
 .btn-gold-save {
   background: linear-gradient(135deg, #ffd700 0%, #ffb900 100%);
   color: #0a192f;
@@ -1179,7 +1142,6 @@ button:disabled {
   box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
 }
 
-/* Tombol Ubah Data (Blue) */
 .btn-edit-mode {
   background: linear-gradient(135deg, #3a7bd5 0%, #3a6073 100%);
   color: white;
@@ -1198,7 +1160,6 @@ button:disabled {
   box-shadow: 0 6px 20px rgba(58, 123, 213, 0.5);
 }
 
-/* Tombol Batal (Red Soft) */
 .btn-cancel-edit {
   background: #ffecf0;
   color: #d63031;
@@ -1215,7 +1176,6 @@ button:disabled {
   box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
 }
 
-/* TABLE ACTION BUTTONS (Lihat, Edit, Hapus) */
 .btn-act {
   width: 35px;
   height: 35px;
@@ -1245,7 +1205,6 @@ button:disabled {
   box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
 }
 
-/* HEADER BUTTONS */
 .header-actions button {
   padding: 8px 16px;
   border-radius: 6px;
@@ -1253,7 +1212,6 @@ button:disabled {
   font-weight: 500;
 }
 
-/* --- TOMBOL REFRESH BARU (SESUAI REQUEST) --- */
 .btn-refresh {
   background: #fff;
   color: var(--navy);
@@ -1290,7 +1248,6 @@ button:disabled {
   box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
 }
 
-/* CHART FILTER BUTTONS (NEW) */
 .chart-filter-group {
   display: flex;
   gap: 5px;
@@ -1319,7 +1276,6 @@ button:disabled {
   box-shadow: 0 2px 5px rgba(10, 25, 47, 0.3);
 }
 
-/* TABLE & PAGINATION */
 .table-card {
   background: #fff;
   padding: 0;
@@ -1356,7 +1312,6 @@ button:disabled {
   background: #f5f7fa;
 }
 
-/* --- FILTER PANEL YANG LEBIH BAGUS (RESPONSIVE) --- */
 .filter-card {
   background: #fff;
   padding: 20px;
@@ -1371,7 +1326,6 @@ button:disabled {
   gap: 15px;
   align-items: center;
 }
-/* Memastikan tombol filter tidak terlalu kecil */
 .grid-filter .btn-filter {
   height: 42px;
   border-radius: 6px;
@@ -1403,7 +1357,6 @@ button:disabled {
   color: var(--gold);
 }
 
-/* --- SERVICE STATION INPUT STYLING (FINAL REVISION) --- */
 .service-selection-box {
   background: #f8fafc;
   border: 2px dashed #cbd5e0;
@@ -1429,13 +1382,11 @@ button:disabled {
   position: relative;
   display: block;
 }
-/* Hide Default Checkbox */
 .tool-checkbox-card input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
 }
-/* Custom Card Design */
 .tool-card-design {
   display: flex;
   align-items: center;
@@ -1468,8 +1419,6 @@ button:disabled {
   font-weight: 600;
   font-size: 14px;
 }
-
-/* Checked State */
 .tool-checkbox-card input:checked + .tool-card-design {
   border-color: #00c853;
   background: #f0fdf4;
@@ -1481,39 +1430,20 @@ button:disabled {
   color: #fff;
 }
 
-/* --- GLOBAL ANIMATION & UTILS --- */
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes zoomIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 @keyframes blink {
-  50% {
-    opacity: 0.5;
-  }
+  50% { opacity: 0.5; }
 }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .modal-overlay {
   position: fixed;
@@ -1610,32 +1540,21 @@ button:disabled {
 }
 
 /* =========================================
-   PERBAIKAN RESPONSIVE 
+   PERBAIKAN RESPONSIVE (UPDATE GRID & NAVBAR)
    ========================================= */
-
 @media (max-width: 900px) {
-  /* Fix Navbar Padding */
   .navbar.glass-nav {
-    padding: 0 20px;     
-    padding-right: 30px;  
+    padding: 0 20px;
+    padding-right: 30px;
   }
-
-  /* Sembunyikan elemen yang tidak perlu di HP */
-  .system-status {
+  .system-status, .user-info-nav {
     display: none;
   }
-  .user-info-nav {
-    display: none;
-  }
-
-  /* Reset Container Kanan */
   .nav-right {
-    min-width: auto;  
-    gap: 0;           
-    width: auto;      
+    min-width: auto;
+    gap: 0;
+    width: auto;
   }
-
-  /* Sidebar Mobile */
   .sidebar {
     left: -260px;
     top: 70px;
@@ -1644,24 +1563,20 @@ button:disabled {
   .sidebar.show {
     left: 0;
   }
-
-  /* Main Content adjustment */
   .main-content {
     margin-left: 0;
     padding: 15px;
-    padding-top: 30px; /* Tambah jarak atas sedikit */
+    padding-top: 30px;
   }
-
-  /* Toggle Button */
   .mobile-toggle {
     display: block !important;
     color: #fff;
     font-size: 24px;
     cursor: pointer;
   }
-
-  /* Grid Fixes */
-.charts-container,
+  
+  /* GRID STACKING FIX */
+  .charts-container,
   .grid-form,
   .grid-filter,
   .service-options-container,
@@ -1685,7 +1600,6 @@ button:disabled {
   }
 }
 
-/* --- TAMBAHAN STYLE KHUSUS MOBILE PENGGUNA --- */
 .status-indicator-wrapper {
   display: inline-flex;
   align-items: center;
@@ -1703,12 +1617,8 @@ button:disabled {
   animation: blink 1.5s infinite;
 }
 @keyframes blink {
-  50% {
-    opacity: 0.4;
-  }
+  50% { opacity: 0.4; }
 }
-
-/* Mobile Responsive Tweaks */
 @media (max-width: 768px) {
   .navbar-glass {
     padding: 0 20px;
@@ -1720,14 +1630,12 @@ button:disabled {
   .brand-logo i {
     font-size: 26px;
   }
-
   .desktop-profile-info {
     display: none;
   }
   .mobile-profile-wrapper {
     display: block;
   }
-
   .profile-dropdown {
     top: 60px;
     right: 0;
