@@ -1580,7 +1580,7 @@ button:disabled {
   .grid-form,
   .grid-filter,
   .service-options-container,
-  .annual-filter-row { 
+  .annual-filter-row { /* Grid untuk card tahunan juga di-stack */
     grid-template-columns: 1fr !important;
   }
   
