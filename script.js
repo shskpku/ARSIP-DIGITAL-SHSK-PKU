@@ -1,7 +1,7 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (FINAL v5.4 - CSS FIX)
+   SCRIPT.JS - THE ULTIMATE MASTER FILE (FINAL v6.2 - AUDIO & CHART FIX)
    Fitur: Annual Report Dashboard (2-Row Grid), SHSK Dropdown, NTR/Oil Barge, 
-   Multi-Photo, Smart TTS, Direct DL, Smart Cert & Email Bundling.
+   Multi-Photo, Smart TTS (Mobile Fix), Direct DL, Service Chart Split.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
@@ -9,58 +9,69 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIV
 
 // --- DATABASE KODE SURAT ---
 const CERT_CODES = {
-  "KONSTRUKSI": "AL.501",
-  "PERLENGKAPAN": "AL.501",
-  "RADIO": "AL.502",
-  "ENDORS KONSTRUKSI": "AL.501",
-  "ENDORS PERLENGKAPAN": "AL.501",
-  "ENDORS RADIO": "AL.502",
-  "GARIS MUAT": "AL.509",
-  "KESELAMATAN KLM": "AL.501",
-  "KESELAMATAN MOORING": "AL.501",
-  "IMDG": "AL.503",
-  "SNPP": "AL.601",
-  "ENDORS SNPP": "AL.601",
-  "IOPP": "AL.602",
-  "ENDORS IOPP": "AL.602",
-  "ISPP": "AL.602",
-  "ENDORS ISPP": "AL.602",
-  "IAPP": "AL.602",
-  "ENDORS IAPP": "AL.602",
-  "BALLAST WATER MANAGEMENT": "AL.601",
-  "ANTIFOULING": "AL.601",
-  "DOC": "AL.602",
-  "ENDORS DOC": "AL.602",
-  "SMC": "AL.602",
-  "SMC INTERMEDIATE": "AL.602",
-  // LOGIKA KHUSUS
-  "NTR": "SPECIAL", 
-  "OIL BARGE": "SPECIAL"
+  "KONSTRUKSI": "AL.501", "PERLENGKAPAN": "AL.501", "RADIO": "AL.502",
+  "ENDORS KONSTRUKSI": "AL.501", "ENDORS PERLENGKAPAN": "AL.501", "ENDORS RADIO": "AL.502",
+  "GARIS MUAT": "AL.509", "KESELAMATAN KLM": "AL.501", "KESELAMATAN MOORING": "AL.501",
+  "IMDG": "AL.503", "SNPP": "AL.601", "ENDORS SNPP": "AL.601",
+  "IOPP": "AL.602", "ENDORS IOPP": "AL.602", "ISPP": "AL.602", "ENDORS ISPP": "AL.602",
+  "IAPP": "AL.602", "ENDORS IAPP": "AL.602", "BALLAST WATER MANAGEMENT": "AL.601",
+  "ANTIFOULING": "AL.601", "DOC": "AL.602", "ENDORS DOC": "AL.602",
+  "SMC": "AL.602", "SMC INTERMEDIATE": "AL.602",
+  "NTR": "SPECIAL", "OIL BARGE": "SPECIAL"
 };
 
 let globalCompanySet = new Set(); 
 
 // ====================================================================
-// 1. UTILITIES & HELPER
+// 1. UTILITIES & HELPER (AUDIO FIX MOBILE)
 // ====================================================================
 
 function speakWelcome(namaLengkap) {
-    if ('speechSynthesis' in window) {
-        if (sessionStorage.getItem("welcome_played")) return; 
+    if (!('speechSynthesis' in window)) return;
+    if (sessionStorage.getItem("welcome_played")) return; 
+
+    const runSpeech = () => {
         window.speechSynthesis.cancel(); 
         let rawName = namaLengkap.split(',')[0].trim().split(' ')[0];
         let nickName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
         const text = `Selamat datang, ${nickName}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
+        
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'id-ID'; 
         utterance.rate = 0.9;      
         utterance.pitch = 1;      
         utterance.volume = 1;     
-        const voices = window.speechSynthesis.getVoices();
-        const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
-        if (indoVoice) utterance.voice = indoVoice;
-        window.speechSynthesis.speak(utterance);
-        sessionStorage.setItem("welcome_played", "true");
+
+        let voices = window.speechSynthesis.getVoices();
+        const setVoice = () => {
+             voices = window.speechSynthesis.getVoices();
+             const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
+             if (indoVoice) utterance.voice = indoVoice;
+             window.speechSynthesis.speak(utterance);
+             sessionStorage.setItem("welcome_played", "true");
+        };
+
+        if (voices.length === 0) {
+            window.speechSynthesis.onvoiceschanged = setVoice;
+        } else {
+            setVoice();
+        }
+    };
+
+    // FIX MOBILE: Pancing audio dengan interaksi user
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+        const unlockAudio = () => {
+            runSpeech();
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('scroll', unlockAudio);
+        };
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+        document.addEventListener('scroll', unlockAudio);
+    } else {
+        runSpeech();
     }
 }
 
@@ -78,14 +89,33 @@ function showPopup(message, type = "info") {
   setTimeout(() => popup.classList.remove("show"), 3000);
 }
 
+// FORMAT TANGGAL INDO DI TABEL (FRONTEND)
 function formatDate(dateStr) {
   if (!dateStr || dateStr === "-") return "-";
+  // Cek jika format sudah Indo (dd MMMM yyyy) dari backend
+  if (/[a-zA-Z]/.test(dateStr) && !dateStr.includes("T")) return dateStr; 
+
   const d = new Date(dateStr);
-  return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString("id-ID");
+  if (isNaN(d.getTime())) return dateStr;
+  
+  const day = ('0' + d.getDate()).slice(-2);
+  const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  return `${day} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function formatDateForInput(dateStr) {
   if (!dateStr || dateStr === "-") return "";
+  // Handle format Indo (dd MMMM yyyy) balikin ke yyyy-mm-dd untuk input date
+  const monthsIndo = {"Januari":"01", "Februari":"02", "Maret":"03", "April":"04", "Mei":"05", "Juni":"06", "Juli":"07", "Agustus":"08", "September":"09", "Oktober":"10", "November":"11", "Desember":"12"};
+  
+  if (dateStr.includes(" ")) { // Asumsi format "01 Januari 2026"
+      const parts = dateStr.split(" ");
+      if(parts.length === 3) {
+          const m = monthsIndo[parts[1]] || "01";
+          return `${parts[2]}-${m}-${parts[0]}`;
+      }
+  }
+
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "";
   return d.toISOString().split("T")[0];
@@ -105,14 +135,12 @@ async function postData(data) {
 
 function injectCustomStyles() {
     const style = document.createElement('style');
-    // PERBAIKAN DI SINI: CSS Grid 2 Baris sudah ditanam langsung agar tidak konflik
     style.innerHTML = `
         .service-options-container { display: flex; gap: 10px; }
         .tool-checkbox-card { flex: 1; }
         .special-section { background: #f0f8ff; padding: 10px; border-left: 4px solid var(--neon-blue); border-radius: 4px; margin-bottom: 10px; }
         .special-label { font-weight: bold; color: var(--navy); display: block; margin-bottom: 5px; font-size: 13px; }
         
-        /* STYLE UNTUK CARD LAPORAN TAHUNAN (2-ROW LAYOUT FIXED) */
         .annual-report-card {
             background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 25px; margin-bottom: 30px; border-top: 4px solid var(--gold);
@@ -120,10 +148,9 @@ function injectCustomStyles() {
         .annual-title { font-size: 18px; font-weight: bold; color: var(--navy); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .annual-subtitle { font-size: 13px; color: #666; margin-bottom: 20px; font-style: italic; }
         
-        /* GRID 2 BARIS UNTUK DESKTOP */
         .annual-filter-row { 
             display: grid; 
-            grid-template-columns: 1fr 1fr; /* Baris 1: Bulan Awal | Bulan Akhir */
+            grid-template-columns: 1fr 1fr; 
             gap: 15px; 
             align-items: end; 
         }
@@ -137,11 +164,10 @@ function injectCustomStyles() {
         }
         .btn-annual-export:hover { background: #0f2d50; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        /* RESPONSIVE MOBILE: 1 KOLOM */
         @media (max-width: 768px) {
             .service-options-container { flex-direction: column !important; }
             .tool-checkbox-card { width: 100% !important; margin-bottom: 10px; }
-            .annual-filter-row { grid-template-columns: 1fr !important; } /* Stack 1 kolom */
+            .annual-filter-row { grid-template-columns: 1fr !important; } 
             .annual-form-group { width: 100%; }
             .btn-annual-export { width: 100%; }
         }
@@ -197,14 +223,14 @@ window.handleCertTypeChange = function(index) {
 };
 
 // ====================================================================
-// 2. DASHBOARD & ANNUAL REPORT LOGIC (NEW FEATURE 🔥)
+// 2. DASHBOARD & ANNUAL REPORT LOGIC
 // ====================================================================
 
 function initAnnualReportUI() {
     const container = document.querySelector(".chart-grid"); 
-    if(!container) return; // Hanya jalan di halaman dashboard
+    if(!container) return; 
 
-    // Inject Container Laporan Tahunan di bawah Chart (2-Row Layout)
+    // Inject Container Laporan Tahunan (2-Row Layout Fixed)
     const annualHTML = `
         <div class="annual-report-card" style="grid-column: 1 / -1;">
             <div class="annual-title"><i class="fa fa-chart-line"></i> REKAPITULASI TAHUNAN</div>
@@ -236,7 +262,8 @@ function initAnnualReportUI() {
                     <select id="repYear" class="form-control"></select>
                 </div>
                 <div class="annual-form-group">
-                    <label>&nbsp;</label> <button class="btn-annual-export" onclick="handleAnnualReport(this)">
+                    <label>&nbsp;</label> 
+                    <button class="btn-annual-export" onclick="handleAnnualReport(this)">
                         <i class="fa fa-file-export"></i> EXPORT LAPORAN
                     </button>
                 </div>
@@ -245,7 +272,6 @@ function initAnnualReportUI() {
     `;
     container.insertAdjacentHTML('afterend', annualHTML);
 
-    // Populate Year Dropdown
     const yearSelect = document.getElementById("repYear");
     const currentYear = new Date().getFullYear();
     for(let y = currentYear; y >= 2020; y--) {
@@ -281,7 +307,6 @@ async function handleAnnualReport(btn) {
 
         if (res.status === "SUCCESS" && res.url) {
             showPopup("Laporan Tahunan Siap! Mengunduh...", "success");
-            // Direct Download Injection
             setTimeout(() => {
                 const a = document.createElement('a');
                 a.href = res.url;
@@ -301,6 +326,7 @@ async function handleAnnualReport(btn) {
     btn.innerHTML = originalText;
     btn.disabled = false;
 }
+
 // ====================================================================
 // 2. AUTO LOGOUT & SESSION
 // ====================================================================
@@ -510,7 +536,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultBtn = document.querySelector(".filter-btn.active");
     updateChartFilter("year", defaultBtn);
 
-    // INISIALISASI DASHBOARD TAHUNAN BARU
     initAnnualReportUI();
     renderBulkForm("SHSK");
     renderBulkForm("SERTIFIKASI");
@@ -730,6 +755,7 @@ function loadProfilePetugas() {
     sbInitial.innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
     sbInitial.style.border = "2px solid var(--gold)";
   }
+  // PANGGIL SUARA DI SINI (SUDAH FIX MOBILE)
   speakWelcome(user.nama);
 }
 
