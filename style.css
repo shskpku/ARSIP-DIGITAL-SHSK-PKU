@@ -979,7 +979,7 @@ body.petugas-page {
 }
 .annual-filter-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto; 
+  grid-template-columns: 180px 180px 120px auto; 
   gap: 15px;
   align-items: end;
 }
