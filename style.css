@@ -1615,6 +1615,7 @@ button:disabled {
   .chart-card h3 {
       text-align: center;
       justify-content: center;
+      margin-bottom: 25px !important;
   }
 
   /* FIX CANVAS CONTAINER */
