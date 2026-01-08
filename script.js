@@ -1,90 +1,121 @@
 /* ====================================================================
-   SCRIPT.JS - THE ULTIMATE MASTER FILE (FINAL v6.2 - AUDIO & CHART FIX)
-   Fitur: Annual Report Dashboard (2-Row Grid), SHSK Dropdown, NTR/Oil Barge, 
-   Multi-Photo, Smart TTS (Mobile Fix), Direct DL, Service Chart Split.
+   SCRIPT.JS - ULTIMATE MASTER (FINAL v8.0 - EXIBHITUM SPLIT LOGIC)
+   Fitur: Exibhitum Multi-Select, Dashboard Split, Mobile Audio Fix, 
+   SHSK/Sertifikasi/Service CRUD, Annual Report Grid.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
-const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec"; 
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
 // --- DATABASE KODE SURAT ---
 const CERT_CODES = {
-  "KONSTRUKSI": "AL.501", "PERLENGKAPAN": "AL.501", "RADIO": "AL.502",
-  "ENDORS KONSTRUKSI": "AL.501", "ENDORS PERLENGKAPAN": "AL.501", "ENDORS RADIO": "AL.502",
-  "GARIS MUAT": "AL.509", "KESELAMATAN KLM": "AL.501", "KESELAMATAN MOORING": "AL.501",
-  "IMDG": "AL.503", "SNPP": "AL.601", "ENDORS SNPP": "AL.601",
-  "IOPP": "AL.602", "ENDORS IOPP": "AL.602", "ISPP": "AL.602", "ENDORS ISPP": "AL.602",
-  "IAPP": "AL.602", "ENDORS IAPP": "AL.602", "BALLAST WATER MANAGEMENT": "AL.601",
-  "ANTIFOULING": "AL.601", "DOC": "AL.602", "ENDORS DOC": "AL.602",
-  "SMC": "AL.602", "SMC INTERMEDIATE": "AL.602",
-  "NTR": "SPECIAL", "OIL BARGE": "SPECIAL"
+  KONSTRUKSI: "AL.501",
+  PERLENGKAPAN: "AL.501",
+  RADIO: "AL.502",
+  "ENDORS KONSTRUKSI": "AL.501",
+  "ENDORS PERLENGKAPAN": "AL.501",
+  "ENDORS RADIO": "AL.502",
+  "GARIS MUAT": "AL.509",
+  "KESELAMATAN KLM": "AL.501",
+  "KESELAMATAN MOORING": "AL.501",
+  IMDG: "AL.503",
+  SNPP: "AL.601",
+  "ENDORS SNPP": "AL.601",
+  IOPP: "AL.602",
+  "ENDORS IOPP": "AL.602",
+  ISPP: "AL.602",
+  "ENDORS ISPP": "AL.602",
+  IAPP: "AL.602",
+  "ENDORS IAPP": "AL.602",
+  "BALLAST WATER MANAGEMENT": "AL.601",
+  ANTIFOULING: "AL.601",
+  DOC: "AL.602",
+  "ENDORS DOC": "AL.602",
+  SMC: "AL.602",
+  "SMC INTERMEDIATE": "AL.602",
+  NTR: "SPECIAL",
+  "OIL BARGE": "SPECIAL",
 };
 
-let globalCompanySet = new Set(); 
+let globalCompanySet = new Set();
 
 // ====================================================================
 // 1. UTILITIES & HELPER (AUDIO FIX MOBILE)
 // ====================================================================
 
 function speakWelcome(namaLengkap) {
-    if (!('speechSynthesis' in window)) return;
-    if (sessionStorage.getItem("welcome_played")) return; 
+  if (!("speechSynthesis" in window)) return;
+  if (sessionStorage.getItem("welcome_played")) return;
 
-    const runSpeech = () => {
-        window.speechSynthesis.cancel(); 
-        let rawName = namaLengkap.split(',')[0].trim().split(' ')[0];
-        let nickName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
-        const text = `Selamat datang, ${nickName}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
-        
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'id-ID'; 
-        utterance.rate = 0.9;      
-        utterance.pitch = 1;      
-        utterance.volume = 1;     
+  const runSpeech = () => {
+    window.speechSynthesis.cancel();
+    let rawName = namaLengkap.split(",")[0].trim().split(" ")[0];
+    let nickName =
+      rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
+    const text = `Selamat datang, ${nickName}, di era digitalisasi arsip, Seksi SHSK, KSOP Kelas 2 Pekanbaru`;
 
-        let voices = window.speechSynthesis.getVoices();
-        const setVoice = () => {
-             voices = window.speechSynthesis.getVoices();
-             const indoVoice = voices.find(v => v.lang === 'id-ID' || v.name.includes('Indonesia'));
-             if (indoVoice) utterance.voice = indoVoice;
-             window.speechSynthesis.speak(utterance);
-             sessionStorage.setItem("welcome_played", "true");
-        };
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "id-ID";
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
 
-        if (voices.length === 0) {
-            window.speechSynthesis.onvoiceschanged = setVoice;
-        } else {
-            setVoice();
-        }
+    let voices = window.speechSynthesis.getVoices();
+    const setVoice = () => {
+      voices = window.speechSynthesis.getVoices();
+      const indoVoice = voices.find(
+        (v) => v.lang === "id-ID" || v.name.includes("Indonesia")
+      );
+      if (indoVoice) utterance.voice = indoVoice;
+      window.speechSynthesis.speak(utterance);
+      sessionStorage.setItem("welcome_played", "true");
     };
 
-    // FIX MOBILE: Pancing audio dengan interaksi user
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-        const unlockAudio = () => {
-            runSpeech();
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('touchstart', unlockAudio);
-            document.removeEventListener('scroll', unlockAudio);
-        };
-        document.addEventListener('click', unlockAudio);
-        document.addEventListener('touchstart', unlockAudio);
-        document.addEventListener('scroll', unlockAudio);
+    if (voices.length === 0) {
+      window.speechSynthesis.onvoiceschanged = setVoice;
     } else {
-        runSpeech();
+      setVoice();
     }
+  };
+
+  // FIX MOBILE: Pancing audio dengan interaksi user
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    const unlockAudio = () => {
+      runSpeech();
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("touchstart", unlockAudio);
+      document.removeEventListener("scroll", unlockAudio);
+    };
+    document.addEventListener("click", unlockAudio);
+    document.addEventListener("touchstart", unlockAudio);
+    document.addEventListener("scroll", unlockAudio);
+  } else {
+    runSpeech(); // Desktop langsung gas
+  }
 }
 
 function showPopup(message, type = "info") {
   const popup = document.getElementById("app-notification");
-  if (!popup) { alert(message); return; }
+  if (!popup) {
+    alert(message);
+    return;
+  }
   const msgEl = document.getElementById("popup-message");
   const iconEl = popup.querySelector("i");
   msgEl.innerText = message;
   popup.className = "popup";
-  if (type === "success") { popup.classList.add("success"); if (iconEl) iconEl.className = "fa fa-check-circle"; } 
-  else if (type === "error") { popup.classList.add("error"); if (iconEl) iconEl.className = "fa fa-times-circle"; } 
-  else { popup.classList.add("info"); if (iconEl) iconEl.className = "fa fa-info-circle"; }
+  if (type === "success") {
+    popup.classList.add("success");
+    if (iconEl) iconEl.className = "fa fa-check-circle";
+  } else if (type === "error") {
+    popup.classList.add("error");
+    if (iconEl) iconEl.className = "fa fa-times-circle";
+  } else {
+    popup.classList.add("info");
+    if (iconEl) iconEl.className = "fa fa-info-circle";
+  }
   popup.classList.add("show");
   setTimeout(() => popup.classList.remove("show"), 3000);
 }
@@ -92,28 +123,53 @@ function showPopup(message, type = "info") {
 // FORMAT TANGGAL INDO DI TABEL (FRONTEND)
 function formatDate(dateStr) {
   if (!dateStr || dateStr === "-") return "-";
-  // Cek jika format sudah Indo (dd MMMM yyyy) dari backend
-  if (/[a-zA-Z]/.test(dateStr) && !dateStr.includes("T")) return dateStr; 
+  if (/[a-zA-Z]/.test(dateStr) && !dateStr.includes("T")) return dateStr;
 
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
-  
-  const day = ('0' + d.getDate()).slice(-2);
-  const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+  const day = ("0" + d.getDate()).slice(-2);
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
   return `${day} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function formatDateForInput(dateStr) {
   if (!dateStr || dateStr === "-") return "";
-  // Handle format Indo (dd MMMM yyyy) balikin ke yyyy-mm-dd untuk input date
-  const monthsIndo = {"Januari":"01", "Februari":"02", "Maret":"03", "April":"04", "Mei":"05", "Juni":"06", "Juli":"07", "Agustus":"08", "September":"09", "Oktober":"10", "November":"11", "Desember":"12"};
-  
-  if (dateStr.includes(" ")) { // Asumsi format "01 Januari 2026"
-      const parts = dateStr.split(" ");
-      if(parts.length === 3) {
-          const m = monthsIndo[parts[1]] || "01";
-          return `${parts[2]}-${m}-${parts[0]}`;
-      }
+  const monthsIndo = {
+    Januari: "01",
+    Februari: "02",
+    Maret: "03",
+    April: "04",
+    Mei: "05",
+    Juni: "06",
+    Juli: "07",
+    Agustus: "08",
+    September: "09",
+    Oktober: "10",
+    November: "11",
+    Desember: "12",
+  };
+
+  if (dateStr.includes(" ")) {
+    // Asumsi format "01 Januari 2026"
+    const parts = dateStr.split(" ");
+    if (parts.length === 3) {
+      const m = monthsIndo[parts[1]] || "01";
+      return `${parts[2]}-${m}-${parts[0]}`;
+    }
   }
 
   const d = new Date(dateStr);
@@ -134,92 +190,57 @@ async function postData(data) {
 }
 
 function injectCustomStyles() {
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .service-options-container { display: flex; gap: 10px; }
-        .tool-checkbox-card { flex: 1; }
-        .special-section { background: #f0f8ff; padding: 10px; border-left: 4px solid var(--neon-blue); border-radius: 4px; margin-bottom: 10px; }
-        .special-label { font-weight: bold; color: var(--navy); display: block; margin-bottom: 5px; font-size: 13px; }
-        
-        .annual-report-card {
-            background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            padding: 25px; margin-bottom: 30px; border-top: 4px solid var(--gold);
-        }
-        .annual-title { font-size: 18px; font-weight: bold; color: var(--navy); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        .annual-subtitle { font-size: 13px; color: #666; margin-bottom: 20px; font-style: italic; }
-        
-        .annual-filter-row { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            align-items: end; 
-        }
-        .annual-form-group { width: 100%; }
-        .annual-form-group label { display: block; font-size: 12px; font-weight: bold; color: #444; margin-bottom: 5px; }
-        
-        .btn-annual-export {
-            background: var(--navy); color: var(--gold); border: none; padding: 10px 20px;
-            border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 8px; height: 42px; width: 100%;
-        }
-        .btn-annual-export:hover { background: #0f2d50; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        
-        @media (max-width: 768px) {
-            .service-options-container { flex-direction: column !important; }
-            .tool-checkbox-card { width: 100% !important; margin-bottom: 10px; }
-            .annual-filter-row { grid-template-columns: 1fr !important; } 
-            .annual-form-group { width: 100%; }
-            .btn-annual-export { width: 100%; }
-        }
-    `;
-    document.head.appendChild(style);
+  // Styles sudah dipindah ke style.css
+  // Fungsi ini dikosongkan atau dihapus jika CSS sudah terpisah
 }
 
 function initSmartSearch() {
-    if (!document.getElementById('companyList')) {
-        const dl = document.createElement('datalist');
-        dl.id = 'companyList';
-        document.body.appendChild(dl);
-    }
+  if (!document.getElementById("companyList")) {
+    const dl = document.createElement("datalist");
+    dl.id = "companyList";
+    document.body.appendChild(dl);
+  }
 }
 
 function updateCompanyDatalist(dataArray, keyName) {
-    dataArray.forEach(item => { if(item[keyName]) globalCompanySet.add(item[keyName].trim().toUpperCase()); });
-    const dl = document.getElementById('companyList');
-    if(dl) {
-        dl.innerHTML = '';
-        globalCompanySet.forEach(name => { const opt = document.createElement('option'); opt.value = name; dl.appendChild(opt); });
-    }
+  dataArray.forEach((item) => {
+    if (item[keyName]) globalCompanySet.add(item[keyName].trim().toUpperCase());
+  });
+  const dl = document.getElementById("companyList");
+  if (dl) {
+    dl.innerHTML = "";
+    globalCompanySet.forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      dl.appendChild(opt);
+    });
+  }
 }
 
-window.handleCertTypeChange = function(index) {
-    const jenisEl = document.querySelector(`select[name="jenisSertifikat_${index}"]`);
-    const dynamicContainer = document.getElementById(`dynamic-cert-fields-${index}`);
-    if(!jenisEl || !dynamicContainer) return;
-    const jenis = jenisEl.value;
-    const currentYear = new Date().getFullYear();
-    let html = "";
+window.handleCertTypeChange = function (index) {
+  const jenisEl = document.querySelector(
+    `select[name="jenisSertifikat_${index}"]`
+  );
+  const dynamicContainer = document.getElementById(
+    `dynamic-cert-fields-${index}`
+  );
+  if (!jenisEl || !dynamicContainer) return;
+  const jenis = jenisEl.value;
+  const currentYear = new Date().getFullYear();
+  let html = "";
 
-    if (jenis === "NTR") {
-        html = `
-            <div class="special-section">
-                <span class="special-label"><i class="fa fa-layer-group"></i> PAKET NTR (3 SERTIFIKAT)</span>
-                <div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div>
-                <div style="margin-bottom:8px;"><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div>
-                <div><label style="font-size:12px;">3. No. Radio</label><input type="text" name="noSertifikat_RADIO_${index}" class="form-control" value="AL.502///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_RADIO_${index}" style="margin-top:2px;"></div>
-            </div>`;
-    } else if (jenis === "OIL BARGE") {
-        html = `
-            <div class="special-section" style="border-color: var(--gold);">
-                <span class="special-label"><i class="fa fa-ship"></i> PAKET OIL BARGE (2 SERTIFIKAT)</span>
-                <div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div>
-                <div><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div>
-            </div>`;
-    } else {
-        let autoVal = (CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL") ? `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}` : "";
-        html = `<label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>`;
-    }
-    dynamicContainer.innerHTML = html;
+  if (jenis === "NTR") {
+    html = `<div class="special-section"><span class="special-label"><i class="fa fa-layer-group"></i> PAKET NTR (3 SERTIFIKAT)</span><div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div><div style="margin-bottom:8px;"><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div><div><label style="font-size:12px;">3. No. Radio</label><input type="text" name="noSertifikat_RADIO_${index}" class="form-control" value="AL.502///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_RADIO_${index}" style="margin-top:2px;"></div></div>`;
+  } else if (jenis === "OIL BARGE") {
+    html = `<div class="special-section" style="border-color: var(--gold);"><span class="special-label"><i class="fa fa-ship"></i> PAKET OIL BARGE (2 SERTIFIKAT)</span><div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div><div><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div></div>`;
+  } else {
+    let autoVal =
+      CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL"
+        ? `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`
+        : "";
+    html = `<label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>`;
+  }
+  dynamicContainer.innerHTML = html;
 };
 
 // ====================================================================
@@ -227,15 +248,14 @@ window.handleCertTypeChange = function(index) {
 // ====================================================================
 
 function initAnnualReportUI() {
-    const container = document.querySelector(".chart-grid"); 
-    if(!container) return; 
+  const container = document.querySelector(".chart-grid");
+  if (!container) return;
 
-    // Inject Container Laporan Tahunan (2-Row Layout Fixed)
-    const annualHTML = `
+  // Inject Container Laporan Tahunan
+  const annualHTML = `
         <div class="annual-report-card" style="grid-column: 1 / -1;">
             <div class="annual-title"><i class="fa fa-chart-line"></i> REKAPITULASI TAHUNAN</div>
             <div class="annual-subtitle">IKK 54 Persentase Pelayanan Dibidang Kelaiklautan Kapal</div>
-            
             <div class="annual-filter-row">
                 <div class="annual-form-group">
                     <label>Bulan Awal</label>
@@ -256,7 +276,6 @@ function initAnnualReportUI() {
                         <option value="10">Oktober</option><option value="11">November</option>
                     </select>
                 </div>
-                
                 <div class="annual-form-group">
                     <label>Tahun</label>
                     <select id="repYear" class="form-control"></select>
@@ -270,61 +289,58 @@ function initAnnualReportUI() {
             </div>
         </div>
     `;
-    container.insertAdjacentHTML('afterend', annualHTML);
+  container.insertAdjacentHTML("afterend", annualHTML);
 
-    const yearSelect = document.getElementById("repYear");
-    const currentYear = new Date().getFullYear();
-    for(let y = currentYear; y >= 2020; y--) {
-        const opt = document.createElement("option");
-        opt.value = y;
-        opt.text = y;
-        yearSelect.appendChild(opt);
-    }
+  const yearSelect = document.getElementById("repYear");
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y >= 2020; y--) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.text = y;
+    yearSelect.appendChild(opt);
+  }
 }
 
 async function handleAnnualReport(btn) {
-    const startM = document.getElementById("repStartMonth").value;
-    const endM = document.getElementById("repEndMonth").value;
-    const year = document.getElementById("repYear").value;
+  const startM = document.getElementById("repStartMonth").value;
+  const endM = document.getElementById("repEndMonth").value;
+  const year = document.getElementById("repYear").value;
 
-    if(parseInt(startM) > parseInt(endM)) {
-        showPopup("Bulan Awal tidak boleh lebih besar dari Bulan Akhir!", "error");
-        return;
+  if (parseInt(startM) > parseInt(endM)) {
+    showPopup("Bulan Awal tidak boleh lebih besar dari Bulan Akhir!", "error");
+    return;
+  }
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> PROCESSING...';
+  btn.disabled = true;
+  showPopup("Sedang mengkalkulasi data tahunan...", "info");
+
+  try {
+    const res = await postData({
+      action: "exportAnnualReport",
+      startMonth: startM,
+      endMonth: endM,
+      year: year,
+    });
+    if (res.status === "SUCCESS" && res.url) {
+      showPopup("Laporan Tahunan Siap! Mengunduh...", "success");
+      setTimeout(() => {
+        const a = document.createElement("a");
+        a.href = res.url;
+        a.setAttribute("download", "");
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, 1000);
+    } else {
+      showPopup(res.message || "Gagal membuat laporan.", "error");
     }
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> PROCESSING...';
-    btn.disabled = true;
-    showPopup("Sedang mengkalkulasi data tahunan...", "info");
-
-    try {
-        const res = await postData({ 
-            action: "exportAnnualReport", 
-            startMonth: startM, 
-            endMonth: endM, 
-            year: year 
-        });
-
-        if (res.status === "SUCCESS" && res.url) {
-            showPopup("Laporan Tahunan Siap! Mengunduh...", "success");
-            setTimeout(() => {
-                const a = document.createElement('a');
-                a.href = res.url;
-                a.setAttribute('download', '');
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            }, 1000);
-        } else {
-            showPopup(res.message || "Gagal membuat laporan.", "error");
-        }
-    } catch (e) {
-        showPopup("Terjadi kesalahan koneksi.", "error");
-    }
-
-    btn.innerHTML = originalText;
-    btn.disabled = false;
+  } catch (e) {
+    showPopup("Terjadi kesalahan koneksi.", "error");
+  }
+  btn.innerHTML = originalText;
+  btn.disabled = false;
 }
 
 // ====================================================================
@@ -335,7 +351,6 @@ let idleTime = 0;
 function resetIdleTimer() {
   idleTime = 0;
 }
-
 function initAutoLogout() {
   setInterval(() => {
     idleTime++;
@@ -343,7 +358,6 @@ function initAutoLogout() {
       logout();
     }
   }, 60000);
-
   window.onmousemove = resetIdleTimer;
   window.onkeypress = resetIdleTimer;
   window.onclick = resetIdleTimer;
@@ -357,7 +371,6 @@ function initAutoLogout() {
 async function handleLogin(e, role) {
   if (e) e.preventDefault();
   let inputIdStr, inputPassStr, btnIdStr;
-
   if (role === "PETUGAS") {
     inputIdStr = "nip";
     inputPassStr = "passPetugas";
@@ -367,24 +380,20 @@ async function handleLogin(e, role) {
     inputPassStr = "passPengguna";
     btnIdStr = "btnSubmitPengguna";
   }
-
   const inputIdElem = document.getElementById(inputIdStr);
   const inputPassElem = document.getElementById(inputPassStr);
   const btnElem = document.getElementById(btnIdStr);
   if (!inputIdElem || !inputPassElem || !btnElem) return;
-
   const userId = inputIdElem.value.trim();
   const password = inputPassElem.value.trim();
   if (!userId || !password) {
     showPopup("Data tidak lengkap.", "error");
     return;
   }
-
   const originalText = btnElem.innerHTML;
   btnElem.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
   btnElem.disabled = true;
   showPopup("Sedang Masuk...", "info");
-
   try {
     const res = await postData({
       action: "login",
@@ -419,16 +428,13 @@ async function handleRegisterSubmit(e) {
   const password = document.getElementById("reg-password").value;
   const perusahaan = document.getElementById("reg-perusahaan").value;
   const btn = document.getElementById("btn-register-submit");
-
   if (!nama || !email || !password || !perusahaan) {
     showPopup("Harap isi semua kolom!", "error");
     return;
   }
-
   const originalText = btn.innerText;
   btn.innerText = "MEMPROSES...";
   btn.disabled = true;
-
   try {
     const res = await postData({
       action: "register",
@@ -534,12 +540,27 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (document.querySelector(".petugas-page")) {
     loadProfilePetugas();
     const defaultBtn = document.querySelector(".filter-btn.active");
-    updateChartFilter("year", defaultBtn);
+    if (defaultBtn) updateChartFilter("year", defaultBtn);
+
+    // NEW: INIT EXIBHITUM CHART IF PAGE LOADED
+    if (document.getElementById("chartExibhitum"))
+      updateExibChart(
+        "year",
+        document.querySelector(".filter-btn-ex.active"),
+        "ex"
+      );
+    if (document.getElementById("chartPengesahan"))
+      updateExibChart(
+        "year",
+        document.querySelector(".filter-btn-psh.active"),
+        "psh"
+      );
 
     initAnnualReportUI();
     renderBulkForm("SHSK");
     renderBulkForm("SERTIFIKASI");
     renderBulkForm("SERVICE");
+    renderBulkForm("EXIBHITUM"); // NEW FORM
     initAutoLogout();
   }
 });
@@ -550,7 +571,6 @@ function toggleSidebar() {
   s.classList.toggle("show");
   o.classList.toggle("active");
 }
-
 function showSection(id, el) {
   document
     .querySelectorAll(".main-content > div")
@@ -564,6 +584,7 @@ function showSection(id, el) {
     if (id.includes("shsk")) loadData("SHSK");
     else if (id.includes("sertifikasi")) loadData("SERTIFIKASI");
     else if (id.includes("service")) loadData("SERVICE");
+    else if (id.includes("exibhitum")) loadData("EXIBHITUM");
   }
   if (window.innerWidth <= 900) {
     const s = document.getElementById("sidebar");
@@ -574,10 +595,9 @@ function showSection(id, el) {
     }
   }
 }
-
 function toggleSubmenu(id) {
-  const target = document.getElementById(id);
-  const isOpen = target.classList.contains("show");
+  const t = document.getElementById(id);
+  const isOpen = t.classList.contains("show");
   document
     .querySelectorAll(".submenu-container")
     .forEach((el) => el.classList.remove("show"));
@@ -585,48 +605,32 @@ function toggleSubmenu(id) {
     .querySelectorAll(".menu-item")
     .forEach((el) => el.classList.remove("open"));
   if (!isOpen) {
-    target.classList.add("show");
-    if (target.previousElementSibling)
-      target.previousElementSibling.classList.add("open");
+    t.classList.add("show");
+    if (t.previousElementSibling)
+      t.previousElementSibling.classList.add("open");
   }
 }
-
 window.toggleAccordion = function (headerElement) {
   const item = headerElement.closest(".accordion-item");
   if (item) item.classList.toggle("open");
 };
 
 // ====================================================================
-// 5. CHART UI
+// 5. CHART UI (UTAMA & EXIBHITUM)
 // ====================================================================
 let barChartInstance = null;
 let doughnutChartInstance = null;
+let exChartInstance = null; // New Exibhitum
+let pshChartInstance = null; // New Pengesahan
 let currentFilter = "year";
 
+// CHART UTAMA
 function updateChartFilter(period, btnElement) {
   currentFilter = period;
   document
     .querySelectorAll(".filter-btn")
     .forEach((btn) => btn.classList.remove("active"));
-  if (btnElement) {
-    btnElement.classList.add("active");
-  } else {
-    const targetBtn = Array.from(document.querySelectorAll(".filter-btn")).find(
-      (b) =>
-        b.innerText
-          .toLowerCase()
-          .includes(
-            period === "year"
-              ? "tahun"
-              : period === "month"
-              ? "bulan"
-              : period === "week"
-              ? "minggu"
-              : "hari"
-          )
-    );
-    if (targetBtn) targetBtn.classList.add("active");
-  }
+  if (btnElement) btnElement.classList.add("active");
   initCharts(period);
 }
 
@@ -645,18 +649,11 @@ async function initCharts(p = "year") {
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
   if (titleEl && titleEl.parentNode)
     titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
-
   const total = 2040;
   const sisa = total - d.totalYear;
   const targetInfo = document.querySelector(".target-info");
   if (targetInfo) {
-    targetInfo.innerHTML = `
-        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px;">
-            <span><i class="fa fa-circle" style="color: #ffd700"></i> Status Hukum: <b>${d.breakdown.shsk}</b></span>
-            <span><i class="fa fa-circle" style="color: #0a192f"></i> Sertifikasi: <b>${d.breakdown.sert}</b></span>
-            <span><i class="fa fa-circle" style="color: #00c853"></i> ILR & PMK: <b>${d.breakdown.serv}</b></span>
-        </div>
-      `;
+    targetInfo.innerHTML = `<div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px;"><span><i class="fa fa-circle" style="color: #ffd700"></i> Status Hukum: <b>${d.breakdown.shsk}</b></span><span><i class="fa fa-circle" style="color: #0a192f"></i> Sertifikasi: <b>${d.breakdown.sert}</b></span><span><i class="fa fa-circle" style="color: #00c853"></i> ILR & PMK: <b>${d.breakdown.serv}</b></span></div>`;
   }
 
   const ctxBar = document.getElementById("barChart").getContext("2d");
@@ -730,6 +727,64 @@ async function initCharts(p = "year") {
   });
 }
 
+// CHART EXIBHITUM (NEW)
+async function updateExibChart(period, btn, type) {
+  // type: 'ex' or 'psh'
+  if (type === "ex")
+    document
+      .querySelectorAll(".filter-btn-ex")
+      .forEach((b) => b.classList.remove("active"));
+  else
+    document
+      .querySelectorAll(".filter-btn-psh")
+      .forEach((b) => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  const res = await postData({ action: "getDashboardStats", period: period }); // Re-use API
+  if (res.status === "SUCCESS") {
+    const d = res.data;
+    // Data format dari backend: [DECK, MESIN, OIL, SAMPAH, GMDSS]
+    const labels = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
+    const dataSet =
+      type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
+    const color =
+      type === "ex" ? "rgba(0, 243, 255, 0.7)" : "rgba(255, 159, 67, 0.7)";
+    const border =
+      type === "ex" ? "rgba(0, 243, 255, 1)" : "rgba(255, 159, 67, 1)";
+    const canvasId = type === "ex" ? "chartExibhitum" : "chartPengesahan";
+
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    if (type === "ex" && exChartInstance) exChartInstance.destroy();
+    if (type === "psh" && pshChartInstance) pshChartInstance.destroy();
+
+    const chartConfig = {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Jumlah Buku",
+            data: dataSet,
+            backgroundColor: color,
+            borderColor: border,
+            borderWidth: 1,
+            borderRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
+    };
+
+    if (type === "ex") exChartInstance = new Chart(ctx, chartConfig);
+    else pshChartInstance = new Chart(ctx, chartConfig);
+  }
+}
+
 // ====================================================================
 // 6. PROFILE PETUGAS
 // ====================================================================
@@ -755,13 +810,59 @@ function loadProfilePetugas() {
     sbInitial.innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
     sbInitial.style.border = "2px solid var(--gold)";
   }
-  // PANGGIL SUARA DI SINI (SUDAH FIX MOBILE)
   speakWelcome(user.nama);
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE (UPDATED FOR NTR & OIL BARGE)
+// 7. BULK INPUT ENGINE (UPDATED FOR EXIBHITUM)
 // ====================================================================
+
+// --- LOGIC MULTI-SELECT EXIBHITUM ---
+// Fungsi ini dipanggil saat checkbox Layanan/Buku di-klik untuk generate form Nomor Surat
+window.updateExibhitumForms = function (index) {
+  const container = document.getElementById(`dynamic-nomor-${index}`);
+  const checkEx = document.querySelector(
+    `input[name="layanan_ex_${index}"]`
+  ).checked;
+  const checkPsh = document.querySelector(
+    `input[name="layanan_psh_${index}"]`
+  ).checked;
+
+  // Get checked books
+  const books = [];
+  ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"].forEach((b) => {
+    if (document.querySelector(`input[name="buku_${b}_${index}"]`).checked)
+      books.push(b);
+  });
+
+  let html = "";
+  const currentYear = new Date().getFullYear();
+  const defaultNomor = `AL.531///KSOP.PKU.${currentYear}`;
+
+  // Loop Layanan -> Loop Buku
+  const services = [];
+  if (checkEx) services.push({ code: "EX", label: "Exibhitum" });
+  if (checkPsh) services.push({ code: "PSH", label: "Pengesahan" });
+
+  services.forEach((serv) => {
+    books.forEach((book) => {
+      const key = `${serv.code}.${book}`; // EX.DECK
+      const label = `${serv.label} - ${book}`;
+      html += `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:12px; font-weight:bold; color:#0a192f;">Nomor Surat (${label})</label>
+                    <input type="text" name="nomorSurat_${key}_${index}" class="form-control" value="${defaultNomor}">
+                    <input type="hidden" name="jenisBukuGenerate_${index}[]" value="${serv.code}. ${book}"> 
+                </div>
+            `;
+    });
+  });
+
+  if (html === "")
+    html =
+      "<small style='color:orange;'>Pilih Layanan & Jenis Buku untuk mengisi Nomor Surat.</small>";
+  container.innerHTML = html;
+};
 
 window.updateServiceQty = function (i) {
   const container = document.getElementById(`qty-container-${i}`);
@@ -788,6 +889,9 @@ function renderBulkForm(type) {
   } else if (type === "SERVICE") {
     countSelectId = "bulkCountService";
     containerId = "bulk-container-SERVICE";
+  } else if (type === "EXIBHITUM") {
+    countSelectId = "bulkCountExibhitum";
+    containerId = "bulk-container-EXIBHITUM";
   }
 
   const countSelect = document.getElementById(countSelectId);
@@ -798,236 +902,56 @@ function renderBulkForm(type) {
   container.innerHTML = "";
 
   for (let i = 1; i <= count; i++) {
-    let html = `
-        <div class="data-wrapper" style="margin-bottom:30px; border:2px solid var(--navy); border-radius:10px; overflow:hidden;">
-            <div style="background:var(--navy); color:#fff; padding:10px 15px; font-weight:bold;">
-                <i class="fa fa-file-alt"></i> DATA KE-${i}
-            </div>
-            <div style="padding:15px; background:#fff;">
-                <input type="hidden" name="noUrut_${i}">
-                <input type="hidden" name="oldFolderUrl_${i}">
-        `;
+    let html = `<div class="data-wrapper" style="margin-bottom:30px; border:2px solid var(--navy); border-radius:10px; overflow:hidden;"><div style="background:var(--navy); color:#fff; padding:10px 15px; font-weight:bold;"><i class="fa fa-file-alt"></i> DATA KE-${i}</div><div style="padding:15px; background:#fff;"><input type="hidden" name="noUrut_${i}"><input type="hidden" name="oldFolderUrl_${i}">`;
 
     if (type === "SHSK") {
-      html += `
-            <div class="accordion-item open">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body" style="display:block;">
-                    <div class="grid-form">
-                        <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label>
-                        <label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                        <label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label>
-                        <label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label>
-                        <label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label>
-                        <label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pengukuhan STKK</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                        <label>Jenis Dokumen / STKK 
-                            <select name="statusPengukuhan_${i}" class="form-control">
-                                <option value="">-- Pilih --</option>
-                                <option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option>
-                                <option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option>
-                                <option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option>
-                                <option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option>
-                                <option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option>
-                                <option value="DAFTAR UKUR">DAFTAR UKUR</option>
-                                <option value="PAS BESAR">PAS BESAR</option>
-                                <option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option>
-                                <option value="PAS BESAR ENDORSMENT">PAS BESAR ENDORSMENT</option>
-                                <option value="SURAT LAUT ENDORSMENT">SURAT LAUT ENDORSMENT</option>
-                                <option value="PAS KECIL">PAS KECIL</option>
-                                <option value="PAS KECIL ENDORSMENT">PAS KECIL ENDORSMENT</option>
-                                <option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option>
-                                <option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option>
-                                <option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option>
-                                <option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option>
-                                <option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option>
-                                <option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option>
-                                <option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option>
-                            </select>
-                        </label>
-                        <label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                        <label>Permohonan <input type="file" name="permohonan_${i}"></label>
-                        <label>STKK <input type="file" name="stkk_${i}"></label>
-                        <label>Grosse <input type="file" name="grosse_${i}"></label>
-                        <label>Surat Ukur <input type="file" name="ukur_${i}"></label>
-                        <label>PNBP <input type="file" name="pnbp_${i}"></label>
-                    </div>
-                </div>
-            </div>`;
+      html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pengukuhan STKK</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Jenis Dokumen / STKK <select name="statusPengukuhan_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option><option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option><option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option><option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option><option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option><option value="DAFTAR UKUR">DAFTAR UKUR</option><option value="PAS BESAR">PAS BESAR</option><option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option><option value="PAS BESAR ENDORSMENT">PAS BESAR ENDORSMENT</option><option value="SURAT LAUT ENDORSMENT">SURAT LAUT ENDORSMENT</option><option value="PAS KECIL">PAS KECIL</option><option value="PAS KECIL ENDORSMENT">PAS KECIL ENDORSMENT</option><option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option><option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option><option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option><option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option><option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option><option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option><option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option></select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>STKK <input type="file" name="stkk_${i}"></label><label>Grosse <input type="file" name="grosse_${i}"></label><label>Surat Ukur <input type="file" name="ukur_${i}"></label><label>PNBP <input type="file" name="pnbp_${i}"></label></div></div></div>`;
     } else if (type === "SERTIFIKASI") {
-      html += `
-            <div class="accordion-item open">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body" style="display:block;">
-                    <div class="grid-form">
-                        <label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
-                        <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
-                        <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Bahan <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Daerah Pelayaran 
-                             <select name="daerahPelayaran_${i}" class="form-control">
-                                <option value="">-- Pilih --</option>
-                                <option value="SEMUA LAUTAN">SEMUA LAUTAN</option>
-                                <option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option>
-                                <option value="LOKAL">LOKAL</option>
-                                <option value="TERBATAS">TERBATAS</option>
-                                <option value="AREA PELABUHAN">AREA PELABUHAN</option>
-                            </select>
-                        </label>
-                        <label>Keterangan 
-                            <select name="keterangan_${i}" class="form-control">
-                                <option value="">(Kosong)</option>
-                                <option value="DOCKING">DOCKING</option>
-                                <option value="1 X PELAYARAN">1 X PELAYARAN</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Data Sertifikat</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                        <label>Jenis Sertifikat 
-                            <select name="jenisSertifikat_${i}" class="form-control" onchange="handleCertTypeChange(${i})">
-                                <option value="">-- Pilih Jenis --</option>
-                                <option value="KONSTRUKSI">KONSTRUKSI</option>
-                                <option value="PERLENGKAPAN">PERLENGKAPAN</option>
-                                <option value="RADIO">RADIO</option>
-                                <option value="NTR">NTR (PAKET 3 ITEM)</option>
-                                <option value="OIL BARGE">OIL BARGE (PAKET 2 ITEM)</option>
-                                <option value="ENDORS KONSTRUKSI">ENDORS KONSTRUKSI</option>
-                                <option value="ENDORS PERLENGKAPAN">ENDORS PERLENGKAPAN</option>
-                                <option value="ENDORS RADIO">ENDORS RADIO</option>
-                                <option value="GARIS MUAT">GARIS MUAT</option>
-                                <option value="KESELAMATAN KLM">KESELAMATAN KLM</option>
-                                <option value="KESELAMATAN MOORING">KESELAMATAN MOORING</option>
-                                <option value="IMDG">IMDG</option>
-                                <option value="SNPP">SNPP</option>
-                                <option value="ENDORS SNPP">ENDORS SNPP</option>
-                                <option value="IOPP">IOPP</option>
-                                <option value="ENDORS IOPP">ENDORS IOPP</option>
-                                <option value="ISPP">ISPP</option>
-                                <option value="ENDORS ISPP">ENDORS ISPP</option>
-                                <option value="IAPP">IAPP</option>
-                                <option value="ENDORS IAPP">ENDORS IAPP</option>
-                                <option value="BALLAST WATER MANAGEMENT">BALLAST WATER MANAGEMENT</option>
-                                <option value="ANTIFOULING">ANTIFOULING</option>
-                                <option value="DOC">DOC</option>
-                                <option value="ENDORS DOC">ENDORS DOC</option>
-                                <option value="SMC">SMC</option>
-                                <option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option>
-                                <option value="PENGESAHAN GAMBAR KAPAL">PENGESAHAN GAMBAR KAPAL</option>
-                            </select>
-                        </label>
-                        <label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
-                        <label>Masa Berlaku <input type="date" name="tglBerlaku_${i}" class="form-control"></label>
-                        <label>Kode Billing <input type="text" name="kodeBilling_${i}" class="form-control"></label>
-                    </div>
-                    
-                    <div id="dynamic-cert-fields-${i}" style="margin-top:15px;">
-                        <label>No Sertifikat <input type="text" name="noSertifikat_${i}" class="form-control"></label>
-                        <label>Upload Sertifikat <input type="file" name="sertifikat_${i}"></label>
-                    </div>
-
-                </div>
-            </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pemeriksa</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                         <label>Nama Pemeriksa 
-                            <select name="pemeriksa_${i}" class="form-control">
-                                <option value="">-- Pilih Pemeriksa --</option>
-                                <option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option>
-                                <option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option>
-                                <option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                        <label>Permohonan <input type="file" name="permohonan_${i}"></label>
-                        <label>Evaluasi <input type="file" name="evaluasi_${i}"></label>
-                        <label>Laporan Pemeriksaan <input type="file" name="laporan_pemeriksaan_${i}"></label>
-                        <label>Surat Tugas <input type="file" name="surat_tugas_${i}"></label>
-                        <label>PNBP <input type="file" name="pnbp_${i}"></label>
-                        <label>Foto/Dokumentasi <input type="file" name="foto_${i}" multiple></label>
-                    </div>
-                </div>
-            </div>`;
+      html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label><label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label><label>Bahan <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label><label>Daerah Pelayaran <select name="daerahPelayaran_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SEMUA LAUTAN">SEMUA LAUTAN</option><option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option><option value="LOKAL">LOKAL</option><option value="TERBATAS">TERBATAS</option><option value="AREA PELABUHAN">AREA PELABUHAN</option></select></label><label>Keterangan <select name="keterangan_${i}" class="form-control"><option value="">(Kosong)</option><option value="DOCKING">DOCKING</option><option value="1 X PELAYARAN">1 X PELAYARAN</option></select></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Data Sertifikat</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Jenis Sertifikat <select name="jenisSertifikat_${i}" class="form-control" onchange="handleCertTypeChange(${i})"><option value="">-- Pilih Jenis --</option><option value="KONSTRUKSI">KONSTRUKSI</option><option value="PERLENGKAPAN">PERLENGKAPAN</option><option value="RADIO">RADIO</option><option value="NTR">NTR (PAKET 3 ITEM)</option><option value="OIL BARGE">OIL BARGE (PAKET 2 ITEM)</option><option value="ENDORS KONSTRUKSI">ENDORS KONSTRUKSI</option><option value="ENDORS PERLENGKAPAN">ENDORS PERLENGKAPAN</option><option value="ENDORS RADIO">ENDORS RADIO</option><option value="GARIS MUAT">GARIS MUAT</option><option value="KESELAMATAN KLM">KESELAMATAN KLM</option><option value="KESELAMATAN MOORING">KESELAMATAN MOORING</option><option value="IMDG">IMDG</option><option value="SNPP">SNPP</option><option value="ENDORS SNPP">ENDORS SNPP</option><option value="IOPP">IOPP</option><option value="ENDORS IOPP">ENDORS IOPP</option><option value="ISPP">ISPP</option><option value="ENDORS ISPP">ENDORS ISPP</option><option value="IAPP">IAPP</option><option value="ENDORS IAPP">ENDORS IAPP</option><option value="BALLAST WATER MANAGEMENT">BALLAST WATER MANAGEMENT</option><option value="ANTIFOULING">ANTIFOULING</option><option value="DOC">DOC</option><option value="ENDORS DOC">ENDORS DOC</option><option value="SMC">SMC</option><option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option><option value="PENGESAHAN GAMBAR KAPAL">PENGESAHAN GAMBAR KAPAL</option></select></label><label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label><label>Masa Berlaku <input type="date" name="tglBerlaku_${i}" class="form-control"></label><label>Kode Billing <input type="text" name="kodeBilling_${i}" class="form-control"></label></div><div id="dynamic-cert-fields-${i}" style="margin-top:15px;"><label>No Sertifikat <input type="text" name="noSertifikat_${i}" class="form-control"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${i}"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pemeriksa</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Nama Pemeriksa <select name="pemeriksa_${i}" class="form-control"><option value="">-- Pilih Pemeriksa --</option><option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option><option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option><option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option></select></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>Evaluasi <input type="file" name="evaluasi_${i}"></label><label>Laporan Pemeriksaan <input type="file" name="laporan_pemeriksaan_${i}"></label><label>Surat Tugas <input type="file" name="surat_tugas_${i}"></label><label>PNBP <input type="file" name="pnbp_${i}"></label><label>Foto/Dokumentasi <input type="file" name="foto_${i}" multiple></label></div></div></div>`;
     } else if (type === "SERVICE") {
+      html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi & Alat</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div><div class="service-selection-box"><label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label><div class="service-options-container"><label class="tool-checkbox-card"><input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})"><div class="tool-card-design"><div class="tool-icon"><i class="fa fa-life-ring"></i></div><span class="tool-text">1. LIFERAFT</span></div></label><label class="tool-checkbox-card"><input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})"><div class="tool-card-design"><div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div><span class="tool-text">2. FIRE EXTINGUISHER</span></div></label></div><div id="qty-container-${i}" class="qty-dynamic-area"></div></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>STKK <input type="file" name="stkk_${i}"></label><label>Sertifikat ILR PMK <input type="file" name="sertifikat_${i}"></label></div></div></div>`;
+    } else if (type === "EXIBHITUM") {
+      // FORM EXIBHITUM BARU
       html += `
-            <div class="accordion-item open">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi & Alat</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body" style="display:block;">
-                    <div class="grid-form">
-                        <label>Nama Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
-                        <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
-                        <label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label>
-                    </div>
-                    
-                    <div class="service-selection-box">
-                        <label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label>
-                        <div class="service-options-container">
-                            <label class="tool-checkbox-card">
-                                <input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})">
-                                <div class="tool-card-design">
-                                    <div class="tool-icon"><i class="fa fa-life-ring"></i></div>
-                                    <span class="tool-text">1. LIFERAFT</span>
-                                </div>
-                            </label>
-                            <label class="tool-checkbox-card">
-                                <input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})">
-                                <div class="tool-card-design">
-                                    <div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div>
-                                    <span class="tool-text">2. FIRE EXTINGUISHER</span>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="qty-container-${i}" class="qty-dynamic-area"></div>
-                    </div>
-
+        <div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Data Umum</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;">
+            <div class="grid-form">
+                <label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label>
+                <label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
+                <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
+                <label>PUP / Billing <input type="text" name="pup_${i}" class="form-control"></label>
+            </div>
+        </div></div>
+        
+        <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Jenis Buku & Layanan</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body">
+            <div class="service-selection-box">
+                <label class="form-label-bold">Pilih Layanan (Bisa Lebih dari 1):</label>
+                <div style="display:flex; gap:15px; margin-bottom:15px;">
+                    <label><input type="checkbox" name="layanan_ex_${i}" value="EXIBHITUM" onchange="updateExibhitumForms(${i})"> EXIBHITUM</label>
+                    <label><input type="checkbox" name="layanan_psh_${i}" value="PENGESAHAN" onchange="updateExibhitumForms(${i})"> PENGESAHAN</label>
+                </div>
+                <hr style="margin:10px 0; border:0; border-top:1px dashed #ccc;">
+                <label class="form-label-bold">Pilih Jenis Buku (Bisa Lebih dari 1):</label>
+                <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                    <label><input type="checkbox" name="buku_DECK_${i}" onchange="updateExibhitumForms(${i})"> DECK</label>
+                    <label><input type="checkbox" name="buku_MESIN_${i}" onchange="updateExibhitumForms(${i})"> MESIN</label>
+                    <label><input type="checkbox" name="buku_OIL_${i}" onchange="updateExibhitumForms(${i})"> OIL</label>
+                    <label><input type="checkbox" name="buku_SAMPAH_${i}" onchange="updateExibhitumForms(${i})"> SAMPAH</label>
+                    <label><input type="checkbox" name="buku_GMDSS_${i}" onchange="updateExibhitumForms(${i})"> GMDSS</label>
                 </div>
             </div>
-            <div class="accordion-item">
-                <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
-                <div class="accordion-body">
-                    <div class="grid-form">
-                        <label>Permohonan <input type="file" name="permohonan_${i}"></label>
-                        <label>STKK <input type="file" name="stkk_${i}"></label>
-                        <label>Sertifikat ILR PMK <input type="file" name="sertifikat_${i}"></label>
-                    </div>
-                </div>
-            </div>`;
+            
+            <div id="dynamic-nomor-${i}" style="margin-top:20px; padding:15px; background:#f9f9f9; border:1px solid #eee; border-radius:8px;">
+                <small style="color:#aaa;">Nomor surat akan muncul otomatis setelah memilih Layanan & Buku.</small>
+            </div>
+        </div></div>
+
+        <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body">
+            <div class="grid-form">
+                <label>Permohonan <input type="file" name="permohonan_${i}"></label>
+                <label>Billing <input type="file" name="billing_${i}"></label>
+            </div>
+        </div></div>
+      `;
     }
 
     html += `</div></div>`;
@@ -1049,6 +973,10 @@ async function handleBulkSubmit(type) {
     formId = "formService";
     countId = "bulkCountService";
     btnId = "btn-save-SERVICE";
+  } else if (type === "EXIBHITUM") {
+    formId = "formExibhitum";
+    countId = "bulkCountExibhitum";
+    btnId = "btn-save-EXIBHITUM";
   }
 
   const form = document.getElementById(formId);
@@ -1061,32 +989,98 @@ async function handleBulkSubmit(type) {
   showPopup("Sedang menyimpan data...", "info");
 
   const items = [];
-  let fileFields = [];
-
-  if (type === "SHSK")
-    fileFields = ["permohonan", "stkk", "grosse", "ukur", "pnbp"];
-  else if (type === "SERTIFIKASI")
-    fileFields = [
-      "permohonan",
-      "evaluasi",
-      "laporan_pemeriksaan",
-      "surat_tugas",
-      "pnbp",
-      "foto",
-    ];
-  else if (type === "SERVICE")
-    fileFields = ["permohonan", "stkk", "sertifikat"];
 
   for (let i = 1; i <= count; i++) {
     const itemData = {};
     let hasData = false;
 
-    if (type === "SERVICE") {
+    // --- HANDLE EXIBHITUM (SPLIT LOGIC) ---
+    if (type === "EXIBHITUM") {
+      itemData.tanggal = form.querySelector(`[name="tanggal_${i}"]`).value;
+      itemData.perusahaan = form
+        .querySelector(`[name="perusahaan_${i}"]`)
+        .value.toUpperCase();
+      itemData.namaKapal = form
+        .querySelector(`[name="namaKapal_${i}"]`)
+        .value.toUpperCase();
+      itemData.pup = form.querySelector(`[name="pup_${i}"]`).value;
+      itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
+      itemData.oldFolderUrl = form.querySelector(
+        `[name="oldFolderUrl_${i}"]`
+      ).value;
+
+      if (itemData.namaKapal.trim()) hasData = true;
+
+      // Collect Split Data
+      const jenisBukuArray = [];
+      const nomorSuratArray = [];
+      const inputs = form.querySelectorAll(
+        `input[name^="nomorSurat_"][name$="_${i}"]`
+      );
+
+      inputs.forEach((inp) => {
+        const keyParts = inp.name.split("_"); // nomorSurat_EX.DECK_1
+        const jenisKey = keyParts[1]; // EX.DECK
+        // Ambil label dari hidden input
+        const labelInput = form.querySelector(
+          `input[name="jenisBukuGenerate_${i}[]"][value^="${jenisKey.replace(
+            ".",
+            ". "
+          )}"]`
+        );
+
+        // Format label jadi "EX. DECK" (spasi setelah titik)
+        let formattedJenis = jenisKey.replace(".", ". ");
+
+        jenisBukuArray.push(formattedJenis);
+        nomorSuratArray.push(inp.value);
+      });
+
+      itemData.jenisBukuArray = jenisBukuArray;
+      itemData.nomorSuratArray = nomorSuratArray;
+
+      // Files
+      itemData.files = [];
+      const fPermohonan = form.querySelector(`[name="permohonan_${i}"]`);
+      const fBilling = form.querySelector(`[name="billing_${i}"]`);
+
+      if (fPermohonan && fPermohonan.files.length > 0) {
+        const file = fPermohonan.files[0];
+        const reader = new FileReader();
+        await new Promise((r) => {
+          reader.onload = (e) => {
+            itemData.files.push({
+              jenis: "PERMOHONAN",
+              ext: file.name.split(".").pop(),
+              data: e.target.result,
+            });
+            r();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      if (fBilling && fBilling.files.length > 0) {
+        const file = fBilling.files[0];
+        const reader = new FileReader();
+        await new Promise((r) => {
+          reader.onload = (e) => {
+            itemData.files.push({
+              jenis: "BILLING",
+              ext: file.name.split(".").pop(),
+              data: e.target.result,
+            });
+            r();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+    // --- HANDLE SERVICE (EXISTING) ---
+    else if (type === "SERVICE") {
       const penyedia = form.querySelector(
         `[name="namaPenyediaJasa_${i}"]`
       ).value;
       if (penyedia.trim()) hasData = true;
-
       itemData.namaPenyediaJasa = penyedia.toUpperCase();
       itemData.namaKapal = form
         .querySelector(`[name="namaKapal_${i}"]`)
@@ -1098,28 +1092,50 @@ async function handleBulkSubmit(type) {
       itemData.oldFolderUrl = form.querySelector(
         `[name="oldFolderUrl_${i}"]`
       ).value;
-
-      let jenisArr = [];
-      let jumlahArr = [];
+      let jenisArr = [],
+        jumlahArr = [],
+        counter = 1;
       const lrCheck = form.querySelector(`[name="check_liferaft_${i}"]`);
       const feCheck = form.querySelector(`[name="check_fe_${i}"]`);
-      const lrQty = form.querySelector(`[name="jumlah_LIFERAFT_${i}"]`);
-      const feQty = form.querySelector(`[name="jumlah_FE_${i}"]`);
-
-      let counter = 1;
       if (lrCheck && lrCheck.checked) {
         jenisArr.push(`${counter}. LIFERAFT`);
-        jumlahArr.push(lrQty ? lrQty.value : "0");
+        jumlahArr.push(
+          form.querySelector(`[name="jumlah_LIFERAFT_${i}"]`).value || "0"
+        );
         counter++;
       }
       if (feCheck && feCheck.checked) {
         jenisArr.push(`${counter}. FIRE EXTINGUISHER`);
-        jumlahArr.push(feQty ? feQty.value : "0");
+        jumlahArr.push(
+          form.querySelector(`[name="jumlah_FE_${i}"]`).value || "0"
+        );
       }
-
       itemData.jenisAlat = jenisArr.join("\n");
       itemData.jumlah = jumlahArr.join("\n");
-    } else {
+      // Files logic Service (Standard)
+      itemData.files = [];
+      const fields = ["permohonan", "stkk", "sertifikat"];
+      for (const field of fields) {
+        const fInput = form.querySelector(`[name="${field}_${i}"]`);
+        if (fInput && fInput.files.length > 0) {
+          const file = fInput.files[0];
+          const reader = new FileReader();
+          await new Promise((r) => {
+            reader.onload = (e) => {
+              itemData.files.push({
+                jenis: field,
+                ext: file.name.split(".").pop(),
+                data: e.target.result,
+              });
+              r();
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+    }
+    // --- HANDLE STANDARD (SHSK/SERTIFIKASI) ---
+    else {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       inputs.forEach((input) => {
         const key = input.name.replace(`_${i}`, "");
@@ -1132,115 +1148,121 @@ async function handleBulkSubmit(type) {
           if (key === "namaKapal" && input.value.trim() !== "") hasData = true;
         }
       });
-    }
+      if (!hasData) continue;
 
-    if (!hasData) continue;
+      // File Logic Standard
+      itemData.files = [];
+      let fileFields =
+        type === "SHSK"
+          ? ["permohonan", "stkk", "grosse", "ukur", "pnbp"]
+          : [
+              "permohonan",
+              "evaluasi",
+              "laporan_pemeriksaan",
+              "surat_tugas",
+              "pnbp",
+              "foto",
+            ];
 
-    itemData.files = [];
-
-    // --- 1. HANDLE STANDARD FILES (Permohonan, Evaluasi, dll) ---
-    for (const field of fileFields) {
-      const fileInput = form.querySelector(`[name="${field}_${i}"]`);
-      if (fileInput && fileInput.files.length > 0) {
-        // SUPPORT MULTI-FILE (FOTO)
-        if (field === "foto") {
-          for (let f = 0; f < fileInput.files.length; f++) {
-            const file = fileInput.files[f];
+      for (const field of fileFields) {
+        const fileInput = form.querySelector(`[name="${field}_${i}"]`);
+        if (fileInput && fileInput.files.length > 0) {
+          if (field === "foto") {
+            // Multi-file
+            for (let f = 0; f < fileInput.files.length; f++) {
+              const file = fileInput.files[f];
+              const reader = new FileReader();
+              await new Promise((r) => {
+                reader.onload = (e) => {
+                  itemData.files.push({
+                    jenis: `FOTO ${f + 1}`,
+                    ext: file.name.split(".").pop(),
+                    data: e.target.result,
+                  });
+                  r();
+                };
+                reader.readAsDataURL(file);
+              });
+            }
+          } else {
+            // Single file
+            const file = fileInput.files[0];
             const reader = new FileReader();
-            await new Promise((resolve) => {
+            await new Promise((r) => {
               reader.onload = (e) => {
                 itemData.files.push({
-                  jenis: `FOTO ${f + 1}`,
+                  jenis: field,
                   ext: file.name.split(".").pop(),
                   data: e.target.result,
                 });
-                resolve();
+                r();
               };
               reader.readAsDataURL(file);
             });
           }
-        } else {
-          // SINGLE FILE STANDARD
-          const file = fileInput.files[0];
-          const reader = new FileReader();
-          await new Promise((resolve) => {
-            reader.onload = (e) => {
-              itemData.files.push({
-                jenis: field,
-                ext: file.name.split(".").pop(),
-                data: e.target.result,
-              });
-              resolve();
-            };
-            reader.readAsDataURL(file);
-          });
         }
       }
-    }
 
-    // --- 2. HANDLE SPECIAL CERTIFICATES (NTR / OIL BARGE / STANDARD) ---
-    if (type === "SERTIFIKASI") {
-      const jenisSert = itemData.jenisSertifikat; // Sudah diambil di loop inputs atas
-
-      if (jenisSert === "NTR") {
-        // Ambil 3 File & 3 Nomor Sertifikat
-        const subTypes = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
-        for (const sub of subTypes) {
-          const fInput = form.querySelector(`[name="sertifikat_${sub}_${i}"]`);
-          if (fInput && fInput.files.length > 0) {
-            const file = fInput.files[0];
-            const reader = new FileReader();
-            await new Promise((r) => {
-              reader.onload = (e) => {
-                itemData.files.push({
-                  jenis: `sertifikat_${sub}`,
-                  ext: file.name.split(".").pop(),
-                  data: e.target.result,
-                });
-                r();
-              };
-              reader.readAsDataURL(file);
-            });
-          }
-        }
-      } else if (jenisSert === "OIL BARGE") {
-        // Ambil 2 File
-        const subTypes = ["KONSTRUKSI", "PERLENGKAPAN"];
-        for (const sub of subTypes) {
-          const fInput = form.querySelector(`[name="sertifikat_${sub}_${i}"]`);
-          if (fInput && fInput.files.length > 0) {
-            const file = fInput.files[0];
-            const reader = new FileReader();
-            await new Promise((r) => {
-              reader.onload = (e) => {
-                itemData.files.push({
-                  jenis: `sertifikat_${sub}`,
-                  ext: file.name.split(".").pop(),
-                  data: e.target.result,
-                });
-                r();
-              };
-              reader.readAsDataURL(file);
-            });
-          }
-        }
-      } else {
-        // Standard Single Sertifikat
-        const fInput = form.querySelector(`[name="sertifikat_${i}"]`);
-        if (fInput && fInput.files.length > 0) {
-          const file = fInput.files[0];
-          const reader = new FileReader();
-          await new Promise((r) => {
-            reader.onload = (e) => {
-              itemData.files.push({
-                jenis: "sertifikat",
-                ext: file.name.split(".").pop(),
-                data: e.target.result,
+      // NTR / Oil Barge Logic (Sertifikasi Only)
+      if (type === "SERTIFIKASI") {
+        const jenis = itemData.jenisSertifikat;
+        if (jenis === "NTR") {
+          const subs = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
+          for (const s of subs) {
+            const f = form.querySelector(`[name="sertifikat_${s}_${i}"]`);
+            if (f && f.files.length > 0) {
+              const file = f.files[0];
+              const reader = new FileReader();
+              await new Promise((r) => {
+                reader.onload = (e) => {
+                  itemData.files.push({
+                    jenis: `sertifikat_${s}`,
+                    ext: file.name.split(".").pop(),
+                    data: e.target.result,
+                  });
+                  r();
+                };
+                reader.readAsDataURL(file);
               });
-              r();
-            };
-            reader.readAsDataURL(file);
-          });
+            }
+          }
+        } else if (jenis === "OIL BARGE") {
+          const subs = ["KONSTRUKSI", "PERLENGKAPAN"];
+          for (const s of subs) {
+            const f = form.querySelector(`[name="sertifikat_${s}_${i}"]`);
+            if (f && f.files.length > 0) {
+              const file = f.files[0];
+              const reader = new FileReader();
+              await new Promise((r) => {
+                reader.onload = (e) => {
+                  itemData.files.push({
+                    jenis: `sertifikat_${s}`,
+                    ext: file.name.split(".").pop(),
+                    data: e.target.result,
+                  });
+                  r();
+                };
+                reader.readAsDataURL(file);
+              });
+            }
+          }
+        } else {
+          const f = form.querySelector(`[name="sertifikat_${i}"]`);
+          if (f && f.files.length > 0) {
+            const file = f.files[0];
+            const reader = new FileReader();
+            await new Promise((r) => {
+              reader.onload = (e) => {
+                itemData.files.push({
+                  jenis: "sertifikat",
+                  ext: file.name.split(".").pop(),
+                  data: e.target.result,
+                });
+                r();
+              };
+              reader.readAsDataURL(file);
+            });
+          }
         }
       }
     }
@@ -1259,11 +1281,15 @@ async function handleBulkSubmit(type) {
   if (type === "SHSK") action = "uploadBulkSHSK";
   else if (type === "SERTIFIKASI") action = "uploadBulkSertifikasi";
   else if (type === "SERVICE") action = "uploadBulkService";
+  else if (type === "EXIBHITUM") action = "uploadBulkExibhitum";
 
+  // Check Update
   if (items.length === 1 && items[0].noUrut) {
     if (type === "SHSK") action = "updateSHSK";
     else if (type === "SERTIFIKASI") action = "updateSertifikasi";
     else if (type === "SERVICE") action = "updateService";
+    else if (type === "EXIBHITUM") action = "updateExibhitum";
+
     Object.assign(items[0], { action: action });
     const res = await postData(items[0]);
     handleResponse(res, type, form, originalText, btnSave, true);
@@ -1277,7 +1303,6 @@ async function handleBulkSubmit(type) {
 function handleResponse(res, type, form, btnText, btnEl, isEdit) {
   btnEl.innerHTML = btnText;
   btnEl.disabled = false;
-
   if (res.status === "SUCCESS") {
     showPopup(
       isEdit ? "Data Diperbarui!" : "Data Berhasil Disimpan!",
@@ -1287,21 +1312,24 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
     renderBulkForm(type);
     if (isEdit) cancelEdit(type);
     loadData(type);
-    if (type !== "SERVICE") updateChartFilter(currentFilter);
-    else initCharts(currentFilter);
+
+    // Update Chart
+    if (type === "SERVICE") initCharts(currentFilter);
+    else if (type === "EXIBHITUM") {
+      /* No main chart update needed */
+    } else updateChartFilter(currentFilter);
   } else {
     showPopup("Gagal: " + res.message, "error");
   }
 }
 
 // ====================================================================
-// 8. EDIT DATA & LOCK MECHANISM
+// 8. EDIT DATA (UPDATED)
 // ====================================================================
 
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   let formId, countId;
-
   if (type === "SHSK") {
     formId = "formSHSK";
     countId = "bulkCountSHSK";
@@ -1311,13 +1339,15 @@ function editData(type, rowDataStr) {
   } else if (type === "SERVICE") {
     formId = "formService";
     countId = "bulkCountService";
+  } else if (type === "EXIBHITUM") {
+    formId = "formExibhitum";
+    countId = "bulkCountExibhitum";
   }
 
   showSection(`${type.toLowerCase()}-input`);
   const countSelect = document.getElementById(countId);
   countSelect.value = "1";
   renderBulkForm(type);
-
   const form = document.getElementById(formId);
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
@@ -1332,6 +1362,7 @@ function editData(type, rowDataStr) {
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
   if (type === "SHSK") {
+    /* ... (Same as before) ... */
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("tonase", rowData.TONASE_GT);
     setVal("tandaPendaftaran", rowData.TANDA_PENDAFTARAN);
@@ -1344,6 +1375,7 @@ function editData(type, rowDataStr) {
     setVal("statusPengukuhan", rowData.STATUS_PENGUKUHAN);
     setVal("tglPengukuhan", rowData.TANGGAL_PENGUKUHAN);
   } else if (type === "SERTIFIKASI") {
+    /* ... (Same as before) ... */
     setVal("perusahaan", rowData.NAMA_PERUSAHAAN);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("ukuran", rowData.UKURAN_GT);
@@ -1358,14 +1390,13 @@ function editData(type, rowDataStr) {
     setVal("kodeBilling", rowData.KODE_BILLING);
     setVal("pemeriksa", rowData.NAMA_PEMERIKSA);
   } else if (type === "SERVICE") {
+    /* ... (Same as before) ... */
     setVal("namaPenyediaJasa", rowData.NAMA_PENYEDIA_JASA);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("tglValidasi", rowData.TANGGAL_VALIDASI_SERVICE_REPORT);
-
     const jenisStr = rowData.JENIS_ALAT_YANG_DISERVICE || "";
     const jumlahStr = rowData.JUMLAH || "";
     const jumlahArr = jumlahStr.split("\n");
-
     if (jenisStr.includes("LIFERAFT")) {
       const ck = form.querySelector('[name="check_liferaft_1"]');
       if (ck) ck.checked = true;
@@ -1374,9 +1405,7 @@ function editData(type, rowDataStr) {
       const ck = form.querySelector('[name="check_fe_1"]');
       if (ck) ck.checked = true;
     }
-
     updateServiceQty(1);
-
     let idx = 0;
     const lrInput = form.querySelector('[name="jumlah_LIFERAFT_1"]');
     if (lrInput && jenisStr.includes("LIFERAFT")) {
@@ -1389,18 +1418,56 @@ function editData(type, rowDataStr) {
       feInput.value = jumlahArr[idx] || 0;
       feInput.disabled = true;
     }
+    form
+      .querySelectorAll('[type="checkbox"]')
+      .forEach((c) => (c.disabled = true));
+  } else if (type === "EXIBHITUM") {
+    // Logic Populate Edit Exibhitum (Single Row Only - because data is already split)
+    setVal("tanggal", rowData.TANGGAL);
+    setVal("perusahaan", rowData.PERUSAHAAN);
+    setVal("namaKapal", rowData.NAMA_KAPAL);
+    setVal("pup", rowData.PUP);
+
+    // Auto-check Layanan & Buku based on "JENIS_BUKU" (e.g., "EX. DECK")
+    const jb = rowData.JENIS_BUKU || "";
+    let serviceType = ""; // EX or PSH
+    let bookType = ""; // DECK, MESIN...
+
+    if (jb.startsWith("EX")) {
+      serviceType = "layanan_ex";
+      bookType = jb.replace("EX. ", "");
+    } else {
+      serviceType = "layanan_psh";
+      bookType = jb.replace("PSH. ", "");
+    }
+
+    const servCheck = form.querySelector(`input[name="${serviceType}_1"]`);
+    if (servCheck) servCheck.checked = true;
+
+    const bookCheck = form.querySelector(`input[name="buku_${bookType}_1"]`);
+    if (bookCheck) bookCheck.checked = true;
+
+    updateExibhitumForms(1);
+
+    // Fill Nomor Surat
+    const noSuratInput = form.querySelector(
+      `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
+    );
+    if (noSuratInput) {
+      noSuratInput.value = rowData.PENOMORAN;
+      noSuratInput.disabled = true;
+    }
 
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
   }
 
+  // Lock & Show Edit Buttons
   const allInputs = form.querySelectorAll("input, select");
   allInputs.forEach((i) => (i.disabled = true));
-
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
   if (btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
-
   let btnUnlock = document.getElementById(`btn-unlock-${type}`);
   if (!btnUnlock) {
     const btnContainer = btnSaveOriginal.parentNode;
@@ -1413,13 +1480,10 @@ function editData(type, rowDataStr) {
     btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
-
   const btnCancel = document.getElementById(`btn-cancel-${type}`);
   if (btnCancel) btnCancel.classList.remove("hidden");
-
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
-
   showPopup("Mode Edit (Terkunci). Klik 'Ubah Data' untuk mengedit.", "info");
 }
 
@@ -1429,13 +1493,13 @@ function enableEditMode(type) {
       ? "formSHSK"
       : type === "SERTIFIKASI"
       ? "formSertifikasi"
-      : "formService";
+      : type === "SERVICE"
+      ? "formService"
+      : "formExibhitum";
   const form = document.getElementById(formId);
   const allInputs = form.querySelectorAll("input, select");
-
   allInputs.forEach((i) => (i.disabled = false));
   document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
-
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (!btnUpdate) {
     const btnUnlock = document.getElementById(`btn-unlock-${type}`);
@@ -1458,20 +1522,18 @@ function cancelEdit(type) {
       ? "formSHSK"
       : type === "SERTIFIKASI"
       ? "formSertifikasi"
-      : "formService";
+      : type === "SERVICE"
+      ? "formService"
+      : "formExibhitum";
   const form = document.getElementById(formId);
   form.reset();
   renderBulkForm(type);
-
   document.getElementById(`btn-save-${type}`).classList.remove("hidden");
   document.getElementById(`btn-cancel-${type}`).classList.add("hidden");
-
   const btnUnlock = document.getElementById(`btn-unlock-${type}`);
   if (btnUnlock) btnUnlock.classList.add("hidden");
-
   const btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
-
   showSection(`${type.toLowerCase()}-data`);
 }
 
@@ -1501,6 +1563,10 @@ async function exportTriple(type) {
     filters.bulan = document.getElementById("filterServiceBulan").value;
     filters.tahun = document.getElementById("filterServiceTahun").value;
     filters.search = document.getElementById("searchService").value;
+  } else if (type === "EXIBHITUM") {
+    filters.bulan = document.getElementById("filterExibBulan").value;
+    filters.tahun = document.getElementById("filterExibTahun").value;
+    filters.search = document.getElementById("searchExibhitum").value;
   }
 
   try {
@@ -1511,13 +1577,12 @@ async function exportTriple(type) {
     });
     if (res.status === "SUCCESS" && res.files) {
       showPopup("Laporan Siap! Mengunduh...", "success");
-
       res.files.forEach((f, index) => {
         if (f.url) {
           setTimeout(() => {
             const a = document.createElement("a");
             a.href = f.url;
-            a.setAttribute("download", ""); // Trigger Direct Download
+            a.setAttribute("download", "");
             a.style.display = "none";
             document.body.appendChild(a);
             a.click();
@@ -1531,15 +1596,14 @@ async function exportTriple(type) {
   } catch (e) {
     showPopup("Gagal koneksi", "error");
   }
-
   btn.innerHTML = originalHtml;
   btn.disabled = false;
 }
 
 // TABLE LOGIC
-let rawData = { SHSK: [], SERTIFIKASI: [], SERVICE: [] };
-let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [] };
-let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1 };
+let rawData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
+let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
+let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1, EXIBHITUM: 1 };
 const ROWS_PER_PAGE = 10;
 
 async function loadData(type) {
@@ -1547,6 +1611,7 @@ async function loadData(type) {
   if (type === "SHSK") tbodyId = "tbody-shsk";
   else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi";
   else if (type === "SERVICE") tbodyId = "tbody-service";
+  else tbodyId = "tbody-exibhitum";
 
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML =
@@ -1556,6 +1621,7 @@ async function loadData(type) {
   if (type === "SHSK") action = "getDataSHSK";
   else if (type === "SERTIFIKASI") action = "getDataSertifikasi";
   else if (type === "SERVICE") action = "getDataService";
+  else action = "getDataExibhitum";
 
   const res = await postData({ action: action });
   if (res.status === "SUCCESS") {
@@ -1563,11 +1629,11 @@ async function loadData(type) {
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
 
-    // --- POPULATE SMART SEARCH DATALIST ---
     let keyName = "";
     if (type === "SHSK") keyName = "PEMILIK";
     else if (type === "SERTIFIKASI") keyName = "NAMA_PERUSAHAAN";
     else if (type === "SERVICE") keyName = "NAMA_PENYEDIA_JASA";
+    else keyName = "PERUSAHAAN"; // Exibhitum
 
     if (keyName) updateCompanyDatalist(rawData[type], keyName);
 
@@ -1611,6 +1677,12 @@ function applyFilter(type) {
     filters.search = document
       .getElementById("searchService")
       .value.toUpperCase();
+  } else if (type === "EXIBHITUM") {
+    filters.bulan = document.getElementById("filterExibBulan").value;
+    filters.tahun = document.getElementById("filterExibTahun").value;
+    filters.search = document
+      .getElementById("searchExibhitum")
+      .value.toUpperCase();
   }
 
   filteredData[type] = rawData[type].filter((row) => {
@@ -1620,6 +1692,7 @@ function applyFilter(type) {
     else if (type === "SERTIFIKASI") dateStr = row["TANGGAL_TERBIT"];
     else if (type === "SERVICE")
       dateStr = row["TANGGAL_VALIDASI_SERVICE_REPORT"];
+    else if (type === "EXIBHITUM") dateStr = row["TANGGAL"];
 
     const d = new Date(dateStr);
     if (filters.tahun && d.getFullYear().toString() !== filters.tahun)
@@ -1656,6 +1729,7 @@ function renderTable(type) {
   if (type === "SHSK") tbodyId = "tbody-shsk";
   else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi";
   else if (type === "SERVICE") tbodyId = "tbody-service";
+  else tbodyId = "tbody-exibhitum";
 
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
@@ -1674,32 +1748,25 @@ function renderTable(type) {
     if (type === "SHSK") {
       tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${
         row["TANDA_PENDAFTARAN"]
-      }</td>
-             <td>${row["PEMILIK"]}</td><td>${
+      }</td><td>${row["PEMILIK"]}</td><td>${
         row["TEMPAT_STKK"]
-      }</td><td>${formatDate(row["TANGGAL_STKK"])}</td>
-             <td>${row["NO_URUT_STKK"]}</td><td>${row["NO_HAL_STKK"]}</td><td>${
-        row["NO_BUKU_STKK"]
-      }</td>
-             <td>${row["STATUS_PENGUKUHAN"]}</td><td>${formatDate(
-        row["TANGGAL_PENGUKUHAN"]
-      )}</td>`;
+      }</td><td>${formatDate(row["TANGGAL_STKK"])}</td><td>${
+        row["NO_URUT_STKK"]
+      }</td><td>${row["NO_HAL_STKK"]}</td><td>${row["NO_BUKU_STKK"]}</td><td>${
+        row["STATUS_PENGUKUHAN"]
+      }</td><td>${formatDate(row["TANGGAL_PENGUKUHAN"])}</td>`;
     } else if (type === "SERTIFIKASI") {
       tr += `<td>${row["NAMA_PERUSAHAAN"]}</td><td>${
         row["NAMA_KAPAL"]
-      }</td><td>${row["UKURAN_GT"]}</td>
-             <td>${row["CALL_SIGN"]}</td><td>${row["BAHAN_KAPAL"]}</td><td>${
-        row["KETERANGAN"]
-      }</td>
-             <td>${row["JENIS_SERTIFIKAT"]}</td><td>${formatDate(
-        row["TANGGAL_TERBIT"]
-      )}</td>
-             <td>${formatDate(row["TANGGAL_MASA_BERLAKU"])}</td><td>${
-        row["DAERAH_PELAYARAN"] || "-"
-      }</td>
-             <td>${row["NOMOR_SERTIFIKAT"]}</td><td>${
-        row["KODE_BILLING"]
-      }</td><td>${row["NAMA_PEMERIKSA"]}</td>`;
+      }</td><td>${row["UKURAN_GT"]}</td><td>${row["CALL_SIGN"]}</td><td>${
+        row["BAHAN_KAPAL"]
+      }</td><td>${row["KETERANGAN"]}</td><td>${
+        row["JENIS_SERTIFIKAT"]
+      }</td><td>${formatDate(row["TANGGAL_TERBIT"])}</td><td>${formatDate(
+        row["TANGGAL_MASA_BERLAKU"]
+      )}</td><td>${row["DAERAH_PELAYARAN"] || "-"}</td><td>${
+        row["NOMOR_SERTIFIKAT"]
+      }</td><td>${row["KODE_BILLING"]}</td><td>${row["NAMA_PEMERIKSA"]}</td>`;
     } else if (type === "SERVICE") {
       const jenisTampil = String(row["JENIS_ALAT_YANG_DISERVICE"]).replace(
         /\n/g,
@@ -1711,13 +1778,18 @@ function renderTable(type) {
       }</td><td style="text-align:left;">${jenisTampil}</td><td style="text-align:center;">${jumlahTampil}</td><td>${formatDate(
         row["TANGGAL_VALIDASI_SERVICE_REPORT"]
       )}</td>`;
+    } else if (type === "EXIBHITUM") {
+      // TANGGAL, PERUSAHAAN, JENIS_BUKU, NAMA_KAPAL, PENOMORAN, PUP
+      // Alignment: Default Justify (CSS td). Override for specific columns.
+      tr += `<td>${formatDate(row["TANGGAL"])}</td>
+               <td style="text-align:left;">${row["PERUSAHAAN"]}</td>
+               <td style="text-align:left;">${row["JENIS_BUKU"]}</td>
+               <td style="text-align:left;">${row["NAMA_KAPAL"]}</td>
+               <td>${row["PENOMORAN"]}</td>
+               <td>${row["PUP"]}</td>`;
     }
 
-    tr += `<td><div style="display:flex; justify-content:center; gap:5px;">
-             <button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button>
-             <button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button>
-             <button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button>
-           </div></td></tr>`;
+    tr += `<td><div style="display:flex; justify-content:center; gap:5px;"><button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button><button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button><button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button></div></td></tr>`;
     tbody.innerHTML += tr;
   });
   document.getElementById(
@@ -1738,11 +1810,8 @@ function nextPage(t) {
   }
 }
 
-// ====================================================================
-// DELETE HANDLER (DENGAN ANIMASI LOADING)
-// ====================================================================
+// DELETE & OTHER HELPERS REMAIN THE SAME...
 let pendingDelete = null;
-
 function prepareDelete(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   pendingDelete = {
@@ -1752,29 +1821,25 @@ function prepareDelete(type, rowDataStr) {
   };
   document.getElementById("modal-delete").classList.remove("hidden");
 }
-
 function closeDeleteModal() {
   document.getElementById("modal-delete").classList.add("hidden");
   pendingDelete = null;
 }
-
 async function executeDelete() {
   if (!pendingDelete) return;
   const btnConfirm = document.querySelector(
     "#modal-delete .btn-confirm-logout"
   );
   const originalHtml = btnConfirm.innerHTML;
-
   btnConfirm.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENGHAPUS...';
   btnConfirm.disabled = true;
   btnConfirm.style.opacity = "0.7";
   btnConfirm.style.cursor = "not-allowed";
-
   let action = "";
   if (pendingDelete.type === "SHSK") action = "deleteSHSK";
   else if (pendingDelete.type === "SERTIFIKASI") action = "deleteSertifikasi";
   else if (pendingDelete.type === "SERVICE") action = "deleteService";
-
+  else action = "deleteExibhitum";
   try {
     const res = await postData({
       action: action,
@@ -1791,7 +1856,6 @@ async function executeDelete() {
   } catch (error) {
     showPopup("Gagal koneksi ke server.", "error");
   }
-
   btnConfirm.innerHTML = originalHtml;
   btnConfirm.disabled = false;
   btnConfirm.style.opacity = "1";
@@ -1799,11 +1863,8 @@ async function executeDelete() {
   closeDeleteModal();
 }
 
-// ====================================================================
-// PENGGUNA DASHBOARD
-// ====================================================================
+// ... (Pengguna Dashboard Logic - Same as before) ...
 let penggunaFiles = [];
-
 function initPenggunaDashboard() {
   const u = JSON.parse(localStorage.getItem("user"));
   if (!u) {
@@ -1822,12 +1883,10 @@ function initPenggunaDashboard() {
       u.extra || "PERUSAHAAN";
   fetchPenggunaFiles(u.extra);
 }
-
 async function fetchPenggunaFiles(c) {
   const dropdownTahun = document.getElementById("reqTahun");
   dropdownTahun.innerHTML = "<option>Sedang memuat data...</option>";
   dropdownTahun.disabled = true;
-
   try {
     const res = await postData({ action: "getDropdownData", perusahaan: c });
     if (res.status === "SUCCESS") {
@@ -1847,7 +1906,6 @@ async function fetchPenggunaFiles(c) {
     dropdownTahun.innerHTML = '<option value="">Error Koneksi</option>';
   }
 }
-
 function populateYear() {
   const s = document.getElementById("reqTahun");
   const y = [...new Set(penggunaFiles.map((i) => i.tahun))].sort().reverse();
@@ -1857,7 +1915,6 @@ function populateYear() {
   });
   s.disabled = false;
 }
-
 window.filterMonth = function () {
   const y = document.getElementById("reqTahun").value;
   const s = document.getElementById("reqBulan");
@@ -1876,7 +1933,6 @@ window.filterMonth = function () {
   );
   s.disabled = false;
 };
-
 window.filterShip = function () {
   const y = document.getElementById("reqTahun").value;
   const m = document.getElementById("reqBulan").value;
@@ -1896,7 +1952,6 @@ window.filterShip = function () {
   ships.forEach((v) => (s.innerHTML += `<option value="${v}">${v}</option>`));
   s.disabled = false;
 };
-
 window.filterType = function () {
   const y = document.getElementById("reqTahun").value;
   const m = document.getElementById("reqBulan").value;
@@ -1919,28 +1974,21 @@ window.filterType = function () {
   }
   s.disabled = false;
 };
-
-// --- FUNGSI KIRIM EMAIL (MULTI-SELECT SUPPORT) ---
 window.handleRequestSubmit = async function (e) {
   e.preventDefault();
   const s = document.getElementById("reqJenis");
   const opts = Array.from(s.selectedOptions);
-
   if (opts.length === 0 || s.value === "") {
     showPopup("Silakan pilih minimal satu dokumen!", "error");
     return;
   }
-
   const jenisList = opts.map((o) => o.text);
   const sampleLink = s.value;
-
   const u = JSON.parse(localStorage.getItem("user"));
   const btn = document.getElementById("btnKirimReq");
   const originalText = btn.innerText;
-
   btn.innerText = "MENGIRIM...";
   btn.disabled = true;
-
   await postData({
     action: "sendReportEmail",
     email: u.id,
@@ -1952,12 +2000,10 @@ window.handleRequestSubmit = async function (e) {
     bulan: getMonthName(document.getElementById("reqBulan").value),
     link: sampleLink,
   });
-
   showPopup("Link download telah dikirim ke email Anda!", "success");
   btn.innerText = originalText;
   btn.disabled = false;
 };
-
 function getMonthName(i) {
   const m = [
     "Januari",
