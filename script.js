@@ -818,53 +818,82 @@ function loadProfilePetugas() {
 // ====================================================================
 
 // --- LOGIC MULTI-SELECT EXIBHITUM ---
-// Fungsi ini dipanggil saat checkbox Layanan/Buku di-klik untuk generate form Nomor Surat
 window.updateExibhitumForms = function (index) {
   const container = document.getElementById(`dynamic-nomor-${index}`);
   const books = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
-  let html = "";
   const currentYear = new Date().getFullYear();
   const defaultNomor = `AL.531///KSOP.PKU.${currentYear}`;
 
-  // Loop Checkbox Panel Kiri (EXIBHITUM)
+  let htmlEx = "";
+  let htmlPsh = "";
+
+  // 1. Kumpulkan Input Exibhitum (Panel Kiri)
   books.forEach((buku) => {
     const ck = document.querySelector(
       `input[name="check_EX_${buku}_${index}"]`
     );
     if (ck && ck.checked) {
-      html += `
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:12px; font-weight:bold; color:var(--neon-blue);">
-                        <i class="fa fa-book"></i> NO. SURAT (EXIBHITUM - ${buku})
+      htmlEx += `
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">
+                        ${buku}
                     </label>
-                    <input type="text" name="nomorSurat_EX.${buku}_${index}" class="form-control" value="${defaultNomor}">
+                    <input type="text" name="nomorSurat_EX.${buku}_${index}" class="form-control" value="${defaultNomor}" style="font-size:12px; padding:6px;">
                     <input type="hidden" name="jenisBukuGenerate_${index}[]" value="EX. ${buku}"> 
                 </div>
             `;
     }
   });
 
-  // Loop Checkbox Panel Kanan (PENGESAHAN)
+  // 2. Kumpulkan Input Pengesahan (Panel Kanan)
   books.forEach((buku) => {
     const ck = document.querySelector(
       `input[name="check_PSH_${buku}_${index}"]`
     );
     if (ck && ck.checked) {
-      html += `
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:12px; font-weight:bold; color:#ff9f43;">
-                        <i class="fa fa-stamp"></i> NO. SURAT (PENGESAHAN - ${buku})
+      htmlPsh += `
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">
+                        ${buku}
                     </label>
-                    <input type="text" name="nomorSurat_PSH.${buku}_${index}" class="form-control" value="${defaultNomor}">
+                    <input type="text" name="nomorSurat_PSH.${buku}_${index}" class="form-control" value="${defaultNomor}" style="font-size:12px; padding:6px;">
                     <input type="hidden" name="jenisBukuGenerate_${index}[]" value="PSH. ${buku}"> 
                 </div>
             `;
     }
   });
 
-  if (html === "")
-    html = "<small style='color:orange;'>Belum ada buku yang dipilih.</small>";
-  container.innerHTML = html;
+  // 3. Render Layout Kanan-Kiri
+  if (htmlEx === "" && htmlPsh === "") {
+    container.innerHTML =
+      "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
+  } else {
+    container.innerHTML = `
+            <div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                
+                <div style="background:#f0f8ff; padding:12px; border-radius:8px; border:1px dashed var(--neon-blue);">
+                    <div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">
+                        NO. SURAT EXIBHITUM
+                    </div>
+                    ${
+                      htmlEx ||
+                      '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
+                    }
+                </div>
+
+                <div style="background:#fff8f0; padding:12px; border-radius:8px; border:1px dashed #ff9f43;">
+                    <div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">
+                        NO. SURAT PENGESAHAN
+                    </div>
+                    ${
+                      htmlPsh ||
+                      '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
+                    }
+                </div>
+
+            </div>
+        `;
+  }
 };
 
 window.updateServiceQty = function (i) {
