@@ -1358,11 +1358,13 @@ function editData(type, rowDataStr) {
     }
   };
 
-  setVal("noUrut", rowData.NO_URUT);
+  // --- PERBAIKAN DISINI (DATA.NO untuk Exibhitum) ---
+  setVal("noUrut", rowData.NO_URUT || rowData["NO"]);
+  // --------------------------------------------------
+
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
   if (type === "SHSK") {
-    /* ... (Same as before) ... */
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("tonase", rowData.TONASE_GT);
     setVal("tandaPendaftaran", rowData.TANDA_PENDAFTARAN);
@@ -1375,7 +1377,6 @@ function editData(type, rowDataStr) {
     setVal("statusPengukuhan", rowData.STATUS_PENGUKUHAN);
     setVal("tglPengukuhan", rowData.TANGGAL_PENGUKUHAN);
   } else if (type === "SERTIFIKASI") {
-    /* ... (Same as before) ... */
     setVal("perusahaan", rowData.NAMA_PERUSAHAAN);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("ukuran", rowData.UKURAN_GT);
@@ -1390,7 +1391,6 @@ function editData(type, rowDataStr) {
     setVal("kodeBilling", rowData.KODE_BILLING);
     setVal("pemeriksa", rowData.NAMA_PEMERIKSA);
   } else if (type === "SERVICE") {
-    /* ... (Same as before) ... */
     setVal("namaPenyediaJasa", rowData.NAMA_PENYEDIA_JASA);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("tglValidasi", rowData.TANGGAL_VALIDASI_SERVICE_REPORT);
@@ -1422,16 +1422,14 @@ function editData(type, rowDataStr) {
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
   } else if (type === "EXIBHITUM") {
-    // Logic Populate Edit Exibhitum (Single Row Only - because data is already split)
     setVal("tanggal", rowData.TANGGAL);
     setVal("perusahaan", rowData.PERUSAHAAN);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("pup", rowData.PUP);
 
-    // Auto-check Layanan & Buku based on "JENIS_BUKU" (e.g., "EX. DECK")
     const jb = rowData.JENIS_BUKU || "";
-    let serviceType = ""; // EX or PSH
-    let bookType = ""; // DECK, MESIN...
+    let serviceType = "";
+    let bookType = "";
 
     if (jb.startsWith("EX")) {
       serviceType = "layanan_ex";
@@ -1443,13 +1441,11 @@ function editData(type, rowDataStr) {
 
     const servCheck = form.querySelector(`input[name="${serviceType}_1"]`);
     if (servCheck) servCheck.checked = true;
-
     const bookCheck = form.querySelector(`input[name="buku_${bookType}_1"]`);
     if (bookCheck) bookCheck.checked = true;
 
     updateExibhitumForms(1);
 
-    // Fill Nomor Surat
     const noSuratInput = form.querySelector(
       `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
     );
@@ -1463,7 +1459,6 @@ function editData(type, rowDataStr) {
       .forEach((c) => (c.disabled = true));
   }
 
-  // Lock & Show Edit Buttons
   const allInputs = form.querySelectorAll("input, select");
   allInputs.forEach((i) => (i.disabled = true));
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
@@ -1816,7 +1811,9 @@ function prepareDelete(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   pendingDelete = {
     type: type,
-    noUrut: rowData.NO_URUT || rowData["NO URUT"],
+    // --- PERBAIKAN DISINI (CHECK 'NO' JUGA) ---
+    noUrut: rowData.NO_URUT || rowData["NO URUT"] || rowData["NO"],
+    // ------------------------------------------
     folderUrl: rowData.LINK_FOLDER,
   };
   document.getElementById("modal-delete").classList.remove("hidden");
