@@ -821,46 +821,49 @@ function loadProfilePetugas() {
 // Fungsi ini dipanggil saat checkbox Layanan/Buku di-klik untuk generate form Nomor Surat
 window.updateExibhitumForms = function (index) {
   const container = document.getElementById(`dynamic-nomor-${index}`);
-  const checkEx = document.querySelector(
-    `input[name="layanan_ex_${index}"]`
-  ).checked;
-  const checkPsh = document.querySelector(
-    `input[name="layanan_psh_${index}"]`
-  ).checked;
-
-  // Get checked books
-  const books = [];
-  ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"].forEach((b) => {
-    if (document.querySelector(`input[name="buku_${b}_${index}"]`).checked)
-      books.push(b);
-  });
-
+  const books = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
   let html = "";
   const currentYear = new Date().getFullYear();
   const defaultNomor = `AL.531///KSOP.PKU.${currentYear}`;
 
-  // Loop Layanan -> Loop Buku
-  const services = [];
-  if (checkEx) services.push({ code: "EX", label: "Exibhitum" });
-  if (checkPsh) services.push({ code: "PSH", label: "Pengesahan" });
-
-  services.forEach((serv) => {
-    books.forEach((book) => {
-      const key = `${serv.code}.${book}`; // EX.DECK
-      const label = `${serv.label} - ${book}`;
+  // Loop Checkbox Panel Kiri (EXIBHITUM)
+  books.forEach((buku) => {
+    const ck = document.querySelector(
+      `input[name="check_EX_${buku}_${index}"]`
+    );
+    if (ck && ck.checked) {
       html += `
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:12px; font-weight:bold; color:#0a192f;">Nomor Surat (${label})</label>
-                    <input type="text" name="nomorSurat_${key}_${index}" class="form-control" value="${defaultNomor}">
-                    <input type="hidden" name="jenisBukuGenerate_${index}[]" value="${serv.code}. ${book}"> 
+                    <label style="font-size:12px; font-weight:bold; color:var(--neon-blue);">
+                        <i class="fa fa-book"></i> NO. SURAT (EXIBHITUM - ${buku})
+                    </label>
+                    <input type="text" name="nomorSurat_EX.${buku}_${index}" class="form-control" value="${defaultNomor}">
+                    <input type="hidden" name="jenisBukuGenerate_${index}[]" value="EX. ${buku}"> 
                 </div>
             `;
-    });
+    }
+  });
+
+  // Loop Checkbox Panel Kanan (PENGESAHAN)
+  books.forEach((buku) => {
+    const ck = document.querySelector(
+      `input[name="check_PSH_${buku}_${index}"]`
+    );
+    if (ck && ck.checked) {
+      html += `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:12px; font-weight:bold; color:#ff9f43;">
+                        <i class="fa fa-stamp"></i> NO. SURAT (PENGESAHAN - ${buku})
+                    </label>
+                    <input type="text" name="nomorSurat_PSH.${buku}_${index}" class="form-control" value="${defaultNomor}">
+                    <input type="hidden" name="jenisBukuGenerate_${index}[]" value="PSH. ${buku}"> 
+                </div>
+            `;
+    }
   });
 
   if (html === "")
-    html =
-      "<small style='color:orange;'>Pilih Layanan & Jenis Buku untuk mengisi Nomor Surat.</small>";
+    html = "<small style='color:orange;'>Belum ada buku yang dipilih.</small>";
   container.innerHTML = html;
 };
 
@@ -911,7 +914,7 @@ function renderBulkForm(type) {
     } else if (type === "SERVICE") {
       html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi & Alat</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div><div class="service-selection-box"><label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label><div class="service-options-container"><label class="tool-checkbox-card"><input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})"><div class="tool-card-design"><div class="tool-icon"><i class="fa fa-life-ring"></i></div><span class="tool-text">1. LIFERAFT</span></div></label><label class="tool-checkbox-card"><input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})"><div class="tool-card-design"><div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div><span class="tool-text">2. FIRE EXTINGUISHER</span></div></label></div><div id="qty-container-${i}" class="qty-dynamic-area"></div></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>STKK <input type="file" name="stkk_${i}"></label><label>Sertifikat ILR PMK <input type="file" name="sertifikat_${i}"></label></div></div></div>`;
     } else if (type === "EXIBHITUM") {
-      // FORM EXIBHITUM BARU
+      // FORM EXIBHITUM (TAMPILAN DUA PANEL)
       html += `
         <div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Data Umum</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;">
             <div class="grid-form">
@@ -922,26 +925,52 @@ function renderBulkForm(type) {
             </div>
         </div></div>
         
-        <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Jenis Buku & Layanan</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body">
+        <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Pilih Layanan & Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body">
+            
             <div class="service-selection-box">
-                <label class="form-label-bold">Pilih Layanan (Bisa Lebih dari 1):</label>
-                <div style="display:flex; gap:15px; margin-bottom:15px;">
-                    <label><input type="checkbox" name="layanan_ex_${i}" value="EXIBHITUM" onchange="updateExibhitumForms(${i})"> EXIBHITUM</label>
-                    <label><input type="checkbox" name="layanan_psh_${i}" value="PENGESAHAN" onchange="updateExibhitumForms(${i})"> PENGESAHAN</label>
-                </div>
-                <hr style="margin:10px 0; border:0; border-top:1px dashed #ccc;">
-                <label class="form-label-bold">Pilih Jenis Buku (Bisa Lebih dari 1):</label>
-                <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                    <label><input type="checkbox" name="buku_DECK_${i}" onchange="updateExibhitumForms(${i})"> DECK</label>
-                    <label><input type="checkbox" name="buku_MESIN_${i}" onchange="updateExibhitumForms(${i})"> MESIN</label>
-                    <label><input type="checkbox" name="buku_OIL_${i}" onchange="updateExibhitumForms(${i})"> OIL</label>
-                    <label><input type="checkbox" name="buku_SAMPAH_${i}" onchange="updateExibhitumForms(${i})"> SAMPAH</label>
-                    <label><input type="checkbox" name="buku_GMDSS_${i}" onchange="updateExibhitumForms(${i})"> GMDSS</label>
+                <div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    
+                    <div style="background:#fff; padding:15px; border:1px solid var(--neon-blue); border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="font-weight:bold; color:var(--neon-blue); margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; text-align:center;">
+                            <i class="fa fa-book"></i> LAYANAN EXIBHITUM
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            ${["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"]
+                              .map(
+                                (b) => `
+                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                    <input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})" style="transform:scale(1.2);"> 
+                                    <span style="font-size:13px; font-weight:500;">Buku ${b}</span>
+                                </label>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+
+                    <div style="background:#fff; padding:15px; border:1px solid #ff9f43; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="font-weight:bold; color:#ff9f43; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; text-align:center;">
+                            <i class="fa fa-stamp"></i> LAYANAN PENGESAHAN
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            ${["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"]
+                              .map(
+                                (b) => `
+                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                    <input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})" style="transform:scale(1.2);"> 
+                                    <span style="font-size:13px; font-weight:500;">Buku ${b}</span>
+                                </label>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+
                 </div>
             </div>
             
             <div id="dynamic-nomor-${i}" style="margin-top:20px; padding:15px; background:#f9f9f9; border:1px solid #eee; border-radius:8px;">
-                <small style="color:#aaa;">Nomor surat akan muncul otomatis setelah memilih Layanan & Buku.</small>
+                <small style="color:#aaa; font-style:italic;">Silakan centang buku di panel kiri atau kanan untuk mengisi Nomor Surat.</small>
             </div>
         </div></div>
 
@@ -1427,25 +1456,29 @@ function editData(type, rowDataStr) {
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("pup", rowData.PUP);
 
-    const jb = rowData.JENIS_BUKU || "";
-    let serviceType = "";
+    const jb = rowData.JENIS_BUKU || ""; // Contoh: "EX. DECK" atau "PSH. MESIN"
+
+    // Parsing Data
+    let prefix = ""; // EX atau PSH
     let bookType = "";
 
     if (jb.startsWith("EX")) {
-      serviceType = "layanan_ex";
-      bookType = jb.replace("EX. ", "");
+      prefix = "EX";
+      bookType = jb.replace("EX. ", "").trim();
     } else {
-      serviceType = "layanan_psh";
-      bookType = jb.replace("PSH. ", "");
+      prefix = "PSH";
+      bookType = jb.replace("PSH. ", "").trim();
     }
 
-    const servCheck = form.querySelector(`input[name="${serviceType}_1"]`);
-    if (servCheck) servCheck.checked = true;
-    const bookCheck = form.querySelector(`input[name="buku_${bookType}_1"]`);
-    if (bookCheck) bookCheck.checked = true;
+    // Cari checkbox yang sesuai format nama baru: check_EX_DECK_1
+    const targetCheck = form.querySelector(
+      `input[name="check_${prefix}_${bookType}_1"]`
+    );
+    if (targetCheck) targetCheck.checked = true;
 
     updateExibhitumForms(1);
 
+    // Isi Nomor Surat
     const noSuratInput = form.querySelector(
       `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
     );
