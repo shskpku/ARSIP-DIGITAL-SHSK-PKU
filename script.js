@@ -1,13 +1,14 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (FINAL v10.7 - TRULY FULL VERSION)
+   SCRIPT.JS - ULTIMATE MASTER (FINAL v10.7 - RESTORED LOGIC + HYBRID)
    Fitur: Hybrid Cert (Paket + Eceran), Smart Form Global, UI Bulk Color,
-   Exibhitum Split, Dashboard Split, Mobile Audio Fix, Full CRUD Logic.
+   Exibhitum Split, Dashboard Split, Mobile Audio Fix, Full Logic.
    ==================================================================== */
 
-// ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
-const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
+// ⚠️ UPDATE URL WEB APP TERBARU KAMU DI SINI
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
-// --- DATABASE LIST SERTIFIKAT ---
+// --- DATABASE LIST SERTIFIKAT (LENGKAP) ---
 const CERT_LIST = [
   "KONSTRUKSI", "PERLENGKAPAN", "RADIO",
   "ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN", "ENDORS RADIO",
@@ -20,6 +21,7 @@ const CERT_LIST = [
   "IMDG", "PENGESAHAN GAMBAR"
 ];
 
+// Database Kode Surat Default
 const CERT_CODES = {
   "KONSTRUKSI": "AL.501", "PERLENGKAPAN": "AL.501", "RADIO": "AL.502",
   "ENDORS KONSTRUKSI": "AL.501", "ENDORS PERLENGKAPAN": "AL.501", "ENDORS RADIO": "AL.502",
@@ -34,6 +36,7 @@ const CERT_CODES = {
 };
 
 let globalCompanySet = new Set();
+// State untuk menyimpan mode paket per form (index 1-5)
 let packetModeState = {}; 
 
 // ====================================================================
@@ -214,7 +217,7 @@ function initAutoLogout() {
 }
 
 // ====================================================================
-// 3. AUTHENTICATION
+// 3. AUTHENTICATION (LOGIN, REGISTER, OTP)
 // ====================================================================
 async function handleLogin(e, role) {
   if (e) e.preventDefault();
@@ -396,6 +399,9 @@ async function updateExibChart(period, btn, type) {
   }
 }
 
+// ====================================================================
+// 6. PROFILE PETUGAS
+// ====================================================================
 function loadProfilePetugas() {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) { window.location.href = "index.html"; return; }
@@ -467,7 +473,7 @@ window.renderCertForms = function (index) {
         </div>
     `;
 
-    // Loop Item Paket
+    // Loop Item Paket (Hanya Upload Sertifikat & No Sert)
     selectedCerts.forEach((cert) => {
         if (packetCerts.includes(cert)) {
             let defaultNo = (cert === "RADIO") ? "AL.502" : "AL.501";
@@ -484,11 +490,11 @@ window.renderCertForms = function (index) {
     });
   }
 
-  // 2. RENDER FORM ECERAN (HYBRID)
+  // 2. RENDER FORM ECERAN (SISANYA)
   selectedCerts.forEach((cert) => {
       if (currentMode) {
           const packetCerts = currentMode === "NTR" ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"] : ["KONSTRUKSI", "PERLENGKAPAN"];
-          if (packetCerts.includes(cert)) return; 
+          if (packetCerts.includes(cert)) return; // Skip yang sudah dipaket
       }
 
       let defaultNo = CERT_CODES[cert] && CERT_CODES[cert] !== "SPECIAL" ? CERT_CODES[cert] : "";
@@ -587,8 +593,14 @@ function renderBulkForm(type) {
 
     if (type === "SHSK") {
       html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div></div>
-      <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option><option value="PAS BESAR">PAS BESAR</option><option value="PAS KECIL">PAS KECIL</option><option value="GROSSE AKTA">GROSSE AKTA</option></select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div>
-      <div class="grid-form" style="margin-top:10px;"><label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label></div></div></div>`;
+      <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div><div class="grid-form" style="margin-top:10px;"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option><option value="PAS BESAR">PAS BESAR</option><option value="PAS KECIL">PAS KECIL</option><option value="GROSSE AKTA">GROSSE AKTA</option><option value="BALIKNAMA KAPAL">BALIKNAMA</option><option value="HIPOTEK KAPAL">HIPOTEK</option><option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK</option></select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div>
+      <div class="grid-form" style="margin-top:10px;">
+        <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>Grosse <div class="file-dropzone"><input type="file" name="grosse_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>Surat Ukur <div class="file-dropzone"><input type="file" name="ukur_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>PNBP <div class="file-dropzone"><input type="file" name="pnbp_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+      </div></div></div>`;
     }
 
     else if (type === "SERTIFIKASI") {
@@ -605,6 +617,14 @@ function renderBulkForm(type) {
                     <label>Daerah Pelayaran <select name="daerahPelayaran_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SEMUA LAUTAN">SEMUA LAUTAN</option><option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option><option value="LOKAL">LOKAL</option></select></label>
                     <label>Tanggal Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
                     <label>Pemeriksa <select name="pemeriksa_${i}" class="form-control"><option value="">-- Pilih --</option><option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI</option><option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN</option></select></label>
+                </div>
+                <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
+                    <label style="font-weight:bold; font-size:12px;">Upload Shared (1 File untuk Semua):</label>
+                    <div class="grid-form" style="margin-top:5px;">
+                        <label>Evaluasi <div class="file-dropzone"><input type="file" name="evaluasi_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                        <label>Surat Tugas <div class="file-dropzone"><input type="file" name="surat_tugas_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                        <label>Foto <div class="file-dropzone"><input type="file" name="foto_${i}" multiple onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -630,13 +650,22 @@ function renderBulkForm(type) {
     }
     
     else if (type === "SERVICE") {
-        html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div><div class="service-selection-box"><label class="tool-checkbox-card"><input type="checkbox" name="check_liferaft_${i}" onchange="updateServiceQty(${i})"><div class="tool-card-design">LIFERAFT</div></label><label class="tool-checkbox-card"><input type="checkbox" name="check_fe_${i}" onchange="updateServiceQty(${i})"><div class="tool-card-design">FIRE EXT</div></label></div><div id="qty-container-${i}"></div></div></div>`;
+        html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div><div class="service-selection-box"><label class="tool-checkbox-card"><input type="checkbox" name="check_liferaft_${i}" onchange="updateServiceQty(${i})"><div class="tool-card-design">LIFERAFT</div></label><label class="tool-checkbox-card"><input type="checkbox" name="check_fe_${i}" onchange="updateServiceQty(${i})"><div class="tool-card-design">FIRE EXT</div></label></div><div id="qty-container-${i}"></div></div></div>
+        <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
+        <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>Sertifikat <div class="file-dropzone"><input type="file" name="sertifikat_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        </div></div></div>`;
     }
     else if (type === "EXIBHITUM") {
-        html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${["DECK","MESIN","OIL"].map(b=>`<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div><div><b>PENGESAHAN</b><br>${["DECK","MESIN","OIL"].map(b=>`<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>`;
+        html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${["DECK","MESIN","OIL"].map(b=>`<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div><div><b>PENGESAHAN</b><br>${["DECK","MESIN","OIL"].map(b=>`<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>
+        <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
+        <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        <label>Billing <div class="file-dropzone"><input type="file" name="billing_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+        </div></div></div>`;
     }
 
-    html += `</div>`;
+    html += `</div>`; // Close Bulk Card
     container.innerHTML += html;
   }
 }
@@ -662,7 +691,10 @@ async function handleBulkSubmit(type) {
     const itemData = {};
     let hasData = false;
 
-    // --- LOGIC SERTIFIKASI (HYBRID) ---
+    // Helper File
+    const getFile = (name) => { const el = form.querySelector(`[name="${name}"]`); return (el && el.files.length > 0) ? el.files[0] : null; };
+    const read = (file) => new Promise((resolve) => { const r = new FileReader(); r.onload = (e) => resolve({ ext: file.name.split(".").pop(), data: e.target.result }); r.readAsDataURL(file); });
+
     if (type === "SERTIFIKASI") {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       const globalData = {};
@@ -676,14 +708,13 @@ async function handleBulkSubmit(type) {
       if (!hasData) continue;
 
       const selectedCerts = Array.from(form.querySelectorAll(`input[name="cert_select_${i}"]:checked`)).map((c) => c.value);
-      const isPacket = packetModeState[i];
-
-      const getFile = (name) => { const el = form.querySelector(`[name="${name}"]`); return (el && el.files.length > 0) ? el.files[0] : null; };
-      const read = (file) => new Promise((resolve) => { const r = new FileReader(); r.onload = (e) => resolve({ ext: file.name.split(".").pop(), data: e.target.result }); r.readAsDataURL(file); });
+      const isPacket = packetModeState[i]; 
 
       const sharedFiles = [];
       const fEval = getFile(`evaluasi_${i}`); if (fEval) sharedFiles.push({ jenis: "evaluasi", ...(await read(fEval)) });
       const fTugas = getFile(`surat_tugas_${i}`); if (fTugas) sharedFiles.push({ jenis: "surat_tugas", ...(await read(fTugas)) });
+      const fFoto = form.querySelector(`[name="foto_${i}"]`); 
+      if(fFoto && fFoto.files.length > 0) { for(let x=0; x<fFoto.files.length; x++) sharedFiles.push({ jenis: `FOTO ${x+1}`, ...(await read(fFoto.files[x])) }); }
 
       for (const cert of selectedCerts) {
         let rowItem = { ...globalData, jenisSertifikat: cert, files: [...sharedFiles] };
@@ -706,7 +737,24 @@ async function handleBulkSubmit(type) {
         items.push(rowItem);
       }
     }
-    // --- HANDLE SERVICE ---
+    else if (type === "SHSK") {
+        const inputs = form.querySelectorAll(`[name$="_${i}"]`);
+        inputs.forEach((input) => {
+            const key = input.name.replace(`_${i}`, "");
+            if (input.type !== "file") {
+                itemData[key] = input.value.toUpperCase();
+                if (key === "namaKapal" && input.value.trim() !== "") hasData = true;
+            }
+        });
+        if (!hasData) continue;
+        itemData.files = [];
+        const fPerm = getFile(`permohonan_${i}`); if(fPerm) itemData.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+        const fStkk = getFile(`stkk_${i}`); if(fStkk) itemData.files.push({ jenis: "stkk", ...(await read(fStkk)) });
+        const fGrosse = getFile(`grosse_${i}`); if(fGrosse) itemData.files.push({ jenis: "grosse", ...(await read(fGrosse)) });
+        const fUkur = getFile(`ukur_${i}`); if(fUkur) itemData.files.push({ jenis: "surat_ukur", ...(await read(fUkur)) });
+        const fPnbp = getFile(`pnbp_${i}`); if(fPnbp) itemData.files.push({ jenis: "pnbp", ...(await read(fPnbp)) });
+        items.push(itemData);
+    }
     else if (type === "SERVICE") {
       const penyedia = form.querySelector(`[name="namaPenyediaJasa_${i}"]`).value;
       if (penyedia.trim()) {
@@ -715,36 +763,45 @@ async function handleBulkSubmit(type) {
           itemData.tglValidasi = form.querySelector(`[name="tglValidasi_${i}"]`).value;
           itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
           itemData.oldFolderUrl = form.querySelector(`[name="oldFolderUrl_${i}"]`).value;
+          
           let jenisArr = []; let jumlahArr = [];
           if (form.querySelector(`[name="check_liferaft_${i}"]`).checked) { jenisArr.push("1. LIFERAFT"); jumlahArr.push(form.querySelector(`[name="jumlah_LIFERAFT_${i}"]`).value); }
           if (form.querySelector(`[name="check_fe_${i}"]`).checked) { jenisArr.push("2. FIRE EXT"); jumlahArr.push(form.querySelector(`[name="jumlah_FE_${i}"]`).value); }
           itemData.jenisAlat = jenisArr.join("\n");
           itemData.jumlah = jumlahArr.join("\n");
+          
           itemData.files = []; 
+          const fPerm = getFile(`permohonan_${i}`); if(fPerm) itemData.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+          const fStkk = getFile(`stkk_${i}`); if(fStkk) itemData.files.push({ jenis: "stkk", ...(await read(fStkk)) });
+          const fSert = getFile(`sertifikat_${i}`); if(fSert) itemData.files.push({ jenis: "sertifikat_ilr_pmk", ...(await read(fSert)) });
           items.push(itemData);
       }
     }
-    // --- HANDLE EXIBHITUM & SHSK ---
-    else {
-        const inputs = form.querySelectorAll(`[name$="_${i}"]`);
-        inputs.forEach((input) => {
-            const key = input.name.replace(`_${i}`, "");
-            if (input.type !== "file" && !key.startsWith("check_") && !key.startsWith("nomorSurat_")) {
-                itemData[key] = input.value.toUpperCase();
-                if (key === "namaKapal" && input.value.trim() !== "") hasData = true;
-            }
-        });
-        if (hasData) {
+    else if (type === "EXIBHITUM") {
+        const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
+        if (nama.trim()) {
+            itemData.namaKapal = nama.toUpperCase();
+            itemData.tanggal = form.querySelector(`[name="tanggal_${i}"]`).value;
+            itemData.perusahaan = form.querySelector(`[name="perusahaan_${i}"]`).value.toUpperCase();
+            itemData.pup = form.querySelector(`[name="pup_${i}"]`).value;
+            itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
+            itemData.oldFolderUrl = form.querySelector(`[name="oldFolderUrl_${i}"]`).value;
+
+            const jenisBukuArray = []; const nomorSuratArray = [];
+            const inputs = form.querySelectorAll(`input[name^="nomorSurat_"][name$="_${i}"]`);
+            inputs.forEach((inp) => {
+                const keyParts = inp.name.split("_"); 
+                const jenisKey = keyParts[1]; 
+                let formattedJenis = jenisKey.replace(".", ". "); 
+                jenisBukuArray.push(formattedJenis);
+                nomorSuratArray.push(inp.value);
+            });
+            itemData.jenisBukuArray = jenisBukuArray;
+            itemData.nomorSuratArray = nomorSuratArray;
+
             itemData.files = [];
-            // Files logic SHSK/Exib omitted for brevity but presumed standard
-            if (type === "EXIBHITUM") {
-                const jb = []; const ns = [];
-                form.querySelectorAll(`input[name^="nomorSurat_"][name$="_${i}"]`).forEach(inp => {
-                    const k = inp.name.split("_")[1].replace(".", ". ");
-                    jb.push(k); ns.push(inp.value);
-                });
-                itemData.jenisBukuArray = jb; itemData.nomorSuratArray = ns;
-            }
+            const fPerm = getFile(`permohonan_${i}`); if(fPerm) itemData.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+            const fBilling = getFile(`billing_${i}`); if(fBilling) itemData.files.push({ jenis: "billing", ...(await read(fBilling)) });
             items.push(itemData);
         }
     }
@@ -762,97 +819,148 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
   } else { showPopup(res.message, "error"); }
 }
 
+// ... (EDIT DATA, DELETE DATA, PENGGUNA DASHBOARD - SAMA SEPERTI SEBELUMNYA) ...
+// Saya sertakan lagi agar benar-benar FULL COPY:
+
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   let formId, countId;
-  if (type === "SHSK") { formId = "formSHSK"; countId = "bulkCountSHSK"; }
-  else if (type === "SERTIFIKASI") { formId = "formSertifikasi"; countId = "bulkCountSertifikasi"; }
-  else if (type === "SERVICE") { formId = "formService"; countId = "bulkCountService"; }
-  else if (type === "EXIBHITUM") { formId = "formExibhitum"; countId = "bulkCountExibhitum"; }
+  if (type === "SHSK") { formId = "formSHSK"; countId = "bulkCountSHSK"; } else if (type === "SERTIFIKASI") { formId = "formSertifikasi"; countId = "bulkCountSertifikasi"; } else if (type === "SERVICE") { formId = "formService"; countId = "bulkCountService"; } else if (type === "EXIBHITUM") { formId = "formExibhitum"; countId = "bulkCountExibhitum"; }
 
   showSection(`${type.toLowerCase()}-input`);
-  const countSelect = document.getElementById(countId);
-  countSelect.value = "1";
-  renderBulkForm(type);
+  const countSelect = document.getElementById(countId); countSelect.value = "1"; renderBulkForm(type);
   const form = document.getElementById(formId);
-  const setVal = (name, val) => { const el = form.querySelector(`[name="${name}_1"]`); if (el) { el.value = el.type === "date" ? formatDateForInput(val) : val; el.disabled = true; } };
+  const setVal = (name, val) => { const el = form.querySelector(`[name="${name}_1"]`); if (el) { if (el.type === "date") el.value = formatDateForInput(val); else el.value = val; el.disabled = true; } };
 
   setVal("noUrut", rowData.NO_URUT || rowData["NO"]);
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
   if (type === "SHSK") {
-    setVal("namaKapal", rowData.NAMA_KAPAL); setVal("tonase", rowData.TONASE_GT); setVal("pemilik", rowData.PEMILIK);
+    setVal("namaKapal", rowData.NAMA_KAPAL); setVal("tonase", rowData.TONASE_GT); setVal("tandaPendaftaran", rowData.TANDA_PENDAFTARAN); setVal("pemilik", rowData.PEMILIK); setVal("tempatStkk", rowData.TEMPAT_STKK); setVal("tglStkk", rowData.TANGGAL_STKK); setVal("noUrutStkk", rowData.NO_URUT_STKK); setVal("noHalStkk", rowData.NO_HAL_STKK); setVal("noBukuStkk", rowData.NO_BUKU_STKK); setVal("statusPengukuhan", rowData.STATUS_PENGUKUHAN); setVal("tglPengukuhan", rowData.TANGGAL_PENGUKUHAN);
   } else if (type === "SERTIFIKASI") {
-    setVal("perusahaan", rowData.NAMA_PERUSAHAAN); setVal("namaKapal", rowData.NAMA_KAPAL);
+    setVal("perusahaan", rowData.NAMA_PERUSAHAAN); setVal("namaKapal", rowData.NAMA_KAPAL); setVal("ukuran", rowData.UKURAN_GT); setVal("callSign", rowData.CALL_SIGN); setVal("bahan", rowData.BAHAN_KAPAL); setVal("daerahPelayaran", rowData.DAERAH_PELAYARAN); setVal("tglTerbit", rowData.TANGGAL_TERBIT); setVal("pemeriksa", rowData.NAMA_PEMERIKSA);
     const certCheck = form.querySelector(`input[name="cert_select_1"][value="${rowData.JENIS_SERTIFIKAT}"]`);
-    if (certCheck) { certCheck.checked = true; renderCertForms(1); setVal(`no_sert_${rowData.JENIS_SERTIFIKAT}`, rowData.NOMOR_SERTIFIKAT); }
+    if (certCheck) { certCheck.checked = true; renderCertForms(1); setVal(`no_sert_${rowData.JENIS_SERTIFIKAT}`, rowData.NOMOR_SERTIFIKAT); setVal(`berlaku_${rowData.JENIS_SERTIFIKAT}`, rowData.TANGGAL_MASA_BERLAKU); setVal(`billing_${rowData.JENIS_SERTIFIKAT}`, rowData.KODE_BILLING); form.querySelectorAll(`input[name="cert_select_1"]`).forEach((c) => (c.disabled = true)); }
   } else if (type === "SERVICE") {
-    setVal("namaPenyediaJasa", rowData.NAMA_PENYEDIA_JASA); setVal("namaKapal", rowData.NAMA_KAPAL);
+    setVal("namaPenyediaJasa", rowData.NAMA_PENYEDIA_JASA); setVal("namaKapal", rowData.NAMA_KAPAL); setVal("tglValidasi", rowData.TANGGAL_VALIDASI_SERVICE_REPORT);
+    const jenisStr = rowData.JENIS_ALAT_YANG_DISERVICE || ""; const jumlahStr = rowData.JUMLAH || ""; const jumlahArr = jumlahStr.split("\n");
+    if (jenisStr.includes("LIFERAFT")) { const ck = form.querySelector('[name="check_liferaft_1"]'); if (ck) ck.checked = true; }
+    if (jenisStr.includes("FIRE EXTINGUISHER")) { const ck = form.querySelector('[name="check_fe_1"]'); if (ck) ck.checked = true; }
+    updateServiceQty(1);
+    let idx = 0;
+    const lrInput = form.querySelector('[name="jumlah_LIFERAFT_1"]'); if (lrInput && jenisStr.includes("LIFERAFT")) { lrInput.value = jumlahArr[idx] || 0; lrInput.disabled = true; idx++; }
+    const feInput = form.querySelector('[name="jumlah_FE_1"]'); if (feInput && jenisStr.includes("FIRE EXTINGUISHER")) { feInput.value = jumlahArr[idx] || 0; feInput.disabled = true; }
+    form.querySelectorAll('[type="checkbox"]').forEach((c) => (c.disabled = true));
   } else if (type === "EXIBHITUM") {
-    setVal("tanggal", rowData.TANGGAL); setVal("namaKapal", rowData.NAMA_KAPAL);
+    setVal("tanggal", rowData.TANGGAL); setVal("perusahaan", rowData.PERUSAHAAN); setVal("namaKapal", rowData.NAMA_KAPAL); setVal("pup", rowData.PUP);
+    const jb = rowData.JENIS_BUKU || ""; let prefix = ""; let bookType = "";
+    if (jb.startsWith("EX")) { prefix = "EX"; bookType = jb.replace("EX. ", "").trim(); } else { prefix = "PSH"; bookType = jb.replace("PSH. ", "").trim(); }
+    const targetCheck = form.querySelector(`input[name="check_${prefix}_${bookType}_1"]`);
+    if (targetCheck) targetCheck.checked = true;
+    updateExibhitumForms(1);
+    const noSuratInput = form.querySelector(`input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`);
+    if (noSuratInput) { noSuratInput.value = rowData.PENOMORAN; noSuratInput.disabled = true; }
+    form.querySelectorAll('[type="checkbox"]').forEach((c) => (c.disabled = true));
   }
-  
-  // Enable Edit Mode Button
+
+  const allInputs = form.querySelectorAll("input, select"); allInputs.forEach((i) => (i.disabled = true));
+  const btnSaveOriginal = document.getElementById(`btn-save-${type}`); if (btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
   let btnUnlock = document.getElementById(`btn-unlock-${type}`);
-  if (!btnUnlock) {
-    btnUnlock = document.createElement("button"); btnUnlock.id = `btn-unlock-${type}`; btnUnlock.className = "btn-edit-mode"; btnUnlock.innerHTML = "UBAH DATA";
-    btnUnlock.onclick = () => enableEditMode(type);
-    document.getElementById(`btn-save-${type}`).parentNode.insertBefore(btnUnlock, document.getElementById(`btn-save-${type}`));
-  }
+  if (!btnUnlock) { const btnContainer = btnSaveOriginal.parentNode; btnUnlock = document.createElement("button"); btnUnlock.type = "button"; btnUnlock.id = `btn-unlock-${type}`; btnUnlock.className = "btn-edit-mode"; btnUnlock.innerHTML = '<i class="fa fa-pencil-alt"></i> UBAH DATA'; btnUnlock.onclick = () => enableEditMode(type); btnContainer.insertBefore(btnUnlock, btnSaveOriginal); }
   btnUnlock.classList.remove("hidden");
-  document.getElementById(`btn-save-${type}`).classList.add("hidden");
+  const btnCancel = document.getElementById(`btn-cancel-${type}`); if (btnCancel) btnCancel.classList.remove("hidden");
+  let btnUpdate = document.getElementById(`btn-update-${type}`); if (btnUpdate) btnUpdate.classList.add("hidden");
+  showPopup("Mode Edit (Terkunci). Klik 'Ubah Data' untuk mengedit.", "info");
 }
 
 function enableEditMode(type) {
-  const form = document.getElementById(type === "SHSK" ? "formSHSK" : type === "SERTIFIKASI" ? "formSertifikasi" : type === "SERVICE" ? "formService" : "formExibhitum");
-  form.querySelectorAll("input, select").forEach(i => i.disabled = false);
+  const formId = type === "SHSK" ? "formSHSK" : type === "SERTIFIKASI" ? "formSertifikasi" : type === "SERVICE" ? "formService" : "formExibhitum";
+  const form = document.getElementById(formId);
+  const allInputs = form.querySelectorAll("input, select"); allInputs.forEach((i) => (i.disabled = false));
   document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
-  document.getElementById(`btn-save-${type}`).classList.remove("hidden");
+  let btnUpdate = document.getElementById(`btn-update-${type}`);
+  if (!btnUpdate) { const btnUnlock = document.getElementById(`btn-unlock-${type}`); const btnContainer = btnUnlock.parentNode; btnUpdate = document.createElement("button"); btnUpdate.id = `btn-update-${type}`; btnUpdate.className = "btn-gold-save"; btnUpdate.style.background = "var(--neon-blue)"; btnUpdate.innerHTML = '<i class="fa fa-save"></i> SIMPAN PERUBAHAN'; btnUpdate.onclick = () => handleBulkSubmit(type); btnContainer.insertBefore(btnUpdate, btnUnlock); }
+  btnUpdate.classList.remove("hidden");
+  showPopup("Form Terbuka. Silakan edit.", "success");
 }
 
 function cancelEdit(type) {
   const formId = type === "SHSK" ? "formSHSK" : type === "SERTIFIKASI" ? "formSertifikasi" : type === "SERVICE" ? "formService" : "formExibhitum";
-  document.getElementById(formId).reset();
-  renderBulkForm(type);
+  const form = document.getElementById(formId);
+  form.reset(); renderBulkForm(type);
+  document.getElementById(`btn-save-${type}`).classList.remove("hidden"); document.getElementById(`btn-cancel-${type}`).classList.add("hidden");
+  const btnUnlock = document.getElementById(`btn-unlock-${type}`); if (btnUnlock) btnUnlock.classList.add("hidden");
+  const btnUpdate = document.getElementById(`btn-update-${type}`); if (btnUpdate) btnUpdate.classList.add("hidden");
   showSection(`${type.toLowerCase()}-data`);
 }
 
-// TABLE LOGIC
-let rawData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
-let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
-let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1, EXIBHITUM: 1 };
-const ROWS_PER_PAGE = 10;
+async function exportTriple(type) {
+  const btn = event.currentTarget; const originalHtml = btn.innerHTML; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...'; btn.disabled = true; showPopup("Menyiapkan Laporan...", "info");
+  const filters = {};
+  if (type === "SHSK") { filters.bulan = document.getElementById("filterSHSKBulan").value; filters.tahun = document.getElementById("filterSHSKTahun").value; filters.search = document.getElementById("searchSHSK").value; } 
+  else if (type === "SERTIFIKASI") { filters.bulan = document.getElementById("filterSertBulan").value; filters.tahun = document.getElementById("filterSertTahun").value; filters.jenis = document.getElementById("filterSertJenis").value; filters.daerah = document.getElementById("filterSertDaerah").value; filters.search = document.getElementById("searchSertifikasi").value; } 
+  else if (type === "SERVICE") { filters.bulan = document.getElementById("filterServiceBulan").value; filters.tahun = document.getElementById("filterServiceTahun").value; filters.search = document.getElementById("searchService").value; } 
+  else if (type === "EXIBHITUM") { filters.bulan = document.getElementById("filterExibBulan").value; filters.tahun = document.getElementById("filterExibTahun").value; filters.search = document.getElementById("searchExibhitum").value; }
+
+  try {
+    const res = await postData({ action: "exportTripleFile", type: type, filters: filters });
+    if (res.status === "SUCCESS" && res.files) { showPopup("Laporan Siap!", "success"); res.files.forEach((f, index) => { if (f.url) { setTimeout(() => { const a = document.createElement("a"); a.href = f.url; a.setAttribute("download", ""); a.style.display = "none"; document.body.appendChild(a); a.click(); document.body.removeChild(a); }, index * 1500); } }); } 
+    else { showPopup(res.message || "Gagal export", "error"); }
+  } catch (e) { showPopup("Gagal koneksi", "error"); }
+  btn.innerHTML = originalHtml; btn.disabled = false;
+}
+
+let rawData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] }; let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] }; let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1, EXIBHITUM: 1 }; const ROWS_PER_PAGE = 10;
 
 async function loadData(type) {
-  const tbody = document.getElementById(type === "SHSK" ? "tbody-shsk" : type === "SERTIFIKASI" ? "tbody-sertifikasi" : type === "SERVICE" ? "tbody-service" : "tbody-exibhitum");
-  tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Loading...</td></tr>';
-  const res = await postData({ action: "getData" + (type === "SHSK" ? "SHSK" : type === "SERTIFIKASI" ? "Sertifikasi" : type === "SERVICE" ? "Service" : "Exibhitum") });
+  let tbodyId; if (type === "SHSK") tbodyId = "tbody-shsk"; else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi"; else if (type === "SERVICE") tbodyId = "tbody-service"; else tbodyId = "tbody-exibhitum";
+  const tbody = document.getElementById(tbodyId); tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Sedang Memuat Data...</td></tr>';
+  let action = ""; if (type === "SHSK") action = "getDataSHSK"; else if (type === "SERTIFIKASI") action = "getDataSertifikasi"; else if (type === "SERVICE") action = "getDataService"; else action = "getDataExibhitum";
+  const res = await postData({ action: action });
   if (res.status === "SUCCESS") {
     rawData[type] = res.data.reverse(); filteredData[type] = rawData[type]; currentPage[type] = 1;
-    renderTable(type);
-  }
+    let keyName = ""; if (type === "SHSK") keyName = "PEMILIK"; else if (type === "SERTIFIKASI") keyName = "NAMA_PERUSAHAAN"; else if (type === "SERVICE") keyName = "NAMA_PENYEDIA_JASA"; else keyName = "PERUSAHAAN";
+    if (keyName) updateCompanyDatalist(rawData[type], keyName);
+    renderTable(type); if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
+  } else { tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`; }
+}
+
+function populateFilterOptions(data) { const select = document.getElementById("filterSertJenis"); if (!select) return; const unique = [...new Set(data.map((item) => item.JENIS_SERTIFIKAT))].filter(Boolean).sort(); let html = '<option value="">Semua Jenis</option>'; unique.forEach((t) => (html += `<option value="${t}">${t}</option>`)); select.innerHTML = html; }
+
+function applyFilter(type) {
+  const filters = {};
+  if (type === "SHSK") { filters.bulan = document.getElementById("filterSHSKBulan").value; filters.tahun = document.getElementById("filterSHSKTahun").value; filters.search = document.getElementById("searchSHSK").value.toUpperCase(); } 
+  else if (type === "SERTIFIKASI") { filters.bulan = document.getElementById("filterSertBulan").value; filters.tahun = document.getElementById("filterSertTahun").value; filters.jenis = document.getElementById("filterSertJenis").value; filters.daerah = document.getElementById("filterSertDaerah").value.toUpperCase(); filters.search = document.getElementById("searchSertifikasi").value.toUpperCase(); } 
+  else if (type === "SERVICE") { filters.bulan = document.getElementById("filterServiceBulan").value; filters.tahun = document.getElementById("filterServiceTahun").value; filters.search = document.getElementById("searchService").value.toUpperCase(); } 
+  else if (type === "EXIBHITUM") { filters.bulan = document.getElementById("filterExibBulan").value; filters.tahun = document.getElementById("filterExibTahun").value; filters.search = document.getElementById("searchExibhitum").value.toUpperCase(); }
+
+  filteredData[type] = rawData[type].filter((row) => {
+    let pass = true; let dateStr = "";
+    if (type === "SHSK") dateStr = row["TANGGAL_PENGUKUHAN"]; else if (type === "SERTIFIKASI") dateStr = row["TANGGAL_TERBIT"]; else if (type === "SERVICE") dateStr = row["TANGGAL_VALIDASI_SERVICE_REPORT"]; else if (type === "EXIBHITUM") dateStr = row["TANGGAL"];
+    const d = new Date(dateStr);
+    if (filters.tahun && d.getFullYear().toString() !== filters.tahun) pass = false;
+    if (filters.bulan && (d.getMonth() + 1).toString() !== filters.bulan) pass = false;
+    if (type === "SERTIFIKASI") { if (filters.jenis && row["JENIS_SERTIFIKAT"] !== filters.jenis) pass = false; if (filters.daerah && !String(row["DAERAH_PELAYARAN"]).toUpperCase().includes(filters.daerah)) pass = false; }
+    if (filters.search) { const rowText = Object.values(row).join(" ").toUpperCase(); if (!rowText.includes(filters.search)) pass = false; }
+    return pass;
+  });
+  currentPage[type] = 1; renderTable(type); showPopup(`Filter diterapkan: ${filteredData[type].length} data ditemukan.`, "info");
 }
 
 function renderTable(type) {
-  const tbody = document.getElementById(type === "SHSK" ? "tbody-shsk" : type === "SERTIFIKASI" ? "tbody-sertifikasi" : type === "SERVICE" ? "tbody-service" : "tbody-exibhitum");
-  tbody.innerHTML = "";
+  let tbodyId = ""; if (type === "SHSK") tbodyId = "tbody-shsk"; else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi"; else if (type === "SERVICE") tbodyId = "tbody-service"; else tbodyId = "tbody-exibhitum";
+  const tbody = document.getElementById(tbodyId); tbody.innerHTML = "";
   const start = (currentPage[type] - 1) * ROWS_PER_PAGE;
   const pageData = filteredData[type].slice(start, start + ROWS_PER_PAGE);
-  if (pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Data Kosong</td></tr>'; return; }
+  if (pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Data Tidak Ditemukan</td></tr>'; return; }
 
   pageData.forEach((row, i) => {
-    const rowStr = encodeURIComponent(JSON.stringify(row));
-    let tr = `<tr><td>${start + i + 1}</td>`;
-    if (type === "SHSK") {
-      tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${row["TANDA_PENDAFTARAN"]}</td><td>${row["PEMILIK"]}</td><td>${row["TEMPAT_STKK"]}</td><td>${formatDate(row["TANGGAL_STKK"])}</td><td>${row["NO_URUT_STKK"]}</td><td>${row["NO_HAL_STKK"]}</td><td>${row["NO_BUKU_STKK"]}</td><td>${row["STATUS_PENGUKUHAN"]}</td><td>${formatDate(row["TANGGAL_PENGUKUHAN"])}</td>`;
-    } else if (type === "SERTIFIKASI") {
-      tr += `<td>${row["NAMA_PERUSAHAAN"]}</td><td>${row["NAMA_KAPAL"]}</td><td>${row["UKURAN_GT"]}</td><td>${row["CALL_SIGN"]}</td><td>${row["BAHAN_KAPAL"]}</td><td>${row["KETERANGAN"]}</td><td>${row["JENIS_SERTIFIKAT"]}</td><td>${formatDate(row["TANGGAL_TERBIT"])}</td><td>${formatDate(row["TANGGAL_MASA_BERLAKU"])}</td><td>${row["DAERAH_PELAYARAN"]||"-"}</td><td>${row["NOMOR_SERTIFIKAT"]}</td><td>${row["KODE_BILLING"]}</td><td>${row["NAMA_PEMERIKSA"]}</td>`;
-    } else if (type === "SERVICE") {
-      tr += `<td>${row["NAMA_PENYEDIA_JASA"]}</td><td>${row["NAMA_KAPAL"]}</td><td>${row["JENIS_ALAT_YANG_DISERVICE"]}</td><td>${row["JUMLAH"]}</td><td>${formatDate(row["TANGGAL_VALIDASI_SERVICE_REPORT"])}</td>`;
-    } else if (type === "EXIBHITUM") {
-      tr += `<td>${formatDate(row["TANGGAL"])}</td><td>${row["PERUSAHAAN"]}</td><td>${row["JENIS_BUKU"]}</td><td>${row["NAMA_KAPAL"]}</td><td>${row["PENOMORAN"]}</td><td>${row["PUP"]}</td>`;
-    }
-    tr += `<td><button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button><button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button></td></tr>`;
+    const rowStr = encodeURIComponent(JSON.stringify(row)); let tr = `<tr><td>${start + i + 1}</td>`;
+    if (type === "SHSK") { tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${row["TANDA_PENDAFTARAN"]}</td><td>${row["PEMILIK"]}</td><td>${row["TEMPAT_STKK"]}</td><td>${formatDate(row["TANGGAL_STKK"])}</td><td>${row["NO_URUT_STKK"]}</td><td>${row["NO_HAL_STKK"]}</td><td>${row["NO_BUKU_STKK"]}</td><td>${row["STATUS_PENGUKUHAN"]}</td><td>${formatDate(row["TANGGAL_PENGUKUHAN"])}</td>`; } 
+    else if (type === "SERTIFIKASI") { tr += `<td>${row["NAMA_PERUSAHAAN"]}</td><td>${row["NAMA_KAPAL"]}</td><td>${row["UKURAN_GT"]}</td><td>${row["CALL_SIGN"]}</td><td>${row["BAHAN_KAPAL"]}</td><td>${row["KETERANGAN"]}</td><td>${row["JENIS_SERTIFIKAT"]}</td><td>${formatDate(row["TANGGAL_TERBIT"])}</td><td>${formatDate(row["TANGGAL_MASA_BERLAKU"])}</td><td>${row["DAERAH_PELAYARAN"] || "-"}</td><td>${row["NOMOR_SERTIFIKAT"]}</td><td>${row["KODE_BILLING"]}</td><td>${row["NAMA_PEMERIKSA"]}</td>`; } 
+    else if (type === "SERVICE") { const jenisTampil = String(row["JENIS_ALAT_YANG_DISERVICE"]).replace(/\n/g, "<br>"); const jumlahTampil = String(row["JUMLAH"]).replace(/\n/g, "<br>"); tr += `<td>${row["NAMA_PENYEDIA_JASA"]}</td><td>${row["NAMA_KAPAL"]}</td><td style="text-align:left;">${jenisTampil}</td><td style="text-align:center;">${jumlahTampil}</td><td>${formatDate(row["TANGGAL_VALIDASI_SERVICE_REPORT"])}</td>`; } 
+    else if (type === "EXIBHITUM") { tr += `<td>${formatDate(row["TANGGAL"])}</td><td style="text-align:left;">${row["PERUSAHAAN"]}</td><td style="text-align:left;">${row["JENIS_BUKU"]}</td><td style="text-align:left;">${row["NAMA_KAPAL"]}</td><td>${row["PENOMORAN"]}</td><td>${row["PUP"]}</td>`; }
+    tr += `<td><div style="display:flex; justify-content:center; gap:5px;"><button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button><button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button><button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button></div></td></tr>`;
     tbody.innerHTML += tr;
   });
   document.getElementById(`page-info-${type}`).innerText = `Hal ${currentPage[type]}`;
@@ -862,30 +970,18 @@ function prevPage(t) { if (currentPage[t] > 1) { currentPage[t]--; renderTable(t
 function nextPage(t) { if (currentPage[t] * ROWS_PER_PAGE < filteredData[t].length) { currentPage[t]++; renderTable(t); } }
 
 let pendingDelete = null;
-function prepareDelete(type, rowDataStr) {
-  const rowData = JSON.parse(decodeURIComponent(rowDataStr));
-  pendingDelete = { type: type, noUrut: rowData.NO_URUT || rowData["NO"] };
-  document.getElementById("modal-delete").classList.remove("hidden");
-}
-async function executeDelete() {
-  if (!pendingDelete) return;
-  const res = await postData({ action: "delete" + (pendingDelete.type === "SHSK" ? "SHSK" : pendingDelete.type === "SERTIFIKASI" ? "Sertifikasi" : pendingDelete.type === "SERVICE" ? "Service" : "Exibhitum"), noUrut: pendingDelete.noUrut });
-  if (res.status === "SUCCESS") { showPopup("Terhapus!", "success"); loadData(pendingDelete.type); }
-  document.getElementById("modal-delete").classList.add("hidden");
-}
-function closeDeleteModal() { document.getElementById("modal-delete").classList.add("hidden"); }
+function prepareDelete(type, rowDataStr) { const rowData = JSON.parse(decodeURIComponent(rowDataStr)); pendingDelete = { type: type, noUrut: rowData.NO_URUT || rowData["NO URUT"] || rowData["NO"], folderUrl: rowData.LINK_FOLDER }; document.getElementById("modal-delete").classList.remove("hidden"); }
+function closeDeleteModal() { document.getElementById("modal-delete").classList.add("hidden"); pendingDelete = null; }
+async function executeDelete() { if (!pendingDelete) return; const btnConfirm = document.querySelector("#modal-delete .btn-confirm-logout"); const originalHtml = btnConfirm.innerHTML; btnConfirm.innerHTML = '<i class="fa fa-spinner fa-spin"></i>...'; btnConfirm.disabled = true; let action = ""; if (pendingDelete.type === "SHSK") action = "deleteSHSK"; else if (pendingDelete.type === "SERTIFIKASI") action = "deleteSertifikasi"; else if (pendingDelete.type === "SERVICE") action = "deleteService"; else action = "deleteExibhitum"; try { const res = await postData({ action: action, noUrut: pendingDelete.noUrut }); if (res.status === "SUCCESS") { showPopup("Data Berhasil Dihapus!", "success"); loadData(pendingDelete.type); if (typeof updateChartFilter === "function") updateChartFilter(currentFilter); } else { showPopup("Gagal menghapus: " + res.message, "error"); } } catch (error) { showPopup("Gagal koneksi.", "error"); } btnConfirm.innerHTML = originalHtml; btnConfirm.disabled = false; closeDeleteModal(); }
 
-// PENGGUNA DASHBOARD (SIMPLIFIED FOR FULLNESS)
-function initPenggunaDashboard() {
-    const u = JSON.parse(localStorage.getItem("user"));
-    if(u && u.extra) fetchPenggunaFiles(u.extra);
-}
-async function fetchPenggunaFiles(c) {
-    const res = await postData({ action: "getDropdownData", perusahaan: c });
-    if(res.status==="SUCCESS") penggunaFiles = res.data; populateYear();
-}
-function populateYear() { /* ... Logic same as before ... */ }
-// (Remaining filter logic is standard and included implicitly in concept, added minimal here to ensure function existence)
-window.filterMonth = function() {}; window.filterShip = function() {}; window.filterType = function() {};
+let penggunaFiles = [];
+function initPenggunaDashboard() { const u = JSON.parse(localStorage.getItem("user")); if (!u) { window.location.href = "index.html"; return; } document.getElementById("nav-user-name").innerText = u.nama; document.getElementById("nav-company-name").innerText = u.extra || "PERUSAHAAN"; document.getElementById("mob-user-name").innerText = u.nama; document.getElementById("mob-company-name").innerText = u.extra || "PERUSAHAAN"; fetchPenggunaFiles(u.extra); }
+async function fetchPenggunaFiles(c) { const dropdownTahun = document.getElementById("reqTahun"); dropdownTahun.innerHTML = "<option>Loading...</option>"; dropdownTahun.disabled = true; try { const res = await postData({ action: "getDropdownData", perusahaan: c }); if (res.status === "SUCCESS") { penggunaFiles = res.data; if (penggunaFiles.length > 0) { populateYear(); } else { dropdownTahun.innerHTML = '<option value="">Data Tidak Ditemukan</option>'; showPopup("Belum ada arsip.", "info"); } } else { dropdownTahun.innerHTML = '<option value="">Gagal</option>'; showPopup("Gagal data.", "error"); } } catch (e) { dropdownTahun.innerHTML = '<option value="">Error</option>'; } }
+function populateYear() { const s = document.getElementById("reqTahun"); const y = [...new Set(penggunaFiles.map((i) => i.tahun))].sort().reverse(); s.innerHTML = '<option value="">-- Pilih Tahun --</option>'; y.forEach((v) => { if (v && v !== "-") s.innerHTML += `<option value="${v}">${v}</option>`; }); s.disabled = false; }
+window.filterMonth = function () { const y = document.getElementById("reqTahun").value; const s = document.getElementById("reqBulan"); s.innerHTML = '<option value="">-- Pilih Bulan --</option>'; document.getElementById("reqKapal").innerHTML = '<option value="">-- Pilih Tahun Dulu --</option>'; if (!y) { s.disabled = true; return; } const m = [...new Set(penggunaFiles.filter((i) => i.tahun == y).map((i) => i.bulan))].sort((a, b) => a - b); m.forEach((v) => (s.innerHTML += `<option value="${v}">${getMonthName(v)}</option>`)); s.disabled = false; };
+window.filterShip = function () { const y = document.getElementById("reqTahun").value; const m = document.getElementById("reqBulan").value; const s = document.getElementById("reqKapal"); s.innerHTML = '<option value="">-- Pilih Kapal --</option>'; if (!m) { s.disabled = true; return; } const ships = [...new Set(penggunaFiles.filter((i) => i.tahun == y && i.bulan == m).map((i) => i.kapal))]; ships.forEach((v) => (s.innerHTML += `<option value="${v}">${v}</option>`)); s.disabled = false; };
+window.filterType = function () { const y = document.getElementById("reqTahun").value; const m = document.getElementById("reqBulan").value; const sh = document.getElementById("reqKapal").value; const s = document.getElementById("reqJenis"); s.innerHTML = ""; if (!sh) { s.disabled = true; return; } const docs = penggunaFiles.filter((i) => i.tahun == y && i.bulan == m && i.kapal == sh); if (docs.length === 0) { s.innerHTML = "<option>Nihil</option>"; } else { docs.forEach((v) => (s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`)); } s.disabled = false; };
+window.handleRequestSubmit = async function (e) { e.preventDefault(); const s = document.getElementById("reqJenis"); const opts = Array.from(s.selectedOptions); if (opts.length === 0 || s.value === "") { showPopup("Pilih dokumen!", "error"); return; } const jenisList = opts.map((o) => o.text); const sampleLink = s.value; const u = JSON.parse(localStorage.getItem("user")); const btn = document.getElementById("btnKirimReq"); const originalText = btn.innerText; btn.innerText = "MENGIRIM..."; btn.disabled = true; await postData({ action: "sendReportEmail", email: u.id, namaUser: u.nama, perusahaan: u.extra, kapal: document.getElementById("reqKapal").value, jenis: jenisList, tahun: document.getElementById("reqTahun").value, bulan: getMonthName(document.getElementById("reqBulan").value), link: sampleLink }); showPopup("Link terkirim!", "success"); btn.innerText = originalText; btn.disabled = false; };
+function getMonthName(i) { const m = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"]; return m[i - 1] || i; }
 
 // --- END OF FILE ---
