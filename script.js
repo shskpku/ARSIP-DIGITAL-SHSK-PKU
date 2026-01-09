@@ -1,14 +1,36 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (FINAL v8.0 - EXIBHITUM SPLIT LOGIC)
-   Fitur: Exibhitum Multi-Select, Dashboard Split, Mobile Audio Fix, 
-   SHSK/Sertifikasi/Service CRUD, Annual Report Grid.
+   SCRIPT.JS - ULTIMATE MASTER (FINAL v9.0 - MULTI-CERTIFICATE LUXURY)
+   Fitur: Exibhitum Split Panel, Multi-Cert (Paket/Eceran), Dashboard Split, 
+   Mobile Audio Fix, SHSK/Service CRUD, Annual Report Grid.
    ==================================================================== */
 
 // ⚠️ PASTE URL WEB APP (DEPLOYMENT BARU) KAMU DI SINI
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
-// --- DATABASE KODE SURAT ---
+// --- DATABASE LIST SERTIFIKAT ---
+const CERT_LIST = [
+  "KONSTRUKSI",
+  "PERLENGKAPAN",
+  "RADIO",
+  "GARIS MUAT",
+  "SNPP",
+  "IOPP",
+  "ISPP",
+  "IAPP",
+  "ANTIFOULING",
+  "BALLAST WATER MANAGEMENT",
+  "KESELAMATAN KLM",
+  "KESELAMATAN MOORING",
+  "DOC",
+  "SMC",
+  "IMDG",
+  "PENGESAHAN GAMBAR",
+  "ENDORS KONSTRUKSI",
+  "ENDORS PERLENGKAPAN",
+  "ENDORS RADIO",
+];
+// Database Kode Surat Default
 const CERT_CODES = {
   KONSTRUKSI: "AL.501",
   PERLENGKAPAN: "AL.501",
@@ -39,6 +61,7 @@ const CERT_CODES = {
 };
 
 let globalCompanySet = new Set();
+let currentPacketMode = null; // 'NTR', 'OB', atau null (Eceran)
 
 // ====================================================================
 // 1. UTILITIES & HELPER (AUDIO FIX MOBILE)
@@ -92,7 +115,7 @@ function speakWelcome(namaLengkap) {
     document.addEventListener("touchstart", unlockAudio);
     document.addEventListener("scroll", unlockAudio);
   } else {
-    runSpeech(); // Desktop langsung gas
+    runSpeech();
   }
 }
 
@@ -191,7 +214,6 @@ async function postData(data) {
 
 function injectCustomStyles() {
   // Styles sudah dipindah ke style.css
-  // Fungsi ini dikosongkan atau dihapus jika CSS sudah terpisah
 }
 
 function initSmartSearch() {
@@ -216,32 +238,6 @@ function updateCompanyDatalist(dataArray, keyName) {
     });
   }
 }
-
-window.handleCertTypeChange = function (index) {
-  const jenisEl = document.querySelector(
-    `select[name="jenisSertifikat_${index}"]`
-  );
-  const dynamicContainer = document.getElementById(
-    `dynamic-cert-fields-${index}`
-  );
-  if (!jenisEl || !dynamicContainer) return;
-  const jenis = jenisEl.value;
-  const currentYear = new Date().getFullYear();
-  let html = "";
-
-  if (jenis === "NTR") {
-    html = `<div class="special-section"><span class="special-label"><i class="fa fa-layer-group"></i> PAKET NTR (3 SERTIFIKAT)</span><div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div><div style="margin-bottom:8px;"><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div><div><label style="font-size:12px;">3. No. Radio</label><input type="text" name="noSertifikat_RADIO_${index}" class="form-control" value="AL.502///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_RADIO_${index}" style="margin-top:2px;"></div></div>`;
-  } else if (jenis === "OIL BARGE") {
-    html = `<div class="special-section" style="border-color: var(--gold);"><span class="special-label"><i class="fa fa-ship"></i> PAKET OIL BARGE (2 SERTIFIKAT)</span><div style="margin-bottom:8px;"><label style="font-size:12px;">1. No. Konstruksi</label><input type="text" name="noSertifikat_KONSTRUKSI_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_KONSTRUKSI_${index}" style="margin-top:2px;"></div><div><label style="font-size:12px;">2. No. Perlengkapan</label><input type="text" name="noSertifikat_PERLENGKAPAN_${index}" class="form-control" value="AL.501///KSOP.PKU/${currentYear}"><input type="file" name="sertifikat_PERLENGKAPAN_${index}" style="margin-top:2px;"></div></div>`;
-  } else {
-    let autoVal =
-      CERT_CODES[jenis] && CERT_CODES[jenis] !== "SPECIAL"
-        ? `${CERT_CODES[jenis]}///KSOP.PKU/${currentYear}`
-        : "";
-    html = `<label>No Sertifikat <input type="text" name="noSertifikat_${index}" class="form-control" value="${autoVal}"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${index}"></label>`;
-  }
-  dynamicContainer.innerHTML = html;
-};
 
 // ====================================================================
 // 2. DASHBOARD & ANNUAL REPORT LOGIC
@@ -542,7 +538,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultBtn = document.querySelector(".filter-btn.active");
     if (defaultBtn) updateChartFilter("year", defaultBtn);
 
-    // NEW: INIT EXIBHITUM CHART IF PAGE LOADED
     if (document.getElementById("chartExibhitum"))
       updateExibChart(
         "year",
@@ -729,7 +724,6 @@ async function initCharts(p = "year") {
 
 // CHART EXIBHITUM (NEW)
 async function updateExibChart(period, btn, type) {
-  // type: 'ex' or 'psh'
   if (type === "ex")
     document
       .querySelectorAll(".filter-btn-ex")
@@ -740,10 +734,9 @@ async function updateExibChart(period, btn, type) {
       .forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
 
-  const res = await postData({ action: "getDashboardStats", period: period }); // Re-use API
+  const res = await postData({ action: "getDashboardStats", period: period });
   if (res.status === "SUCCESS") {
     const d = res.data;
-    // Data format dari backend: [DECK, MESIN, OIL, SAMPAH, GMDSS]
     const labels = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
     const dataSet =
       type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
@@ -814,10 +807,135 @@ function loadProfilePetugas() {
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE (UPDATED FOR EXIBHITUM)
+// 7. BULK INPUT ENGINE (MULTI-CERTIFICATE LOGIC)
 // ====================================================================
 
-// --- LOGIC MULTI-SELECT EXIBHITUM ---
+// LOGIKA PAKET (NTR/OB) & RENDER KARTU SERTIFIKAT DINAMIS
+window.togglePacketMode = function (index, mode, btn) {
+  const parent = btn.parentNode;
+  const isAlreadyActive = btn.classList.contains("active");
+
+  // Reset UI
+  parent
+    .querySelectorAll(".btn-packet")
+    .forEach((b) => b.classList.remove("active"));
+  const checkboxes = document.querySelectorAll(
+    `input[name="cert_select_${index}"]`
+  );
+
+  if (isAlreadyActive) {
+    // Matikan Paket (Balik ke Eceran)
+    currentPacketMode = null;
+    checkboxes.forEach((cb) => {
+      cb.checked = false;
+      cb.disabled = false;
+    });
+  } else {
+    // Aktifkan Paket
+    currentPacketMode = mode;
+    btn.classList.add("active");
+
+    // Auto-check sesuai paket
+    const targets =
+      mode === "NTR"
+        ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"]
+        : ["KONSTRUKSI", "PERLENGKAPAN"];
+    checkboxes.forEach((cb) => {
+      if (targets.includes(cb.value)) {
+        cb.checked = true;
+        cb.disabled = true;
+      } // Lock checkbox
+      else {
+        cb.checked = false;
+        cb.disabled = true;
+      } // Disable others
+    });
+  }
+  renderCertForms(index);
+};
+
+window.renderCertForms = function (index) {
+  const container = document.getElementById(`dynamic-cert-forms-${index}`);
+  const selectedCerts = Array.from(
+    document.querySelectorAll(`input[name="cert_select_${index}"]:checked`)
+  ).map((c) => c.value);
+
+  if (selectedCerts.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:20px; color:#aaa; border:2px dashed #ddd; border-radius:10px;">Belum ada sertifikat yang dipilih.</div>`;
+    return;
+  }
+
+  let html = "";
+  const currentYear = new Date().getFullYear();
+
+  // SKENARIO A: PAKET MODE (NTR / OB)
+  if (currentPacketMode) {
+    const title =
+      currentPacketMode === "NTR"
+        ? "FORMULIR PAKET NTR (New Type Registration)"
+        : "FORMULIR PAKET OIL BARGE";
+    html += `
+            <div class="shared-form-section">
+                <div style="font-weight:bold; color:var(--navy); margin-bottom:10px; border-bottom:1px solid var(--gold); padding-bottom:5px;">
+                    <i class="fa fa-box-open"></i> ${title}
+                </div>
+                <div class="grid-form">
+                    <label>Kode Billing (Shared) <input type="text" name="billing_shared_${index}" class="form-control" placeholder="Isi 1 kode untuk semua"></label>
+                    <label>Masa Berlaku (Shared) <input type="date" name="berlaku_shared_${index}" class="form-control"></label>
+                </div>
+                <div class="grid-form" style="margin-top:10px;">
+                    <label>Upload Permohonan (1 File) <input type="file" name="permohonan_shared_${index}"></label>
+                    <label>Upload Laporan Pemeriksaan (1 File) <input type="file" name="laporan_shared_${index}"></label>
+                    <label>Upload PNBP (1 File) <input type="file" name="pnbp_shared_${index}"></label>
+                </div>
+            </div>
+        `;
+
+    // Loop Kartu Detail per Sertifikat
+    selectedCerts.forEach((cert) => {
+      let defaultNo = "AL.501";
+      if (cert === "RADIO") defaultNo = "AL.502";
+      html += `
+                <div class="cert-dynamic-card">
+                    <span class="cert-card-badge">${cert}</span>
+                    <div class="grid-form">
+                        <label>Nomor Sertifikat <input type="text" name="no_sert_${cert}_${index}" class="form-control" value="${defaultNo}///KSOP.PKU/${currentYear}"></label>
+                        <label>Upload File Sertifikat <input type="file" name="file_sert_${cert}_${index}"></label>
+                    </div>
+                </div>
+            `;
+    });
+  }
+  // SKENARIO B: ECERAN MODE (Mixed)
+  else {
+    selectedCerts.forEach((cert) => {
+      let defaultNo =
+        CERT_CODES[cert] && CERT_CODES[cert] !== "SPECIAL"
+          ? CERT_CODES[cert]
+          : "";
+      html += `
+                <div class="cert-dynamic-card" style="border-left-color:#ff9f43;">
+                    <span class="cert-card-badge" style="background:#ff9f43;">${cert}</span>
+                    <div class="grid-form">
+                        <label>Nomor Sertifikat <input type="text" name="no_sert_${cert}_${index}" class="form-control" value="${defaultNo}///KSOP.PKU/${currentYear}"></label>
+                        <label>Masa Berlaku <input type="date" name="berlaku_${cert}_${index}" class="form-control"></label>
+                        <label>Kode Billing <input type="text" name="billing_${cert}_${index}" class="form-control"></label>
+                    </div>
+                    <div class="grid-form" style="margin-top:10px;">
+                        <label>Upload Permohonan <input type="file" name="permohonan_${cert}_${index}"></label>
+                        <label>Upload Laporan <input type="file" name="laporan_${cert}_${index}"></label>
+                        <label>Upload PNBP <input type="file" name="pnbp_${cert}_${index}"></label>
+                        <label>Upload Sertifikat <input type="file" name="file_sert_${cert}_${index}"></label>
+                    </div>
+                </div>
+            `;
+    });
+  }
+
+  container.innerHTML = html;
+};
+
+// --- LOGIC MULTI-SELECT EXIBHITUM (PANEL KIRI-KANAN + FORM MIRRORING) ---
 window.updateExibhitumForms = function (index) {
   const container = document.getElementById(`dynamic-nomor-${index}`);
   const books = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
@@ -835,9 +953,7 @@ window.updateExibhitumForms = function (index) {
     if (ck && ck.checked) {
       htmlEx += `
                 <div style="margin-bottom:8px;">
-                    <label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">
-                        ${buku}
-                    </label>
+                    <label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">${buku}</label>
                     <input type="text" name="nomorSurat_EX.${buku}_${index}" class="form-control" value="${defaultNomor}" style="font-size:12px; padding:6px;">
                     <input type="hidden" name="jenisBukuGenerate_${index}[]" value="EX. ${buku}"> 
                 </div>
@@ -853,9 +969,7 @@ window.updateExibhitumForms = function (index) {
     if (ck && ck.checked) {
       htmlPsh += `
                 <div style="margin-bottom:8px;">
-                    <label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">
-                        ${buku}
-                    </label>
+                    <label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">${buku}</label>
                     <input type="text" name="nomorSurat_PSH.${buku}_${index}" class="form-control" value="${defaultNomor}" style="font-size:12px; padding:6px;">
                     <input type="hidden" name="jenisBukuGenerate_${index}[]" value="PSH. ${buku}"> 
                 </div>
@@ -870,27 +984,20 @@ window.updateExibhitumForms = function (index) {
   } else {
     container.innerHTML = `
             <div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                
                 <div style="background:#f0f8ff; padding:12px; border-radius:8px; border:1px dashed var(--neon-blue);">
-                    <div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">
-                        NO. SURAT EXIBHITUM
-                    </div>
+                    <div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">NO. SURAT EXIBHITUM</div>
                     ${
                       htmlEx ||
                       '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
                     }
                 </div>
-
                 <div style="background:#fff8f0; padding:12px; border-radius:8px; border:1px dashed #ff9f43;">
-                    <div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">
-                        NO. SURAT PENGESAHAN
-                    </div>
+                    <div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">NO. SURAT PENGESAHAN</div>
                     ${
                       htmlPsh ||
                       '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
                     }
                 </div>
-
             </div>
         `;
   }
@@ -938,8 +1045,92 @@ function renderBulkForm(type) {
 
     if (type === "SHSK") {
       html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Penerbitan STKK</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pengukuhan STKK</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Jenis Dokumen / STKK <select name="statusPengukuhan_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option><option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option><option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option><option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option><option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option><option value="DAFTAR UKUR">DAFTAR UKUR</option><option value="PAS BESAR">PAS BESAR</option><option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option><option value="PAS BESAR ENDORSMENT">PAS BESAR ENDORSMENT</option><option value="SURAT LAUT ENDORSMENT">SURAT LAUT ENDORSMENT</option><option value="PAS KECIL">PAS KECIL</option><option value="PAS KECIL ENDORSMENT">PAS KECIL ENDORSMENT</option><option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option><option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option><option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option><option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option><option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option><option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option><option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option></select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>STKK <input type="file" name="stkk_${i}"></label><label>Grosse <input type="file" name="grosse_${i}"></label><label>Surat Ukur <input type="file" name="ukur_${i}"></label><label>PNBP <input type="file" name="pnbp_${i}"></label></div></div></div>`;
-    } else if (type === "SERTIFIKASI") {
-      html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label><label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label><label>Bahan <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label><label>Daerah Pelayaran <select name="daerahPelayaran_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SEMUA LAUTAN">SEMUA LAUTAN</option><option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option><option value="LOKAL">LOKAL</option><option value="TERBATAS">TERBATAS</option><option value="AREA PELABUHAN">AREA PELABUHAN</option></select></label><label>Keterangan <select name="keterangan_${i}" class="form-control"><option value="">(Kosong)</option><option value="DOCKING">DOCKING</option><option value="1 X PELAYARAN">1 X PELAYARAN</option></select></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Data Sertifikat</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Jenis Sertifikat <select name="jenisSertifikat_${i}" class="form-control" onchange="handleCertTypeChange(${i})"><option value="">-- Pilih Jenis --</option><option value="KONSTRUKSI">KONSTRUKSI</option><option value="PERLENGKAPAN">PERLENGKAPAN</option><option value="RADIO">RADIO</option><option value="NTR">NTR (PAKET 3 ITEM)</option><option value="OIL BARGE">OIL BARGE (PAKET 2 ITEM)</option><option value="ENDORS KONSTRUKSI">ENDORS KONSTRUKSI</option><option value="ENDORS PERLENGKAPAN">ENDORS PERLENGKAPAN</option><option value="ENDORS RADIO">ENDORS RADIO</option><option value="GARIS MUAT">GARIS MUAT</option><option value="KESELAMATAN KLM">KESELAMATAN KLM</option><option value="KESELAMATAN MOORING">KESELAMATAN MOORING</option><option value="IMDG">IMDG</option><option value="SNPP">SNPP</option><option value="ENDORS SNPP">ENDORS SNPP</option><option value="IOPP">IOPP</option><option value="ENDORS IOPP">ENDORS IOPP</option><option value="ISPP">ISPP</option><option value="ENDORS ISPP">ENDORS ISPP</option><option value="IAPP">IAPP</option><option value="ENDORS IAPP">ENDORS IAPP</option><option value="BALLAST WATER MANAGEMENT">BALLAST WATER MANAGEMENT</option><option value="ANTIFOULING">ANTIFOULING</option><option value="DOC">DOC</option><option value="ENDORS DOC">ENDORS DOC</option><option value="SMC">SMC</option><option value="SMC INTERMEDIATE">SMC INTERMEDIATE</option><option value="PENGESAHAN GAMBAR KAPAL">PENGESAHAN GAMBAR KAPAL</option></select></label><label>Tgl Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label><label>Masa Berlaku <input type="date" name="tglBerlaku_${i}" class="form-control"></label><label>Kode Billing <input type="text" name="kodeBilling_${i}" class="form-control"></label></div><div id="dynamic-cert-fields-${i}" style="margin-top:15px;"><label>No Sertifikat <input type="text" name="noSertifikat_${i}" class="form-control"></label><label>Upload Sertifikat <input type="file" name="sertifikat_${i}"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>3. Pemeriksa</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Nama Pemeriksa <select name="pemeriksa_${i}" class="form-control"><option value="">-- Pilih Pemeriksa --</option><option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option><option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option><option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option></select></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>4. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>Evaluasi <input type="file" name="evaluasi_${i}"></label><label>Laporan Pemeriksaan <input type="file" name="laporan_pemeriksaan_${i}"></label><label>Surat Tugas <input type="file" name="surat_tugas_${i}"></label><label>PNBP <input type="file" name="pnbp_${i}"></label><label>Foto/Dokumentasi <input type="file" name="foto_${i}" multiple></label></div></div></div>`;
+    }
+
+    // --- FORM SERTIFIKASI ULTIMATE v3.0 ---
+    else if (type === "SERTIFIKASI") {
+      html += `
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal & Umum</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                <div class="grid-form">
+                    <label>Nama Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
+                    <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
+                    <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
+                    <label>Bahan Kapal <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase" list="bahanList"></label>
+                    <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
+                    <label>Daerah Pelayaran 
+                        <select name="daerahPelayaran_${i}" class="form-control">
+                            <option value="">-- Pilih --</option>
+                            <option value="SEMUA LAUTAN">SEMUA LAUTAN</option>
+                            <option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option>
+                            <option value="LOKAL">LOKAL</option>
+                            <option value="TERBATAS">TERBATAS</option>
+                            <option value="AREA PELABUHAN">AREA PELABUHAN</option>
+                        </select>
+                    </label>
+                    <label>Tanggal Terbit (Sama Semua) <input type="date" name="tglTerbit_${i}" class="form-control"></label>
+                    <label>Pemeriksa <select name="pemeriksa_${i}" class="form-control">
+                        <option value="">-- Pilih --</option>
+                        <option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option>
+                        <option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option>
+                        <option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option>
+                    </select></label>
+                </div>
+                <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
+                    <label style="font-weight:bold; font-size:12px;">Upload Shared (1 File untuk Semua):</label>
+                    <div class="grid-form" style="margin-top:5px;">
+                        <label>Evaluasi <input type="file" name="evaluasi_${i}"></label>
+                        <label>Surat Tugas <input type="file" name="surat_tugas_${i}"></label>
+                        <label>Foto/Dokumentasi <input type="file" name="foto_${i}" multiple></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Pilih Jenis Sertifikat</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                
+                <div class="packet-btn-group">
+                    <div class="btn-packet ntr" onclick="togglePacketMode(${i}, 'NTR', this)">
+                        <i class="fa fa-layer-group"></i> PAKET NTR
+                        <div style="font-size:10px; font-weight:normal;">Konst + Lengkap + Radio</div>
+                    </div>
+                    <div class="btn-packet ob" onclick="togglePacketMode(${i}, 'OB', this)">
+                        <i class="fa fa-ship"></i> PAKET OIL BARGE
+                        <div style="font-size:10px; font-weight:normal;">Konst + Lengkap</div>
+                    </div>
+                </div>
+
+                <div class="cert-grid-container">
+                    ${CERT_LIST.map(
+                      (cert) => `
+                        <label class="cert-check-card">
+                            <input type="checkbox" name="cert_select_${i}" value="${cert}" onchange="renderCertForms(${i})">
+                            <div class="cert-card-ui">${cert}</div>
+                        </label>
+                    `
+                    ).join("")}
+                </div>
+            </div>
+        </div>
+
+        <div id="dynamic-cert-forms-${i}" style="margin-top:20px;"></div>
+      `;
+      // Init Bahan List if not exist
+      if (!document.getElementById("bahanList")) {
+        const dl = document.createElement("datalist");
+        dl.id = "bahanList";
+        ["BAJA", "KAYU", "FIBER REINFORCED PLASTIC", "ALUMINIUM"].forEach(
+          (b) => {
+            const o = document.createElement("option");
+            o.value = b;
+            dl.appendChild(o);
+          }
+        );
+        document.body.appendChild(dl);
+      }
     } else if (type === "SERVICE") {
       html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi & Alat</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div><div class="service-selection-box"><label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label><div class="service-options-container"><label class="tool-checkbox-card"><input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})"><div class="tool-card-design"><div class="tool-icon"><i class="fa fa-life-ring"></i></div><span class="tool-text">1. LIFERAFT</span></div></label><label class="tool-checkbox-card"><input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})"><div class="tool-card-design"><div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div><span class="tool-text">2. FIRE EXTINGUISHER</span></div></label></div><div id="qty-container-${i}" class="qty-dynamic-area"></div></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Permohonan <input type="file" name="permohonan_${i}"></label><label>STKK <input type="file" name="stkk_${i}"></label><label>Sertifikat ILR PMK <input type="file" name="sertifikat_${i}"></label></div></div></div>`;
     } else if (type === "EXIBHITUM") {
@@ -1079,17 +1270,7 @@ async function handleBulkSubmit(type) {
       inputs.forEach((inp) => {
         const keyParts = inp.name.split("_"); // nomorSurat_EX.DECK_1
         const jenisKey = keyParts[1]; // EX.DECK
-        // Ambil label dari hidden input
-        const labelInput = form.querySelector(
-          `input[name="jenisBukuGenerate_${i}[]"][value^="${jenisKey.replace(
-            ".",
-            ". "
-          )}"]`
-        );
-
-        // Format label jadi "EX. DECK" (spasi setelah titik)
-        let formattedJenis = jenisKey.replace(".", ". ");
-
+        let formattedJenis = jenisKey.replace(".", ". "); // EX. DECK
         jenisBukuArray.push(formattedJenis);
         nomorSuratArray.push(inp.value);
       });
@@ -1132,6 +1313,7 @@ async function handleBulkSubmit(type) {
           reader.readAsDataURL(file);
         });
       }
+      items.push(itemData);
     }
     // --- HANDLE SERVICE (EXISTING) ---
     else if (type === "SERVICE") {
@@ -1191,8 +1373,128 @@ async function handleBulkSubmit(type) {
           });
         }
       }
+      items.push(itemData);
     }
-    // --- HANDLE STANDARD (SHSK/SERTIFIKASI) ---
+    // --- HANDLE SERTIFIKASI (MULTI-CERT LOGIC) ---
+    else if (type === "SERTIFIKASI") {
+      const inputs = form.querySelectorAll(`[name$="_${i}"]`);
+      const globalData = {};
+      inputs.forEach((input) => {
+        const key = input.name.replace(`_${i}`, "");
+        if (
+          input.type !== "file" &&
+          !key.startsWith("no_sert") &&
+          !key.startsWith("billing") &&
+          !key.startsWith("berlaku") &&
+          !key.startsWith("cert_select")
+        ) {
+          globalData[key] = input.value.toUpperCase();
+        }
+      });
+
+      const selectedCerts = Array.from(
+        form.querySelectorAll(`input[name="cert_select_${i}"]:checked`)
+      ).map((c) => c.value);
+      if (selectedCerts.length === 0) continue;
+
+      const isPacket = currentPacketMode !== null;
+
+      // Helper Baca File (Promise Wrapper)
+      const getFile = (inputName) => {
+        const el = form.querySelector(`[name="${inputName}"]`);
+        if (!el || el.files.length === 0) return null;
+        return el.files[0];
+      };
+
+      const read = (file) =>
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) =>
+            resolve({ ext: file.name.split(".").pop(), data: e.target.result });
+          reader.readAsDataURL(file);
+        });
+
+      // 1. Load Global Files
+      const sharedFilesBase = [];
+      const fEval = getFile(`evaluasi_${i}`);
+      if (fEval)
+        sharedFilesBase.push({ jenis: "evaluasi", ...(await read(fEval)) });
+      const fTugas = getFile(`surat_tugas_${i}`);
+      if (fTugas)
+        sharedFilesBase.push({ jenis: "surat_tugas", ...(await read(fTugas)) });
+      const fFoto = form.querySelector(`[name="foto_${i}"]`);
+      if (fFoto && fFoto.files.length > 0) {
+        for (let x = 0; x < fFoto.files.length; x++)
+          sharedFilesBase.push({
+            jenis: `FOTO ${x + 1}`,
+            ...(await read(fFoto.files[x])),
+          });
+      }
+
+      // 2. Loop Certificates
+      for (const cert of selectedCerts) {
+        let rowItem = { ...globalData };
+        rowItem.jenisSertifikat = cert;
+        rowItem.files = [...sharedFilesBase]; // Start with global files
+
+        if (isPacket) {
+          rowItem.kodeBilling = form.querySelector(
+            `[name="billing_shared_${i}"]`
+          ).value;
+          rowItem.tglBerlaku = form.querySelector(
+            `[name="berlaku_shared_${i}"]`
+          ).value;
+          rowItem.noSertifikat = form.querySelector(
+            `[name="no_sert_${cert}_${i}"]`
+          ).value;
+
+          const fPerm = getFile(`permohonan_shared_${i}`);
+          if (fPerm)
+            rowItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+          const fLap = getFile(`laporan_shared_${i}`);
+          if (fLap)
+            rowItem.files.push({
+              jenis: "laporan_pemeriksaan",
+              ...(await read(fLap)),
+            });
+          const fPnbp = getFile(`pnbp_shared_${i}`);
+          if (fPnbp)
+            rowItem.files.push({ jenis: "pnbp", ...(await read(fPnbp)) });
+
+          const fSert = getFile(`file_sert_${cert}_${i}`);
+          if (fSert)
+            rowItem.files.push({ jenis: `sertifikat`, ...(await read(fSert)) });
+        } else {
+          rowItem.kodeBilling = form.querySelector(
+            `[name="billing_${cert}_${i}"]`
+          ).value;
+          rowItem.tglBerlaku = form.querySelector(
+            `[name="berlaku_${cert}_${i}"]`
+          ).value;
+          rowItem.noSertifikat = form.querySelector(
+            `[name="no_sert_${cert}_${i}"]`
+          ).value;
+
+          const fPerm = getFile(`permohonan_${cert}_${i}`);
+          if (fPerm)
+            rowItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+          const fLap = getFile(`laporan_${cert}_${i}`);
+          if (fLap)
+            rowItem.files.push({
+              jenis: "laporan_pemeriksaan",
+              ...(await read(fLap)),
+            });
+          const fPnbp = getFile(`pnbp_${cert}_${i}`);
+          if (fPnbp)
+            rowItem.files.push({ jenis: "pnbp", ...(await read(fPnbp)) });
+          const fSert = getFile(`file_sert_${cert}_${i}`);
+          if (fSert)
+            rowItem.files.push({ jenis: `sertifikat`, ...(await read(fSert)) });
+        }
+        items.push(rowItem);
+      }
+    }
+    // --- HANDLE SHSK (EXISTING) ---
     else {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       inputs.forEach((input) => {
@@ -1208,124 +1510,29 @@ async function handleBulkSubmit(type) {
       });
       if (!hasData) continue;
 
-      // File Logic Standard
       itemData.files = [];
-      let fileFields =
-        type === "SHSK"
-          ? ["permohonan", "stkk", "grosse", "ukur", "pnbp"]
-          : [
-              "permohonan",
-              "evaluasi",
-              "laporan_pemeriksaan",
-              "surat_tugas",
-              "pnbp",
-              "foto",
-            ];
+      let fileFields = ["permohonan", "stkk", "grosse", "ukur", "pnbp"];
 
       for (const field of fileFields) {
         const fileInput = form.querySelector(`[name="${field}_${i}"]`);
         if (fileInput && fileInput.files.length > 0) {
-          if (field === "foto") {
-            // Multi-file
-            for (let f = 0; f < fileInput.files.length; f++) {
-              const file = fileInput.files[f];
-              const reader = new FileReader();
-              await new Promise((r) => {
-                reader.onload = (e) => {
-                  itemData.files.push({
-                    jenis: `FOTO ${f + 1}`,
-                    ext: file.name.split(".").pop(),
-                    data: e.target.result,
-                  });
-                  r();
-                };
-                reader.readAsDataURL(file);
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          await new Promise((r) => {
+            reader.onload = (e) => {
+              itemData.files.push({
+                jenis: field,
+                ext: file.name.split(".").pop(),
+                data: e.target.result,
               });
-            }
-          } else {
-            // Single file
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            await new Promise((r) => {
-              reader.onload = (e) => {
-                itemData.files.push({
-                  jenis: field,
-                  ext: file.name.split(".").pop(),
-                  data: e.target.result,
-                });
-                r();
-              };
-              reader.readAsDataURL(file);
-            });
-          }
+              r();
+            };
+            reader.readAsDataURL(file);
+          });
         }
       }
-
-      // NTR / Oil Barge Logic (Sertifikasi Only)
-      if (type === "SERTIFIKASI") {
-        const jenis = itemData.jenisSertifikat;
-        if (jenis === "NTR") {
-          const subs = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
-          for (const s of subs) {
-            const f = form.querySelector(`[name="sertifikat_${s}_${i}"]`);
-            if (f && f.files.length > 0) {
-              const file = f.files[0];
-              const reader = new FileReader();
-              await new Promise((r) => {
-                reader.onload = (e) => {
-                  itemData.files.push({
-                    jenis: `sertifikat_${s}`,
-                    ext: file.name.split(".").pop(),
-                    data: e.target.result,
-                  });
-                  r();
-                };
-                reader.readAsDataURL(file);
-              });
-            }
-          }
-        } else if (jenis === "OIL BARGE") {
-          const subs = ["KONSTRUKSI", "PERLENGKAPAN"];
-          for (const s of subs) {
-            const f = form.querySelector(`[name="sertifikat_${s}_${i}"]`);
-            if (f && f.files.length > 0) {
-              const file = f.files[0];
-              const reader = new FileReader();
-              await new Promise((r) => {
-                reader.onload = (e) => {
-                  itemData.files.push({
-                    jenis: `sertifikat_${s}`,
-                    ext: file.name.split(".").pop(),
-                    data: e.target.result,
-                  });
-                  r();
-                };
-                reader.readAsDataURL(file);
-              });
-            }
-          }
-        } else {
-          const f = form.querySelector(`[name="sertifikat_${i}"]`);
-          if (f && f.files.length > 0) {
-            const file = f.files[0];
-            const reader = new FileReader();
-            await new Promise((r) => {
-              reader.onload = (e) => {
-                itemData.files.push({
-                  jenis: "sertifikat",
-                  ext: file.name.split(".").pop(),
-                  data: e.target.result,
-                });
-                r();
-              };
-              reader.readAsDataURL(file);
-            });
-          }
-        }
-      }
+      items.push(itemData);
     }
-
-    items.push(itemData);
   }
 
   if (items.length === 0) {
@@ -1416,10 +1623,7 @@ function editData(type, rowDataStr) {
     }
   };
 
-  // --- PERBAIKAN DISINI (DATA.NO untuk Exibhitum) ---
   setVal("noUrut", rowData.NO_URUT || rowData["NO"]);
-  // --------------------------------------------------
-
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
   if (type === "SHSK") {
@@ -1435,19 +1639,37 @@ function editData(type, rowDataStr) {
     setVal("statusPengukuhan", rowData.STATUS_PENGUKUHAN);
     setVal("tglPengukuhan", rowData.TANGGAL_PENGUKUHAN);
   } else if (type === "SERTIFIKASI") {
+    // LOGIC EDIT SERTIFIKASI BARU (AUTO-SELECT)
     setVal("perusahaan", rowData.NAMA_PERUSAHAAN);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("ukuran", rowData.UKURAN_GT);
     setVal("callSign", rowData.CALL_SIGN);
     setVal("bahan", rowData.BAHAN_KAPAL);
-    setVal("keterangan", rowData.KETERANGAN);
-    setVal("jenisSertifikat", rowData.JENIS_SERTIFIKAT);
-    setVal("tglTerbit", rowData.TANGGAL_TERBIT);
-    setVal("tglBerlaku", rowData.TANGGAL_MASA_BERLAKU);
     setVal("daerahPelayaran", rowData.DAERAH_PELAYARAN);
-    setVal("noSertifikat", rowData.NOMOR_SERTIFIKAT);
-    setVal("kodeBilling", rowData.KODE_BILLING);
+    setVal("tglTerbit", rowData.TANGGAL_TERBIT);
     setVal("pemeriksa", rowData.NAMA_PEMERIKSA);
+
+    // Auto Check Certificate
+    const certCheck = form.querySelector(
+      `input[name="cert_select_1"][value="${rowData.JENIS_SERTIFIKAT}"]`
+    );
+    if (certCheck) {
+      certCheck.checked = true;
+      renderCertForms(1); // Trigger form rendering
+
+      // Fill Detail
+      setVal(`no_sert_${rowData.JENIS_SERTIFIKAT}`, rowData.NOMOR_SERTIFIKAT);
+      setVal(
+        `berlaku_${rowData.JENIS_SERTIFIKAT}`,
+        rowData.TANGGAL_MASA_BERLAKU
+      );
+      setVal(`billing_${rowData.JENIS_SERTIFIKAT}`, rowData.KODE_BILLING);
+
+      // Disable checkbox after selecting
+      form
+        .querySelectorAll(`input[name="cert_select_1"]`)
+        .forEach((c) => (c.disabled = true));
+    }
   } else if (type === "SERVICE") {
     setVal("namaPenyediaJasa", rowData.NAMA_PENYEDIA_JASA);
     setVal("namaKapal", rowData.NAMA_KAPAL);
@@ -1484,13 +1706,9 @@ function editData(type, rowDataStr) {
     setVal("perusahaan", rowData.PERUSAHAAN);
     setVal("namaKapal", rowData.NAMA_KAPAL);
     setVal("pup", rowData.PUP);
-
-    const jb = rowData.JENIS_BUKU || ""; // Contoh: "EX. DECK" atau "PSH. MESIN"
-
-    // Parsing Data
-    let prefix = ""; // EX atau PSH
+    const jb = rowData.JENIS_BUKU || "";
+    let prefix = "";
     let bookType = "";
-
     if (jb.startsWith("EX")) {
       prefix = "EX";
       bookType = jb.replace("EX. ", "").trim();
@@ -1498,16 +1716,11 @@ function editData(type, rowDataStr) {
       prefix = "PSH";
       bookType = jb.replace("PSH. ", "").trim();
     }
-
-    // Cari checkbox yang sesuai format nama baru: check_EX_DECK_1
     const targetCheck = form.querySelector(
       `input[name="check_${prefix}_${bookType}_1"]`
     );
     if (targetCheck) targetCheck.checked = true;
-
     updateExibhitumForms(1);
-
-    // Isi Nomor Surat
     const noSuratInput = form.querySelector(
       `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
     );
@@ -1515,7 +1728,6 @@ function editData(type, rowDataStr) {
       noSuratInput.value = rowData.PENOMORAN;
       noSuratInput.disabled = true;
     }
-
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
@@ -1837,7 +2049,6 @@ function renderTable(type) {
       )}</td>`;
     } else if (type === "EXIBHITUM") {
       // TANGGAL, PERUSAHAAN, JENIS_BUKU, NAMA_KAPAL, PENOMORAN, PUP
-      // Alignment: Default Justify (CSS td). Override for specific columns.
       tr += `<td>${formatDate(row["TANGGAL"])}</td>
                <td style="text-align:left;">${row["PERUSAHAAN"]}</td>
                <td style="text-align:left;">${row["JENIS_BUKU"]}</td>
@@ -1873,9 +2084,7 @@ function prepareDelete(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   pendingDelete = {
     type: type,
-    // --- PERBAIKAN DISINI (CHECK 'NO' JUGA) ---
     noUrut: rowData.NO_URUT || rowData["NO URUT"] || rowData["NO"],
-    // ------------------------------------------
     folderUrl: rowData.LINK_FOLDER,
   };
   document.getElementById("modal-delete").classList.remove("hidden");
