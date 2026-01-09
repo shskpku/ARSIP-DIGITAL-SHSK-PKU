@@ -8,58 +8,66 @@
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
-// --- DATABASE LIST SERTIFIKAT ---
+// --- DATABASE LIST SERTIFIKAT (UPDATED) ---
 const CERT_LIST = [
   "KONSTRUKSI",
   "PERLENGKAPAN",
   "RADIO",
-  "GARIS MUAT",
-  "SNPP",
-  "IOPP",
-  "ISPP",
-  "IAPP",
-  "ANTIFOULING",
-  "BALLAST WATER MANAGEMENT",
-  "KESELAMATAN KLM",
-  "KESELAMATAN MOORING",
-  "DOC",
-  "SMC",
-  "IMDG",
-  "PENGESAHAN GAMBAR",
   "ENDORS KONSTRUKSI",
   "ENDORS PERLENGKAPAN",
   "ENDORS RADIO",
+  "GARIS MUAT",
+  "SNPP",
+  "ENDORS SNPP",
+  "IOPP",
+  "ENDORS IOPP",
+  "ISPP",
+  "ENDORS ISPP",
+  "IAPP",
+  "ENDORS IAPP",
+  "ANTIFOULING",
+  "BALLAST WATER MANAGEMENT",
+  "ENDORS BALLAST WATER MANAGEMENT",
+  "KESELAMATAN KLM",
+  "KESELAMATAN MOORING",
+  "DOC",
+  "ENDORS DOC",
+  "SMC",
+  "SMC INTERMEDIATE",
+  "IMDG",
+  "PENGESAHAN GAMBAR"
 ];
-// Database Kode Surat Default
+
+// Database Kode Surat Default (UPDATED)
 const CERT_CODES = {
-  KONSTRUKSI: "AL.501",
-  PERLENGKAPAN: "AL.501",
-  RADIO: "AL.502",
+  "KONSTRUKSI": "AL.501",
+  "PERLENGKAPAN": "AL.501",
+  "RADIO": "AL.502",
   "ENDORS KONSTRUKSI": "AL.501",
   "ENDORS PERLENGKAPAN": "AL.501",
   "ENDORS RADIO": "AL.502",
   "GARIS MUAT": "AL.509",
   "KESELAMATAN KLM": "AL.501",
   "KESELAMATAN MOORING": "AL.501",
-  IMDG: "AL.503",
-  SNPP: "AL.601",
+  "IMDG": "AL.503",
+  "SNPP": "AL.601",
   "ENDORS SNPP": "AL.601",
-  IOPP: "AL.602",
+  "IOPP": "AL.602",
   "ENDORS IOPP": "AL.602",
-  ISPP: "AL.602",
+  "ISPP": "AL.602",
   "ENDORS ISPP": "AL.602",
-  IAPP: "AL.602",
+  "IAPP": "AL.602",
   "ENDORS IAPP": "AL.602",
   "BALLAST WATER MANAGEMENT": "AL.601",
-  ANTIFOULING: "AL.601",
-  DOC: "AL.602",
+  "ENDORS BALLAST WATER MANAGEMENT": "AL.601",
+  "ANTIFOULING": "AL.601",
+  "DOC": "AL.602",
   "ENDORS DOC": "AL.602",
-  SMC: "AL.602",
+  "SMC": "AL.602",
   "SMC INTERMEDIATE": "AL.602",
-  NTR: "SPECIAL",
-  "OIL BARGE": "SPECIAL",
+  "NTR": "SPECIAL",
+  "OIL BARGE": "SPECIAL"
 };
-
 let globalCompanySet = new Set();
 let currentPacketMode = null; // 'NTR', 'OB', atau null (Eceran)
 
