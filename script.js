@@ -3,7 +3,7 @@
    SCRIPT.JS - ULTIMATE MASTER (V13.0)
    ==================================================================== */
 
-// ⚠️ UPDATE URL WEB APP TERBARU KAMU DI SINI
+// ---- API URL GOOGLE APPSCRIPT ---
 const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
 // --- DATABASE LIST SERTIFIKAT (LENGKAP) ---
@@ -703,7 +703,7 @@ function renderBulkForm(type) {
     }
     
     else if (type === "SERVICE") {
-        html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
+        html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
         <div class="service-selection-box">
             <label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label>
             <div class="service-options-container">
@@ -731,7 +731,7 @@ function renderBulkForm(type) {
         </div></div></div>`;
     }
     else if (type === "EXIBHITUM") {
-        html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${["DECK","MESIN","OIL","SAMPAH","GMDSS"].map(b=>`<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div><div><b>PENGESAHAN</b><br>${["DECK","MESIN","OIL","SAMPAH","GMDSS"].map(b=>`<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>
+        html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${["DECK","MESIN","OIL","SAMPAH","GMDSS"].map(b=>`<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div><div><b>PENGESAHAN</b><br>${["DECK","MESIN","OIL","SAMPAH","GMDSS"].map(b=>`<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>
         <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
         <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
         <label>Billing <div class="file-dropzone"><input type="file" name="billing_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
