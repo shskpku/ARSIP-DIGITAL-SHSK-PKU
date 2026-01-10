@@ -1,12 +1,12 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (FINAL v10.7 - RESTORED LOGIC + HYBRID)
-   Fitur: Hybrid Cert (Paket + Eceran), Smart Form Global, UI Bulk Color,
-   Exibhitum Split, Dashboard Split, Mobile Audio Fix, Full Logic.
+   SCRIPT.JS - ULTIMATE MASTER (FINAL v11.0 - LOGIN FIX & POLISHED)
+   Fitur: Hybrid Cert, Smart Form, UI Bulk Color, Exibhitum Split (5 Buku),
+   Auto-Collapse Menu, Dashboard Split, Mobile Audio Fix, CRUD Complete.
+   Fixes: Login Animation, Welcome Popup, Consistent Loading State.
    ==================================================================== */
 
 // ⚠️ UPDATE URL WEB APP TERBARU KAMU DI SINI
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
 // --- DATABASE LIST SERTIFIKAT (LENGKAP) ---
 const CERT_LIST = [
@@ -36,7 +36,6 @@ const CERT_CODES = {
 };
 
 let globalCompanySet = new Set();
-// State untuk menyimpan mode paket per form (index 1-5)
 let packetModeState = {}; 
 
 // ====================================================================
@@ -224,20 +223,39 @@ async function handleLogin(e, role) {
   let inputIdStr, inputPassStr, btnIdStr;
   if (role === "PETUGAS") { inputIdStr = "nip"; inputPassStr = "passPetugas"; btnIdStr = "btnSubmitPetugas"; } 
   else { inputIdStr = "email"; inputPassStr = "passPengguna"; btnIdStr = "btnSubmitPengguna"; }
+  
   const userId = document.getElementById(inputIdStr).value.trim();
   const password = document.getElementById(inputPassStr).value.trim();
   const btnElem = document.getElementById(btnIdStr);
+  
   if (!userId || !password) { showPopup("Data tidak lengkap.", "error"); return; }
+  
   const originalText = btnElem.innerHTML;
-  btnElem.innerHTML = '<i class="fa fa-spinner fa-spin"></i>...'; btnElem.disabled = true;
+  // FIX 1: ANIMASI LOADING TUNGGAL & JELAS
+  btnElem.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...'; 
+  btnElem.disabled = true;
+  
   try {
     const res = await postData({ action: "login", role: role, id: userId, password: password });
     if (res.status === "SUCCESS") {
       localStorage.setItem("user", JSON.stringify(res.data));
       sessionStorage.removeItem("welcome_played");
-      window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html";
-    } else { showPopup(res.message, "error"); btnElem.innerHTML = originalText; btnElem.disabled = false; }
-  } catch (error) { showPopup("Gagal koneksi.", "error"); btnElem.innerHTML = originalText; btnElem.disabled = false; }
+      
+      // FIX 2: POPUP NAMA MUNCUL & DELAY REDIRECT
+      showPopup(`Login Berhasil! Halo ${res.data.nama}`, "success");
+      setTimeout(() => {
+          window.location.href = role === "PETUGAS" ? "petugas.html" : "pengguna.html";
+      }, 1500); 
+    } else { 
+        showPopup(res.message, "error"); 
+        btnElem.innerHTML = originalText; 
+        btnElem.disabled = false; 
+    }
+  } catch (error) { 
+      showPopup("Gagal koneksi.", "error"); 
+      btnElem.innerHTML = originalText; 
+      btnElem.disabled = false; 
+  }
 }
 
 async function handleRegisterSubmit(e) {
@@ -248,11 +266,15 @@ async function handleRegisterSubmit(e) {
   const perusahaan = document.getElementById("reg-perusahaan").value;
   const btn = document.getElementById("btn-register-submit");
   if (!nama || !email || !password || !perusahaan) { showPopup("Harap isi semua kolom!", "error"); return; }
-  const originalText = btn.innerText; btn.innerText = "MEMPROSES..."; btn.disabled = true;
+  
+  const originalText = btn.innerText; 
+  btn.innerText = "MEMPROSES..."; 
+  btn.disabled = true;
+  
   try {
     const res = await postData({ action: "register", nama: nama, email: email, password: password, perusahaan: perusahaan });
     if (res.status === "SUCCESS") {
-      showPopup("Pendaftaran Berhasil!", "success");
+      showPopup("Pendaftaran Berhasil! Silakan Login", "success");
       setTimeout(() => { window.location.href = "index.html"; }, 2000);
     } else { showPopup(res.message, "error"); btn.innerText = originalText; btn.disabled = false; }
   } catch (err) { showPopup("Gagal koneksi server.", "error"); btn.innerText = originalText; btn.disabled = false; }
@@ -316,17 +338,39 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function toggleSidebar() { document.getElementById("sidebar").classList.toggle("show"); document.getElementById("sidebar-overlay").classList.toggle("active"); }
+
 function showSection(id, el) {
   document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
   document.querySelectorAll(".menu-item").forEach((m) => m.classList.remove("active"));
   if (el) el.classList.add("active");
+  
   if (id.includes("data")) {
     const type = id.includes("shsk") ? "SHSK" : id.includes("sertifikasi") ? "SERTIFIKASI" : id.includes("service") ? "SERVICE" : "EXIBHITUM";
     loadData(type);
   }
+  
+  if (id === 'dashboard') {
+     document.querySelectorAll('.submenu-container').forEach(el => {
+        el.classList.remove('show');
+        if (el.previousElementSibling) el.previousElementSibling.classList.remove('open');
+     });
+  }
 }
-function toggleSubmenu(id) { document.getElementById(id).classList.toggle("show"); }
+
+function toggleSubmenu(id) {
+  document.querySelectorAll('.submenu-container').forEach(el => {
+    if (el.id !== id) {
+      el.classList.remove('show');
+      if (el.previousElementSibling) el.previousElementSibling.classList.remove('open');
+    }
+  });
+
+  const t = document.getElementById(id);
+  t.classList.toggle("show");
+  if (t.previousElementSibling) t.previousElementSibling.classList.toggle("open");
+}
+
 window.toggleAccordion = function (headerElement) { headerElement.closest(".accordion-item").classList.toggle("open"); };
 
 // ====================================================================
@@ -650,7 +694,27 @@ function renderBulkForm(type) {
     }
     
     else if (type === "SERVICE") {
-        html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div><div class="service-selection-box"><label class="tool-checkbox-card"><input type="checkbox" name="check_liferaft_${i}" onchange="updateServiceQty(${i})"><div class="tool-card-design">LIFERAFT</div></label><label class="tool-checkbox-card"><input type="checkbox" name="check_fe_${i}" onchange="updateServiceQty(${i})"><div class="tool-card-design">FIRE EXT</div></label></div><div id="qty-container-${i}"></div></div></div>
+        html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
+        <div class="service-selection-box">
+            <label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label>
+            <div class="service-options-container">
+                <label class="tool-checkbox-card">
+                    <input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})">
+                    <div class="tool-card-design">
+                        <div class="tool-icon"><i class="fa fa-life-ring"></i></div>
+                        <span class="tool-text">1. LIFERAFT</span>
+                    </div>
+                </label>
+                <label class="tool-checkbox-card">
+                    <input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})">
+                    <div class="tool-card-design">
+                        <div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div>
+                        <span class="tool-text">2. FIRE EXTINGUISHER</span>
+                    </div>
+                </label>
+            </div>
+            <div id="qty-container-${i}" class="qty-dynamic-area"></div>
+        </div></div></div>
         <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
         <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
         <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
@@ -658,7 +722,7 @@ function renderBulkForm(type) {
         </div></div></div>`;
     }
     else if (type === "EXIBHITUM") {
-        html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${["DECK","MESIN","OIL"].map(b=>`<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div><div><b>PENGESAHAN</b><br>${["DECK","MESIN","OIL"].map(b=>`<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>
+        html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${["DECK","MESIN","OIL","SAMPAH","GMDSS"].map(b=>`<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div><div><b>PENGESAHAN</b><br>${["DECK","MESIN","OIL","SAMPAH","GMDSS"].map(b=>`<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`).join('')}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>
         <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
         <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
         <label>Billing <div class="file-dropzone"><input type="file" name="billing_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
@@ -818,9 +882,6 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
     showPopup("Berhasil!", "success"); form.reset(); renderBulkForm(type); loadData(type);
   } else { showPopup(res.message, "error"); }
 }
-
-// ... (EDIT DATA, DELETE DATA, PENGGUNA DASHBOARD - SAMA SEPERTI SEBELUMNYA) ...
-// Saya sertakan lagi agar benar-benar FULL COPY:
 
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
@@ -983,5 +1044,3 @@ window.filterShip = function () { const y = document.getElementById("reqTahun").
 window.filterType = function () { const y = document.getElementById("reqTahun").value; const m = document.getElementById("reqBulan").value; const sh = document.getElementById("reqKapal").value; const s = document.getElementById("reqJenis"); s.innerHTML = ""; if (!sh) { s.disabled = true; return; } const docs = penggunaFiles.filter((i) => i.tahun == y && i.bulan == m && i.kapal == sh); if (docs.length === 0) { s.innerHTML = "<option>Nihil</option>"; } else { docs.forEach((v) => (s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`)); } s.disabled = false; };
 window.handleRequestSubmit = async function (e) { e.preventDefault(); const s = document.getElementById("reqJenis"); const opts = Array.from(s.selectedOptions); if (opts.length === 0 || s.value === "") { showPopup("Pilih dokumen!", "error"); return; } const jenisList = opts.map((o) => o.text); const sampleLink = s.value; const u = JSON.parse(localStorage.getItem("user")); const btn = document.getElementById("btnKirimReq"); const originalText = btn.innerText; btn.innerText = "MENGIRIM..."; btn.disabled = true; await postData({ action: "sendReportEmail", email: u.id, namaUser: u.nama, perusahaan: u.extra, kapal: document.getElementById("reqKapal").value, jenis: jenisList, tahun: document.getElementById("reqTahun").value, bulan: getMonthName(document.getElementById("reqBulan").value), link: sampleLink }); showPopup("Link terkirim!", "success"); btn.innerText = originalText; btn.disabled = false; };
 function getMonthName(i) { const m = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"]; return m[i - 1] || i; }
-
-// --- END OF FILE ---
