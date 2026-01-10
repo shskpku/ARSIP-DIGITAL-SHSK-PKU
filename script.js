@@ -1,8 +1,8 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (FINAL v11.1 - FULL DATASETS)
+   SCRIPT.JS - ULTIMATE MASTER (FINAL v11.4 - DATASETS FIXED)
    Fitur: Hybrid Cert, Smart Form, UI Bulk Color, Exibhitum Split,
    Auto-Collapse Menu, Dashboard Split, Mobile Audio Fix, CRUD Complete.
-   Fixes: List STKK Lengkap, List Pemeriksa Lengkap, Daerah Pelayaran Lengkap.
+   Fixes: List STKK 19 Item (Sesuai Foto), Pemeriksa 3 Nama, Daerah Pelayaran.
    ==================================================================== */
 
 // ⚠️ UPDATE URL WEB APP TERBARU KAMU DI SINI
@@ -615,7 +615,28 @@ function renderBulkForm(type) {
 
     if (type === "SHSK") {
       html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div></div>
-      <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div><div class="grid-form" style="margin-top:10px;"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option><option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option><option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option><option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option><option value="SURAT LAUT">SURAT LAUT</option><option value="SURAT LAUT SEMENTARA">SURAT LAUT SEMENTARA</option><option value="PAS BESAR">PAS BESAR</option><option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option><option value="PAS KECIL">PAS KECIL</option><option value="PAS SUNGAI DAN DANAU">PAS SUNGAI DAN DANAU</option><option value="GROSSE AKTA">GROSSE AKTA</option><option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option><option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option><option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option><option value="GANTI NAMA">GANTI NAMA</option><option value="GANTI MESIN">GANTI MESIN</option><option value="PEROMBAKAN">PEROMBAKAN</option></select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div>
+      <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div><div class="grid-form" style="margin-top:10px;"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control">
+        <option value="">-- Pilih --</option>
+        <option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option>
+        <option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option>
+        <option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option>
+        <option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option>
+        <option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option>
+        <option value="DAFTAR UKUR">DAFTAR UKUR</option>
+        <option value="PAS BESAR">PAS BESAR</option>
+        <option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option>
+        <option value="PAS BESAR ENDORSTMENT">PAS BESAR ENDORSTMENT</option>
+        <option value="SURAT LAUT ENDORSTMENT">SURAT LAUT ENDORSTMENT</option>
+        <option value="PAS KECIL">PAS KECIL</option>
+        <option value="PAS KECIL ENDORSTMENT">PAS KECIL ENDORSTMENT</option>
+        <option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option>
+        <option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option>
+        <option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option>
+        <option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option>
+        <option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option>
+        <option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option>
+        <option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option>
+      </select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div>
       <div class="grid-form" style="margin-top:10px;">
         <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
         <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
@@ -636,9 +657,21 @@ function renderBulkForm(type) {
                     <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
                     <label>Bahan Kapal <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label>
                     <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
-                    <label>Daerah Pelayaran <select name="daerahPelayaran_${i}" class="form-control"><option value="">-- Pilih --</option><option value="SEMUA LAUTAN">SEMUA LAUTAN</option><option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option><option value="LOKAL">LOKAL</option><option value="TERBATAS">TERBATAS</option><option value="PELABUHAN">PELABUHAN</option><option value="SUNGAI DAN DANAU">SUNGAI DAN DANAU</option></select></label>
+                    <label>Daerah Pelayaran <select name="daerahPelayaran_${i}" class="form-control">
+                        <option value="">-- Pilih --</option>
+                        <option value="SEMUA LAUTAN">SEMUA LAUTAN</option>
+                        <option value="PERAIRAN INDONESIA">PERAIRAN INDONESIA</option>
+                        <option value="LOKAL">LOKAL</option>
+                        <option value="TERBATAS">TERBATAS</option>
+                        <option value="PELABUHAN">PELABUHAN</option>
+                    </select></label>
                     <label>Tanggal Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
-                    <label>Pemeriksa <select name="pemeriksa_${i}" class="form-control"><option value="">-- Pilih --</option><option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option><option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option><option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option><option value="RAGIL KURNIAWAN">RAGIL KURNIAWAN</option><option value="FAISAL">FAISAL</option><option value="RAHMAT">RAHMAT</option><option value="LUKMAN HAKIM">LUKMAN HAKIM</option><option value="PRAMUDYA">PRAMUDYA</option></select></label>
+                    <label>Pemeriksa <select name="pemeriksa_${i}" class="form-control">
+                        <option value="">-- Pilih --</option>
+                        <option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option>
+                        <option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option>
+                        <option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option>
+                    </select></label>
                 </div>
                 <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
                     <label style="font-weight:bold; font-size:12px;">Upload Shared (1 File untuk Semua):</label>
