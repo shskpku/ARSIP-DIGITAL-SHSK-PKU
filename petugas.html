@@ -154,6 +154,10 @@
             <div class="icon-box"><i class="fa fa-tools"></i></div>
             <div><h3>Service Station</h3><p>Sertifikasi alat keselamatan (Liferaft & Fire Extinguisher).</p></div>
           </div>
+          <div class="info-card">
+            <div class="icon-box"><i class="fa fa-book-open"></i></div>
+            <div><h3>Exibhitum & Pengesahan</h3><p>Pengesahan dan Exibhitum logbook kapal.</p></div>
+          </div>
         </div>
 
         <div class="charts-container chart-grid">
@@ -172,7 +176,7 @@
             </div>
           </div>
           <div class="chart-card">
-            <h3><i class="fa fa-bullseye" style="color: var(--gold)"></i> Target 2025</h3>
+            <h3><i class="fa fa-bullseye" style="color: var(--gold)"></i> Target 2026</h3>
             <div style="height: 200px; display: flex; justify-content: center; position: relative;">
               <canvas id="doughnutChart"></canvas>
               <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
@@ -229,8 +233,8 @@
         <form id="formSHSK" onsubmit="event.preventDefault(); handleBulkSubmit('SHSK')">
           <div id="bulk-container-SHSK"></div>
           <div id="btn-container-SHSK" class="form-actions">
-            <button type="submit" class="btn-gold-save" id="btn-save-SHSK"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
-            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SHSK" onclick="cancelEdit('SHSK')">BATAL</button>
+            <button type="submit" class="btn-gold-save" id="btn-save-SHSK"><i class="fa fa-save"></i>SAVE</button>
+            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SHSK" onclick="cancelEdit('SHSK')">CANCEL</button>
           </div>
         </form>
       </div>
@@ -274,8 +278,8 @@
         <form id="formSertifikasi" onsubmit="event.preventDefault(); handleBulkSubmit('SERTIFIKASI')">
           <div id="bulk-container-SERTIFIKASI"></div>
           <div id="btn-container-SERTIFIKASI" class="form-actions">
-            <button type="submit" class="btn-gold-save" id="btn-save-SERTIFIKASI"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
-            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERTIFIKASI" onclick="cancelEdit('SERTIFIKASI')">BATAL</button>
+            <button type="submit" class="btn-gold-save" id="btn-save-SERTIFIKASI"><i class="fa fa-save"></i>SAVE</button>
+            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERTIFIKASI" onclick="cancelEdit('SERTIFIKASI')">CANCEL</button>
           </div>
         </form>
       </div>
@@ -304,13 +308,13 @@
             <button onclick="applyFilter('SERTIFIKASI')" class="btn-action btn-filter"><i class="fa fa-filter"></i> Terapkan</button>
           </div>
         </div>
-        <div class="table-card"><div class="table-responsive"><table class="data-table" id="table-sertifikasi"><thead><tr><th>NO</th><th>PERUSAHAAN</th><th>NAMA KAPAL</th><th>UKURAN</th><th>CALL SIGN</th><th>BAHAN</th><th>KET</th><th>JENIS</th><th>TERBIT</th><th>MASA BERLAKU</th><th>DAERAH PELAYARAN</th><th>NO SERT</th><th>BILLING</th><th>PEMERIKSA</th><th>ACTION</th></tr></thead><tbody id="tbody-sertifikasi"></tbody></table></div></div>
+        <div class="table-card"><div class="table-responsive"><table class="data-table" id="table-sertifikasi"><thead><tr><th>NO</th><th>PERUSAHAAN</th><th>NAMA KAPAL</th><th>UKURAN (GT)</th><th>CALL SIGN</th><th>BAHAN</th><th>KET</th><th>JENIS</th><th>TERBIT</th><th>MASA BERLAKU</th><th>DAERAH PELAYARAN</th><th>NO SERT</th><th>NO. PUP</th><th>PEMERIKSA</th><th>ACTION</th></tr></thead><tbody id="tbody-sertifikasi"></tbody></table></div></div>
         <div class="pagination-controls"><button onclick="prevPage('SERTIFIKASI')"><</button><span id="page-info-SERTIFIKASI">Hal 1</span><button onclick="nextPage('SERTIFIKASI')">></button></div>
       </div>
 
       <div id="sec-service-input" class="hidden">
         <div class="section-header">
-          <h2>Input Arsip Service Station</h2>
+          <h2>Input Arsip ILR & PMK</h2>
           <div style="display: flex; align-items: center; gap: 10px">
             <label style="font-weight: 600; color: var(--navy)">Jumlah Data:</label>
             <select id="bulkCountService" class="form-control" style="width: 70px; padding: 5px" onchange="renderBulkForm('SERVICE')">
@@ -321,15 +325,15 @@
         <form id="formService" onsubmit="event.preventDefault(); handleBulkSubmit('SERVICE')">
           <div id="bulk-container-SERVICE"></div>
           <div id="btn-container-SERVICE" class="form-actions">
-            <button type="submit" class="btn-gold-save" id="btn-save-SERVICE"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
-            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERVICE" onclick="cancelEdit('SERVICE')">BATAL</button>
+            <button type="submit" class="btn-gold-save" id="btn-save-SERVICE"><i class="fa fa-save"></i>SAVE</button>
+            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-SERVICE" onclick="cancelEdit('SERVICE')">CANCEL</button>
           </div>
         </form>
       </div>
 
       <div id="sec-service-data" class="hidden">
         <div class="section-header">
-          <h2>Data Arsip Service Station</h2>
+          <h2>Data Arsip ILR & PMK</h2>
           <div class="header-actions">
             <button class="btn-action btn-refresh" onclick="loadData('SERVICE')"><i class="fa fa-sync"></i> Refresh</button>
             <button class="btn-action btn-export" onclick="exportTriple('SERVICE')"><i class="fa fa-file-excel"></i> Export Laporan</button>
@@ -366,15 +370,15 @@
         <form id="formExibhitum" onsubmit="event.preventDefault(); handleBulkSubmit('EXIBHITUM')">
           <div id="bulk-container-EXIBHITUM"></div>
           <div id="btn-container-EXIBHITUM" class="form-actions">
-            <button type="submit" class="btn-gold-save" id="btn-save-EXIBHITUM"><i class="fa fa-save"></i> SIMPAN SEMUA DATA</button>
-            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-EXIBHITUM" onclick="cancelEdit('EXIBHITUM')">BATAL</button>
+            <button type="submit" class="btn-gold-save" id="btn-save-EXIBHITUM"><i class="fa fa-save"></i>SAVE</button>
+            <button type="button" class="btn-cancel-edit hidden" id="btn-cancel-EXIBHITUM" onclick="cancelEdit('EXIBHITUM')">CANCEL</button>
           </div>
         </form>
       </div>
 
       <div id="sec-exibhitum-data" class="hidden">
         <div class="section-header">
-          <h2>Data Buku Pelaut & Pengesahan</h2>
+          <h2>Data Exibhitum & Pengesahan</h2>
           <div class="header-actions">
             <button class="btn-action btn-refresh" onclick="loadData('EXIBHITUM')"><i class="fa fa-sync"></i> Refresh</button>
             <button class="btn-action btn-export" onclick="exportTriple('EXIBHITUM')"><i class="fa fa-file-excel"></i> Export Laporan</button>
