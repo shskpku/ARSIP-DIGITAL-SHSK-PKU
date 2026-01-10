@@ -1,8 +1,6 @@
+
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (FINAL v11.4 - DATASETS FIXED)
-   Fitur: Hybrid Cert, Smart Form, UI Bulk Color, Exibhitum Split,
-   Auto-Collapse Menu, Dashboard Split, Mobile Audio Fix, CRUD Complete.
-   Fixes: List STKK 19 Item (Sesuai Foto), Pemeriksa 3 Nama, Daerah Pelayaran.
+   SCRIPT.JS - ULTIMATE MASTER (V13.0)
    ==================================================================== */
 
 // ⚠️ UPDATE URL WEB APP TERBARU KAMU DI SINI
@@ -1055,5 +1053,38 @@ window.filterShip = function () { const y = document.getElementById("reqTahun").
 window.filterType = function () { const y = document.getElementById("reqTahun").value; const m = document.getElementById("reqBulan").value; const sh = document.getElementById("reqKapal").value; const s = document.getElementById("reqJenis"); s.innerHTML = ""; if (!sh) { s.disabled = true; return; } const docs = penggunaFiles.filter((i) => i.tahun == y && i.bulan == m && i.kapal == sh); if (docs.length === 0) { s.innerHTML = "<option>Nihil</option>"; } else { docs.forEach((v) => (s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`)); } s.disabled = false; };
 window.handleRequestSubmit = async function (e) { e.preventDefault(); const s = document.getElementById("reqJenis"); const opts = Array.from(s.selectedOptions); if (opts.length === 0 || s.value === "") { showPopup("Pilih dokumen!", "error"); return; } const jenisList = opts.map((o) => o.text); const sampleLink = s.value; const u = JSON.parse(localStorage.getItem("user")); const btn = document.getElementById("btnKirimReq"); const originalText = btn.innerText; btn.innerText = "MENGIRIM..."; btn.disabled = true; await postData({ action: "sendReportEmail", email: u.id, namaUser: u.nama, perusahaan: u.extra, kapal: document.getElementById("reqKapal").value, jenis: jenisList, tahun: document.getElementById("reqTahun").value, bulan: getMonthName(document.getElementById("reqBulan").value), link: sampleLink }); showPopup("Link terkirim!", "success"); btn.innerText = originalText; btn.disabled = false; };
 function getMonthName(i) { const m = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"]; return m[i - 1] || i; }
+
+// ====================================================================
+// NEW FEATURES: CINEMATIC INTRO & MODAL LOGIC
+// ====================================================================
+function initCinematic() {
+  // Hanya jalankan animasi jika elemen intro ada
+  const intro = document.getElementById('cinematic-intro');
+  if (intro) {
+    // Timer 3.5 detik untuk slide up (sesuai CSS)
+    setTimeout(() => {
+      // Intro akan hilang otomatis lewat CSS animation 'slideUp'
+      // Tapi kita bisa tambahkan logika cleanup jika perlu
+      console.log("Welcome to SHSK Digital System");
+    }, 3500);
+  }
+}
+
+function openLoginModal() {
+  const modal = document.getElementById('login-modal-overlay');
+  if (modal) {
+    modal.classList.remove('hidden');
+    // Optional: Reset form state saat dibuka
+    document.getElementById('passPetugas').value = "";
+    document.getElementById('passPengguna').value = "";
+  }
+}
+
+function closeLoginModal() {
+  const modal = document.getElementById('login-modal-overlay');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
 
 // --- END OF FILE ---
