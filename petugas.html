@@ -188,8 +188,10 @@
                 <div class="chart-header">
                     <h3><i class="fa fa-book" style="color: var(--neon-blue)"></i> Statistik EXIBHITUM</h3>
                     <div class="chart-filter-group">
-                        <button class="filter-btn-ex active" onclick="updateExibChart('year', this, 'ex')">Thn</button>
-                        <button class="filter-btn-ex" onclick="updateExibChart('month', this, 'ex')">Bln</button>
+                        <button class="filter-btn-ex" onclick="updateExibChart('today', this, 'ex')">Hari</button>
+                        <button class="filter-btn-ex" onclick="updateExibChart('week', this, 'ex')">Minggu</button>
+                        <button class="filter-btn-ex" onclick="updateExibChart('month', this, 'ex')">Bulan</button>
+                        <button class="filter-btn-ex active" onclick="updateExibChart('year', this, 'ex')">Tahun</button>
                     </div>
                 </div>
                 <div style="height: 200px; position: relative">
@@ -200,8 +202,10 @@
                 <div class="chart-header">
                     <h3><i class="fa fa-stamp" style="color: var(--neon-blue)"></i> Statistik PENGESAHAN</h3>
                     <div class="chart-filter-group">
-                        <button class="filter-btn-psh active" onclick="updateExibChart('year', this, 'psh')">Thn</button>
-                        <button class="filter-btn-psh" onclick="updateExibChart('month', this, 'psh')">Bln</button>
+                        <button class="filter-btn-psh" onclick="updateExibChart('today', this, 'psh')">Hari</button>
+                        <button class="filter-btn-psh" onclick="updateExibChart('week', this, 'psh')">Minggu</button>
+                        <button class="filter-btn-psh" onclick="updateExibChart('month', this, 'psh')">Bulan</button>
+                        <button class="filter-btn-psh active" onclick="updateExibChart('year', this, 'psh')">Tahun</button>
                     </div>
                 </div>
                 <div style="height: 200px; position: relative">
@@ -210,7 +214,7 @@
             </div>
         </div>
 
-        </div>
+      </div>
 
       <div id="sec-shsk-input" class="hidden">
         <div class="section-header">
