@@ -13,20 +13,22 @@
     
     <div id="cinematic-intro">
       <div class="intro-content">
-        <img src="logo-shsk.png" alt="Logo SHSK" class="intro-logo pulse-anim">
+        <img src="logo-jangkar.png" alt="Initializing..." class="intro-logo pulse-anim">
+        
         <h2 class="intro-title">SISTEM DIGITALISASI SHSK</h2>
         <div class="typing-container">
-          <span class="typing-text">> Initializing System...</span>
+          <span class="typing-text">> Initializing System Database...</span>
         </div>
       </div>
     </div>
 
     <div id="landing-hero">
       <div class="hero-overlay"></div>
+      
       <div class="hero-content fade-in-up">
         <img src="logo-shsk.png" alt="Logo SHSK" class="hero-logo glow-effect">
+        
         <div class="hero-titles">
-          <h4 class="sub-agency">KEMENTERIAN PERHUBUNGAN</h4>
           <h1 class="main-title">DIGITALISASI ARSIP SEKSI SHSK</h1>
           <h3 class="sub-title">KSOP KELAS II PEKANBARU</h3>
           <p class="hero-desc">
@@ -40,7 +42,7 @@
         
         <div class="hero-footer">
           <p>&copy; 2026 Seksi SHSK - KSOP Kelas II Pekanbaru. All Rights Reserved.</p>
-          <small>Version 13.0 (Cinematic Build)</small>
+          <small>Version 13.1</small>
         </div>
       </div>
     </div>
@@ -75,13 +77,13 @@
                 <input type="checkbox" id="checkPetugas" /> Ingat Saya
               </label>
             </div>
-            <button type="submit" class="btn-neon" id="btnSubmitPetugas">MASUK SISTEM</button>
+            <button type="submit" class="btn-neon" id="btnSubmitPetugas">LOGIN SISTEM</button>
           </form>
   
           <form id="formPengguna" class="hidden" onsubmit="handleLogin(event, 'PENGGUNA')">
             <div class="input-group">
               <input type="email" id="email" required autocomplete="off" placeholder=" " />
-              <label>Email Perusahaan</label>
+              <label>Email</label>
             </div>
             <div class="input-group">
               <input type="password" id="passPengguna" required autocomplete="off" placeholder=" " />
@@ -112,6 +114,7 @@
     <script src="script.js"></script>
 
     <script>
+      // Fungsi Toggle Password
       function togglePass(icon) {
         const input = icon.parentElement.querySelector("input");
         if (input.type === "password") {
@@ -123,6 +126,7 @@
         }
       }
 
+      // Fungsi Switch Role (Petugas/Pengguna)
       function switchRole(role) {
         const card = document.getElementById("loginCard");
         const title = document.getElementById("titleText");
@@ -131,6 +135,7 @@
         const formPetugas = document.getElementById("formPetugas");
         const formPengguna = document.getElementById("formPengguna");
 
+        // Reset field password saat switch
         document.getElementById("passPetugas").type = "password";
         document.getElementById("passPengguna").type = "password";
         document.querySelectorAll(".password-icon").forEach((i) => {
@@ -154,10 +159,12 @@
         }
       }
 
+      // Onload: Jalankan Intro & Cek Remember Me
       window.onload = function () {
-        // Panggil Animasi Intro dari script.js
+        // 1. Jalankan animasi intro (dari script.js)
         if(typeof initCinematic === "function") initCinematic();
 
+        // 2. Cek data Remember Me dari LocalStorage
         if (localStorage.getItem("shsk_nip")) {
           document.getElementById("nip").value = localStorage.getItem("shsk_nip");
           document.getElementById("checkPetugas").checked = true;
@@ -165,6 +172,8 @@
         if (localStorage.getItem("shsk_email")) {
           document.getElementById("email").value = localStorage.getItem("shsk_email");
           document.getElementById("checkPengguna").checked = true;
+          // Jika ingat pengguna, otomatis switch ke tab pengguna saat modal dibuka nanti
+          switchRole('PENGGUNA'); 
         }
       };
     </script>
