@@ -1632,7 +1632,7 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
 }
 
 // ====================================================================
-// 1. FUNGSI EDIT DATA (V13.6 - CHECKBOX BISA DIUBAH)
+// 1. FUNGSI EDIT DATA (V13.7 - DEFAULT LOCKED / BUKA PAKAI TOMBOL)
 // ====================================================================
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
@@ -1662,7 +1662,7 @@ function editData(type, rowDataStr) {
 
   const form = document.getElementById(formId);
 
-  // Helper Isi Nilai & Kunci Input Teks
+  // Helper Isi Nilai
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
     if (el) {
@@ -1670,17 +1670,16 @@ function editData(type, rowDataStr) {
         val === undefined || val === null || val === "undefined" ? "" : val;
       if (el.type === "date") el.value = formatDateForInput(finalVal);
       else el.value = finalVal;
-      el.disabled = true; // Input teks dikunci dulu
     }
   };
 
-  // Helper Cari Data (Anti-Kosong)
+  // Helper Cari Data
   const getRowVal = (keys) => {
     for (let k of keys) if (rowData[k] !== undefined) return rowData[k];
     return "";
   };
 
-  // 3. ISI DATA KE FORM
+  // 3. ISI DATA
   setVal("noUrut", getRowVal(["NO_URUT", "NO URUT", "NO"]));
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
@@ -1720,10 +1719,11 @@ function editData(type, rowDataStr) {
       setVal(`berlaku_${jenisSert}`, getRowVal(["TANGGAL_MASA_BERLAKU"]));
       setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING"]));
     }
-    // 🔥 UNLOCK CHECKBOX (Biar bisa ganti jenis)
+
+    // 🔥 PERUBAHAN DI SINI: PAKSA LOCK SEMUA CHECKBOX DI AWAL 🔥
     form
       .querySelectorAll(`input[name="cert_select_1"]`)
-      .forEach((c) => (c.disabled = false));
+      .forEach((c) => (c.disabled = true));
   } else if (type === "SERVICE") {
     setVal("namaPenyediaJasa", getRowVal(["NAMA_PENYEDIA_JASA"]));
     setVal("namaKapal", getRowVal(["NAMA_KAPAL"]));
@@ -1757,9 +1757,10 @@ function editData(type, rowDataStr) {
         }
       }
     }
+    // 🔥 LOCK CHECKBOX SERVICE 🔥
     form
       .querySelectorAll('[type="checkbox"]')
-      .forEach((c) => (c.disabled = false));
+      .forEach((c) => (c.disabled = true));
   } else if (type === "EXIBHITUM") {
     setVal("tanggal", getRowVal(["TANGGAL"]));
     setVal("perusahaan", getRowVal(["PERUSAHAAN"]));
@@ -1789,18 +1790,19 @@ function editData(type, rowDataStr) {
       );
       if (noSuratInput) noSuratInput.value = nomor;
     }
+    // 🔥 LOCK CHECKBOX EXIBHITUM 🔥
     form
       .querySelectorAll('[type="checkbox"]')
-      .forEach((c) => (c.disabled = false));
+      .forEach((c) => (c.disabled = true));
   }
 
-  // 4. UI HANDLER
-  const allInputs = form.querySelectorAll("input, select");
+  // 4. FINAL LOCK: KUNCI SEMUA INPUT (TERMASUK TEXT & SELECT)
+  const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => {
-    // Checkbox jangan di-disable lagi di sini
-    if (i.type !== "checkbox") i.disabled = true;
+    i.disabled = true; // SEMUA DIKUNCI MATI
   });
 
+  // 5. SIAPKAN TOMBOL "UBAH DATA"
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
   if (btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
 
@@ -1812,7 +1814,7 @@ function editData(type, rowDataStr) {
     btnUnlock.id = `btn-unlock-${type}`;
     btnUnlock.className = "btn-edit-mode";
     btnUnlock.innerHTML = '<i class="fa fa-pencil-alt"></i> UBAH DATA';
-    btnUnlock.onclick = () => enableEditMode(type);
+    btnUnlock.onclick = () => enableEditMode(type); // <--- INI YG BAKAL BUKA GEMBOK
     btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
@@ -1823,21 +1825,25 @@ function editData(type, rowDataStr) {
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
 
-  showPopup("Mode Edit. Data dimuat.", "info");
+  showPopup("Mode Lihat Data (Terkunci). Klik 'UBAH DATA' untuk edit.", "info");
 }
 function enableEditMode(type) {
-  const formId =
-    type === "SHSK"
-      ? "formSHSK"
-      : type === "SERTIFIKASI"
-      ? "formSertifikasi"
-      : type === "SERVICE"
-      ? "formService"
-      : "formExibhitum";
+  let formId;
+  if (type === "SHSK") formId = "formSHSK";
+  else if (type === "SERTIFIKASI") formId = "formSertifikasi";
+  else if (type === "SERVICE") formId = "formService";
+  else if (type === "EXIBHITUM") formId = "formExibhitum";
+
   const form = document.getElementById(formId);
-  const allInputs = form.querySelectorAll("input, select");
+
+  // 🔥 INI MANTRA PEMBUKA GEMBOKNYA:
+  // Membuka input text, select, DAN checkbox sekaligus
+  const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => (i.disabled = false));
+
+  // Ganti Tombol
   document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
+
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (!btnUpdate) {
     const btnUnlock = document.getElementById(`btn-unlock-${type}`);
@@ -1851,7 +1857,8 @@ function enableEditMode(type) {
     btnContainer.insertBefore(btnUpdate, btnUnlock);
   }
   btnUpdate.classList.remove("hidden");
-  showPopup("Form Terbuka. Silakan edit.", "success");
+
+  showPopup("Form Terbuka. Silakan Edit.", "success");
 }
 
 function cancelEdit(type) {
