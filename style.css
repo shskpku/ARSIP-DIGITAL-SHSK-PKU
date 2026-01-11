@@ -1,5 +1,6 @@
 /* ====================================================================
    STYLE.CSS - SHSK PEKANBARU (FULL MASTER VERSION V13.0)
+   Includes: V11.7 Dashboard Fixes + V13.0 Cinematic Landing.
    ==================================================================== */
 
 /* --- 1. GLOBAL VARIABLES & RESET --- */
@@ -2382,4 +2383,61 @@ body.gateway-mode {
     grid-template-columns: 1fr !important; /* Jadi 1 kolom ke bawah di HP */
     gap: 30px !important;
   }
+}
+/* =========================================================
+   NUMBERED PAGINATION STYLE (V13.3)
+   ========================================================= */
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin-top: 20px;
+  padding: 10px;
+  flex-wrap: wrap; /* Biar kalau di HP angkanya turun ke bawah kalau kebanyakan */
+}
+
+.page-btn {
+  min-width: 35px;
+  height: 35px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+/* TOMBOL HALAMAN AKTIF (YANG LAGI DIBUKA) */
+.page-btn.active {
+  background: var(--navy); /* Biru Gelap */
+  color: var(--gold); /* Teks Emas */
+  border-color: var(--navy);
+  box-shadow: 0 4px 10px rgba(10, 25, 47, 0.3);
+  z-index: 2;
+}
+
+/* TOMBOL PREV & NEXT */
+.page-btn.nav-btn {
+  background: #f8fafc;
+  color: var(--navy);
+  font-weight: bold;
+}
+
+.page-btn.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #eee;
 }
