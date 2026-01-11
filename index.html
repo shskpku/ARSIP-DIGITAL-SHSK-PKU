@@ -2,19 +2,31 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>SHSK Pekanbaru - Digital Service</title>
     <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
   <body class="gateway-mode">
-    
     <div id="cinematic-intro">
       <div class="intro-content">
-        <img src="logo-jangkar.png" alt="Initializing..." class="intro-logo pulse-anim">
-        
+        <img
+          src="logo-jangkar.png"
+          alt="Initializing..."
+          class="intro-logo pulse-anim"
+        />
+
         <h2 class="intro-title">SISTEM DIGITALISASI SHSK</h2>
         <div class="typing-container">
           <span class="typing-text">> Initializing System Database...</span>
@@ -24,22 +36,27 @@
 
     <div id="landing-hero">
       <div class="hero-overlay"></div>
-      
+
       <div class="hero-content fade-in-up">
-        <img src="logo-shsk.png" alt="Logo SHSK" class="hero-logo glow-effect">
-        
+        <img
+          src="logo-shsk.png"
+          alt="Logo SHSK"
+          class="hero-logo glow-effect"
+        />
+
         <div class="hero-titles">
           <h1 class="main-title">DIGITALISASI ARSIP SEKSI SHSK</h1>
           <h3 class="sub-title">KSOP KELAS II PEKANBARU</h3>
           <p class="hero-desc">
-            Sistem manajemen arsip digital terintegrasi untuk pelayanan publik yang transparan, akuntabel, dan profesional.
+            Sistem manajemen arsip digital terintegrasi untuk pelayanan publik
+            yang transparan, akuntabel, dan profesional.
           </p>
         </div>
-        
+
         <button class="btn-entrance" onclick="openLoginModal()">
           <i class="fa fa-fingerprint"></i> AKSES SISTEM
         </button>
-        
+
         <div class="hero-footer">
           <p>&copy; 2026 Seksi SHSK - KSOP Kelas II Pekanbaru.</p>
           <small>Version 13.1</small>
@@ -49,46 +66,96 @@
 
     <div id="login-modal-overlay" class="hidden">
       <div class="modal-backdrop" onclick="closeLoginModal()"></div>
-      
+
       <div class="auth-container modal-content zoom-in">
-        <button class="btn-close-modal" onclick="closeLoginModal()"><i class="fa fa-times"></i></button>
-        
+        <button class="btn-close-modal" onclick="closeLoginModal()">
+          <i class="fa fa-times"></i>
+        </button>
+
         <div class="auth-card mode-petugas" id="loginCard">
           <h2 id="titleText">LOGIN PETUGAS</h2>
-  
+
           <div class="role-switch">
             <div class="slider"></div>
-            <button class="role-btn active" id="btnPetugas" onclick="switchRole('PETUGAS')">Petugas</button>
-            <button class="role-btn" id="btnPengguna" onclick="switchRole('PENGGUNA')">Pengguna</button>
+            <button
+              class="role-btn active"
+              id="btnPetugas"
+              onclick="switchRole('PETUGAS')"
+            >
+              Petugas
+            </button>
+            <button
+              class="role-btn"
+              id="btnPengguna"
+              onclick="switchRole('PENGGUNA')"
+            >
+              Pengguna
+            </button>
           </div>
-  
+
           <form id="formPetugas" onsubmit="handleLogin(event, 'PETUGAS')">
             <div class="input-group">
-              <input type="text" id="nip" required autocomplete="off" placeholder=" " />
+              <input
+                type="text"
+                id="nip"
+                required
+                autocomplete="off"
+                placeholder=" "
+              />
               <label>NIP Pegawai</label>
             </div>
             <div class="input-group">
-              <input type="password" id="passPetugas" required autocomplete="off" placeholder=" " />
+              <input
+                type="password"
+                id="passPetugas"
+                required
+                autocomplete="off"
+                placeholder=" "
+              />
               <label>Password</label>
-              <i class="fa-solid fa-eye password-icon" onclick="togglePass(this)"></i>
+              <i
+                class="fa-solid fa-eye password-icon"
+                onclick="togglePass(this)"
+              ></i>
             </div>
             <div class="options-row">
               <label class="remember-me">
                 <input type="checkbox" id="checkPetugas" /> Ingat Saya
               </label>
             </div>
-            <button type="submit" class="btn-neon" id="btnSubmitPetugas">LOGIN SISTEM</button>
+            <button type="submit" class="btn-neon" id="btnSubmitPetugas">
+              LOGIN SISTEM
+            </button>
           </form>
-  
-          <form id="formPengguna" class="hidden" onsubmit="handleLogin(event, 'PENGGUNA')">
+
+          <form
+            id="formPengguna"
+            class="hidden"
+            onsubmit="handleLogin(event, 'PENGGUNA')"
+          >
             <div class="input-group">
-              <input type="email" id="email" required autocomplete="off" placeholder=" " />
+              <input
+                type="email"
+                id="email"
+                required
+                autocomplete="off"
+                placeholder=" "
+              />
               <label>Email</label>
             </div>
             <div class="input-group">
-              <input type="password" id="passPengguna" required autocomplete="off" placeholder=" " />
+              <input
+                type="password"
+                id="passPengguna"
+                required
+                autocomplete="off"
+                placeholder=" "
+              />
               <label>Password</label>
-              <i class="fa-solid fa-eye password-icon" onclick="togglePass(this)"></i>
+              <i
+                class="fa-solid fa-eye password-icon"
+                onclick="togglePass(this)"
+              ></i>
             </div>
             <div class="options-row">
               <label class="remember-me">
@@ -96,14 +163,18 @@
               </label>
               <a href="forgot.html" class="forgot-link">Lupa Password?</a>
             </div>
-            <button type="submit" class="btn-neon" id="btnSubmitPengguna">MASUK LAYANAN</button>
+            <button type="submit" class="btn-neon" id="btnSubmitPengguna">
+              MASUK LAYANAN
+            </button>
             <div class="auth-links">
               <span>Belum punya akun?</span>
-              <a href="register.html">DAFTAR SEKARANG <i class="fa fa-arrow-right"></i></a>
+              <a href="register.html"
+                >DAFTAR SEKARANG <i class="fa fa-arrow-right"></i
+              ></a>
             </div>
           </form>
         </div>
-        </div>
+      </div>
     </div>
 
     <div id="app-notification" class="popup">
@@ -162,18 +233,20 @@
       // Onload: Jalankan Intro & Cek Remember Me
       window.onload = function () {
         // 1. Jalankan animasi intro (dari script.js)
-        if(typeof initCinematic === "function") initCinematic();
+        if (typeof initCinematic === "function") initCinematic();
 
         // 2. Cek data Remember Me dari LocalStorage
         if (localStorage.getItem("shsk_nip")) {
-          document.getElementById("nip").value = localStorage.getItem("shsk_nip");
+          document.getElementById("nip").value =
+            localStorage.getItem("shsk_nip");
           document.getElementById("checkPetugas").checked = true;
         }
         if (localStorage.getItem("shsk_email")) {
-          document.getElementById("email").value = localStorage.getItem("shsk_email");
+          document.getElementById("email").value =
+            localStorage.getItem("shsk_email");
           document.getElementById("checkPengguna").checked = true;
           // Jika ingat pengguna, otomatis switch ke tab pengguna saat modal dibuka nanti
-          switchRole('PENGGUNA'); 
+          switchRole("PENGGUNA");
         }
       };
     </script>
