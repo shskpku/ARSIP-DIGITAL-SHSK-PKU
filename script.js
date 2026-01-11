@@ -56,6 +56,7 @@ const CERT_CODES = {
   IAPP: "AL.602",
   "ENDORS IAPP": "AL.602",
   "BALLAST WATER MANAGEMENT": "AL.601",
+  "ENDORS BALLAST WATER MANAGEMENT": "AL.601",
   ANTIFOULING: "AL.601",
   DOC: "AL.602",
   "ENDORS DOC": "AL.602",
@@ -1287,9 +1288,14 @@ async function handleBulkSubmit(type) {
     btnId = "btn-save-EXIBHITUM";
   }
 
+  // Cek tombol mana yang aktif (Tombol Update atau Save)
+  let btnSave = document.getElementById(`btn-update-${type}`);
+  if (!btnSave || btnSave.classList.contains("hidden")) {
+    btnSave = document.getElementById(btnId);
+  }
+
   const form = document.getElementById(formId);
   const count = parseInt(document.getElementById(countId).value);
-  const btnSave = document.getElementById(btnId);
   const originalText = btnSave.innerHTML;
 
   btnSave.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
@@ -1297,6 +1303,8 @@ async function handleBulkSubmit(type) {
   showPopup("Sedang menyimpan data...", "info");
 
   const items = [];
+
+  // --- LOOPING PENGAMBILAN DATA ---
   for (let i = 1; i <= count; i++) {
     const itemData = {};
     let hasData = false;
@@ -1314,6 +1322,7 @@ async function handleBulkSubmit(type) {
         r.readAsDataURL(file);
       });
 
+    // 1. SERTIFIKASI
     if (type === "SERTIFIKASI") {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       const globalData = {};
@@ -1360,7 +1369,12 @@ async function handleBulkSubmit(type) {
           files: [...sharedFiles],
         };
 
-        // Tentukan Sertifikat mana saja yang masuk paket Shared
+        // PENTING: Ambil No Urut buat cek Edit/Baru
+        rowItem.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
+        rowItem.oldFolderUrl = form.querySelector(
+          `[name="oldFolderUrl_${i}"]`
+        ).value;
+
         let packetCerts = [];
         if (isPacket === "NTR")
           packetCerts = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
@@ -1375,9 +1389,7 @@ async function handleBulkSubmit(type) {
         else if (isPacket === "ENDORS_OB")
           packetCerts = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
 
-        // LOGIKA PENYIMPANAN
         if (isPacket && packetCerts.includes(cert)) {
-          // PAKET SHARED
           rowItem.kodeBilling = form.querySelector(
             `[name="billing_shared_${i}"]`
           ).value;
@@ -1387,7 +1399,6 @@ async function handleBulkSubmit(type) {
           rowItem.noSertifikat = form.querySelector(
             `[name="no_sert_${cert}_${i}"]`
           ).value;
-
           const fPerm = getFile(`permohonan_shared_${i}`);
           if (fPerm)
             rowItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
@@ -1404,7 +1415,6 @@ async function handleBulkSubmit(type) {
               ...(await read(fBilling)),
             });
         } else {
-          // ECERAN / NON-PAKET
           rowItem.kodeBilling = form.querySelector(
             `[name="billing_${cert}_${i}"]`
           ).value;
@@ -1414,7 +1424,6 @@ async function handleBulkSubmit(type) {
           rowItem.noSertifikat = form.querySelector(
             `[name="no_sert_${cert}_${i}"]`
           ).value;
-
           const fPerm = getFile(`permohonan_${cert}_${i}`);
           if (fPerm)
             rowItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
@@ -1431,15 +1440,15 @@ async function handleBulkSubmit(type) {
               ...(await read(fBilling)),
             });
         }
-
-        // File Sertifikat (Selalu Unik per Sertifikat)
         const fSert = getFile(`file_sert_${cert}_${i}`);
         if (fSert)
           rowItem.files.push({ jenis: "sertifikat", ...(await read(fSert)) });
-
         items.push(rowItem);
       }
-    } else if (type === "SHSK") {
+    }
+
+    // 2. SHSK
+    else if (type === "SHSK") {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       inputs.forEach((input) => {
         const key = input.name.replace(`_${i}`, "");
@@ -1464,7 +1473,10 @@ async function handleBulkSubmit(type) {
       const fPnbp = getFile(`pnbp_${i}`);
       if (fPnbp) itemData.files.push({ jenis: "pnbp", ...(await read(fPnbp)) });
       items.push(itemData);
-    } else if (type === "SERVICE") {
+    }
+
+    // 3. SERVICE
+    else if (type === "SERVICE") {
       const penyedia = form.querySelector(
         `[name="namaPenyediaJasa_${i}"]`
       ).value;
@@ -1480,7 +1492,6 @@ async function handleBulkSubmit(type) {
         itemData.oldFolderUrl = form.querySelector(
           `[name="oldFolderUrl_${i}"]`
         ).value;
-
         let jenisArr = [];
         let jumlahArr = [];
         if (form.querySelector(`[name="check_liferaft_${i}"]`).checked) {
@@ -1495,7 +1506,6 @@ async function handleBulkSubmit(type) {
         }
         itemData.jenisAlat = jenisArr.join("\n");
         itemData.jumlah = jumlahArr.join("\n");
-
         itemData.files = [];
         const fPerm = getFile(`permohonan_${i}`);
         if (fPerm)
@@ -1511,7 +1521,10 @@ async function handleBulkSubmit(type) {
           });
         items.push(itemData);
       }
-    } else if (type === "EXIBHITUM") {
+    }
+
+    // 4. EXIBHITUM
+    else if (type === "EXIBHITUM") {
       const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
       if (nama.trim()) {
         itemData.namaKapal = nama.toUpperCase();
@@ -1524,7 +1537,6 @@ async function handleBulkSubmit(type) {
         itemData.oldFolderUrl = form.querySelector(
           `[name="oldFolderUrl_${i}"]`
         ).value;
-
         const jenisBukuArray = [];
         const nomorSuratArray = [];
         const inputs = form.querySelectorAll(
@@ -1539,7 +1551,6 @@ async function handleBulkSubmit(type) {
         });
         itemData.jenisBukuArray = jenisBukuArray;
         itemData.nomorSuratArray = nomorSuratArray;
-
         itemData.files = [];
         const fPerm = getFile(`permohonan_${i}`);
         if (fPerm)
@@ -1552,20 +1563,56 @@ async function handleBulkSubmit(type) {
     }
   }
 
-  // --- SUBMIT ---
-  const res = await postData({
-    action:
-      "uploadBulk" +
-      (type === "SHSK"
-        ? "SHSK"
-        : type === "SERTIFIKASI"
-        ? "Sertifikasi"
-        : type === "SERVICE"
-        ? "Service"
-        : "Exibhitum"),
-    items: items,
-  });
-  handleResponse(res, type, form, originalText, btnSave, false);
+  // ==========================================================
+  // INI LOGIKA CERDASNYA: BARU vs EDIT
+  // ==========================================================
+
+  if (items.length === 0) {
+    showPopup("Tidak ada data untuk disimpan.", "error");
+    btnSave.innerHTML = originalText;
+    btnSave.disabled = false;
+    return;
+  }
+
+  // Cek ID Data (noUrut) pada item pertama
+  const firstItem = items[0];
+  const isEditMode = firstItem.noUrut && String(firstItem.noUrut).trim() !== "";
+
+  let payload = {};
+
+  if (isEditMode) {
+    // --- UPDATE (TIMPA DATA LAMA) ---
+    let action = "";
+    if (type === "SHSK") action = "updateSHSK";
+    else if (type === "SERTIFIKASI") action = "updateSertifikasi";
+    else if (type === "SERVICE") action = "updateService";
+    else if (type === "EXIBHITUM") action = "updateExibhitum";
+
+    // Kirim sebagai single object
+    payload = { action: action, ...firstItem };
+    console.log("Mengirim Update:", payload);
+  } else {
+    // --- UPLOAD (BARIS BARU) ---
+    let action = "";
+    if (type === "SHSK") action = "uploadBulkSHSK";
+    else if (type === "SERTIFIKASI") action = "uploadBulkSertifikasi";
+    else if (type === "SERVICE") action = "uploadBulkService";
+    else if (type === "EXIBHITUM") action = "uploadBulkExibhitum";
+
+    // Kirim array items
+    payload = { action: action, items: items };
+    console.log("Mengirim Baru:", payload);
+  }
+
+  // --- KIRIM ---
+  try {
+    const res = await postData(payload);
+    handleResponse(res, type, form, originalText, btnSave, isEditMode);
+  } catch (e) {
+    showPopup("Gagal koneksi ke server.", "error");
+    btnSave.innerHTML = originalText;
+    btnSave.disabled = false;
+  }
 }
 
 function handleResponse(res, type, form, btnText, btnEl, isEdit) {
@@ -1576,13 +1623,16 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
     form.reset();
     renderBulkForm(type);
     loadData(type);
+    if (isEdit) {
+      cancelEdit(type);
+    }
   } else {
     showPopup(res.message, "error");
   }
 }
 
 // ====================================================================
-// FUNGSI EDIT DATA (VERSI LENGKAP & ROBUST V13.5)
+// 1. FUNGSI EDIT DATA (V13.6 - CHECKBOX BISA DIUBAH)
 // ====================================================================
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
@@ -1605,79 +1655,59 @@ function editData(type, rowDataStr) {
 
   showSection(`${type.toLowerCase()}-input`);
 
-  // 2. Reset Form ke Mode Single (1 Data)
+  // 2. Reset Form ke Mode Single
   const countSelect = document.getElementById(countId);
   if (countSelect) countSelect.value = "1";
-  renderBulkForm(type); // Render ulang form kosong
+  renderBulkForm(type);
 
   const form = document.getElementById(formId);
 
-  // --- HELPER UNTUK MENGISI NILAI ---
-  // Fungsi ini mencari input dan mengisi nilainya (Smart Match)
+  // Helper Isi Nilai & Kunci Input Teks
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
     if (el) {
-      // Cek jika val-nya kosong/undefined
       let finalVal =
         val === undefined || val === null || val === "undefined" ? "" : val;
-
-      if (el.type === "date") {
-        el.value = formatDateForInput(finalVal);
-      } else {
-        el.value = finalVal;
-      }
-      el.disabled = true; // Kunci dulu biar user klik "Ubah Data"
+      if (el.type === "date") el.value = formatDateForInput(finalVal);
+      else el.value = finalVal;
+      el.disabled = true; // Input teks dikunci dulu
     }
   };
 
-  // --- HELPER UNTUK MENCARI KUNCI DATA (ANTI TYPO HEADER) ---
-  // Mencari value dari rowData meskipun header di Sheet beda dikit
+  // Helper Cari Data (Anti-Kosong)
   const getRowVal = (keys) => {
-    for (let k of keys) {
-      if (rowData[k] !== undefined) return rowData[k];
-    }
+    for (let k of keys) if (rowData[k] !== undefined) return rowData[k];
     return "";
   };
 
-  // 3. MULAI ISI DATA (MAPPING LENGKAP)
-
-  // Data Umum (Semua Tipe Ada)
-  setVal("noUrut", getRowVal(["NO_URUT", "NO URUT", "NO", "No"]));
+  // 3. ISI DATA KE FORM
+  setVal("noUrut", getRowVal(["NO_URUT", "NO URUT", "NO"]));
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
   if (type === "SHSK") {
-    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "NAMA KAPAL", "KAPAL"]));
-    setVal("tonase", getRowVal(["TONASE_GT", "TONASE", "GT", "UKURAN"]));
-    setVal(
-      "tandaPendaftaran",
-      getRowVal(["TANDA_PENDAFTARAN", "TANDA PENDAFTARAN"])
-    );
-    setVal("pemilik", getRowVal(["PEMILIK", "NAMA PEMILIK"]));
-    setVal("tempatStkk", getRowVal(["TEMPAT_STKK", "TEMPAT STKK"]));
-    setVal("tglStkk", getRowVal(["TANGGAL_STKK", "TGL STKK", "TANGGAL"]));
-    setVal("noUrutStkk", getRowVal(["NO_URUT_STKK", "NO URUT STKK"]));
-    setVal("noHalStkk", getRowVal(["NO_HAL_STKK", "NO HAL STKK", "HALAMAN"]));
-    setVal("noBukuStkk", getRowVal(["NO_BUKU_STKK", "NO BUKU STKK", "BUKU"]));
-    setVal("statusPengukuhan", getRowVal(["STATUS_PENGUKUHAN", "STATUS"]));
-    setVal(
-      "tglPengukuhan",
-      getRowVal(["TANGGAL_PENGUKUHAN", "TGL PENGUKUHAN"])
-    );
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL"]));
+    setVal("tonase", getRowVal(["TONASE_GT"]));
+    setVal("tandaPendaftaran", getRowVal(["TANDA_PENDAFTARAN"]));
+    setVal("pemilik", getRowVal(["PEMILIK"]));
+    setVal("tempatStkk", getRowVal(["TEMPAT_STKK"]));
+    setVal("tglStkk", getRowVal(["TANGGAL_STKK"]));
+    setVal("noUrutStkk", getRowVal(["NO_URUT_STKK"]));
+    setVal("noHalStkk", getRowVal(["NO_HAL_STKK"]));
+    setVal("noBukuStkk", getRowVal(["NO_BUKU_STKK"]));
+    setVal("statusPengukuhan", getRowVal(["STATUS_PENGUKUHAN"]));
+    setVal("tglPengukuhan", getRowVal(["TANGGAL_PENGUKUHAN"]));
   } else if (type === "SERTIFIKASI") {
-    setVal(
-      "perusahaan",
-      getRowVal(["NAMA_PERUSAHAAN", "PERUSAHAAN", "PEMILIK"])
-    );
-    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "NAMA KAPAL"]));
-    setVal("ukuran", getRowVal(["UKURAN_GT", "GT", "TONASE"]));
-    setVal("callSign", getRowVal(["CALL_SIGN", "CALL SIGN", "CS"]));
-    setVal("bahan", getRowVal(["BAHAN_KAPAL", "BAHAN"]));
-    setVal("daerahPelayaran", getRowVal(["DAERAH_PELAYARAN", "DAERAH"]));
-    setVal("tglTerbit", getRowVal(["TANGGAL_TERBIT", "TGL TERBIT"]));
-    setVal("pemeriksa", getRowVal(["NAMA_PEMERIKSA", "PEMERIKSA"]));
-    setVal("keterangan", getRowVal(["KETERANGAN", "KET"]));
+    setVal("perusahaan", getRowVal(["NAMA_PERUSAHAAN", "PERUSAHAAN"]));
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL"]));
+    setVal("ukuran", getRowVal(["UKURAN_GT"]));
+    setVal("callSign", getRowVal(["CALL_SIGN"]));
+    setVal("bahan", getRowVal(["BAHAN_KAPAL"]));
+    setVal("daerahPelayaran", getRowVal(["DAERAH_PELAYARAN"]));
+    setVal("tglTerbit", getRowVal(["TANGGAL_TERBIT"]));
+    setVal("pemeriksa", getRowVal(["NAMA_PEMERIKSA"]));
+    setVal("keterangan", getRowVal(["KETERANGAN"]));
 
-    // Khusus Sertifikat (Checkbox & Input Dinamis)
+    // Checkbox Sertifikat
     const jenisSert = getRowVal(["JENIS_SERTIFIKAT", "JENIS"]);
     const certCheck = form.querySelector(
       `input[name="cert_select_1"][value="${jenisSert}"]`
@@ -1685,38 +1715,22 @@ function editData(type, rowDataStr) {
 
     if (certCheck) {
       certCheck.checked = true;
-      renderCertForms(1); // Render form eceran
-
-      // Isi data spesifik sertifikat
-      setVal(
-        `no_sert_${jenisSert}`,
-        getRowVal(["NOMOR_SERTIFIKAT", "NO SERTIFIKAT"])
-      );
-      setVal(
-        `berlaku_${jenisSert}`,
-        getRowVal(["TANGGAL_MASA_BERLAKU", "MASA BERLAKU"])
-      );
-      setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING", "BILLING"]));
-
-      // Disable checkbox biar gak diubah sembarangan
-      form
-        .querySelectorAll(`input[name="cert_select_1"]`)
-        .forEach((c) => (c.disabled = true));
+      renderCertForms(1);
+      setVal(`no_sert_${jenisSert}`, getRowVal(["NOMOR_SERTIFIKAT"]));
+      setVal(`berlaku_${jenisSert}`, getRowVal(["TANGGAL_MASA_BERLAKU"]));
+      setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING"]));
     }
+    // 🔥 UNLOCK CHECKBOX (Biar bisa ganti jenis)
+    form
+      .querySelectorAll(`input[name="cert_select_1"]`)
+      .forEach((c) => (c.disabled = false));
   } else if (type === "SERVICE") {
-    setVal(
-      "namaPenyediaJasa",
-      getRowVal(["NAMA_PENYEDIA_JASA", "PENYEDIA JASA", "PERUSAHAAN"])
-    );
-    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "KAPAL"]));
-    setVal(
-      "tglValidasi",
-      getRowVal(["TANGGAL_VALIDASI_SERVICE_REPORT", "TGL VALIDASI"])
-    );
+    setVal("namaPenyediaJasa", getRowVal(["NAMA_PENYEDIA_JASA"]));
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL"]));
+    setVal("tglValidasi", getRowVal(["TANGGAL_VALIDASI_SERVICE_REPORT"]));
 
-    const jenisStr =
-      getRowVal(["JENIS_ALAT_YANG_DISERVICE", "JENIS ALAT"]) || "";
-    const jumlahStr = getRowVal(["JUMLAH", "QTY"]) || "";
+    const jenisStr = getRowVal(["JENIS_ALAT_YANG_DISERVICE"]) || "";
+    const jumlahStr = getRowVal(["JUMLAH"]) || "";
     const jumlahArr = String(jumlahStr).split("\n");
     let idx = 0;
 
@@ -1724,16 +1738,14 @@ function editData(type, rowDataStr) {
       const ck = form.querySelector('[name="check_liferaft_1"]');
       if (ck) {
         ck.checked = true;
-        updateServiceQty(1); // Munculkan input jumlah
+        updateServiceQty(1);
         const lrInput = form.querySelector('[name="jumlah_LIFERAFT_1"]');
         if (lrInput) {
           lrInput.value = jumlahArr[idx] || 0;
-          lrInput.disabled = true;
         }
         idx++;
       }
     }
-
     if (jenisStr.includes("FIRE EXTINGUISHER")) {
       const ck = form.querySelector('[name="check_fe_1"]');
       if (ck) {
@@ -1742,23 +1754,20 @@ function editData(type, rowDataStr) {
         const feInput = form.querySelector('[name="jumlah_FE_1"]');
         if (feInput) {
           feInput.value = jumlahArr[idx] || 0;
-          feInput.disabled = true;
         }
       }
     }
     form
       .querySelectorAll('[type="checkbox"]')
-      .forEach((c) => (c.disabled = true));
+      .forEach((c) => (c.disabled = false));
   } else if (type === "EXIBHITUM") {
-    setVal("tanggal", getRowVal(["TANGGAL", "TGL"]));
-    setVal("perusahaan", getRowVal(["PERUSAHAAN", "NAMA PERUSAHAAN"]));
-    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "KAPAL"]));
+    setVal("tanggal", getRowVal(["TANGGAL"]));
+    setVal("perusahaan", getRowVal(["PERUSAHAAN"]));
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL"]));
     setVal("pup", getRowVal(["PUP"]));
 
-    const jb = getRowVal(["JENIS_BUKU", "JENIS"]) || "";
-    const nomor = getRowVal(["PENOMORAN", "NO SURAT"]) || "";
-
-    // Parse Jenis Buku (EX. DECK atau PSH. DECK)
+    const jb = getRowVal(["JENIS_BUKU"]) || "";
+    const nomor = getRowVal(["PENOMORAN"]) || "";
     let prefix = "",
       bookType = "";
     if (jb.startsWith("EX")) {
@@ -1774,30 +1783,27 @@ function editData(type, rowDataStr) {
     );
     if (targetCheck) {
       targetCheck.checked = true;
-      updateExibhitumForms(1); // Munculkan input nomor
-
-      // Isi Nomor Surat
+      updateExibhitumForms(1);
       const noSuratInput = form.querySelector(
         `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
       );
-      if (noSuratInput) {
-        noSuratInput.value = nomor;
-        noSuratInput.disabled = true;
-      }
+      if (noSuratInput) noSuratInput.value = nomor;
     }
     form
       .querySelectorAll('[type="checkbox"]')
-      .forEach((c) => (c.disabled = true));
+      .forEach((c) => (c.disabled = false));
   }
 
-  // 4. AKTIFKAN MODE EDIT (UI LOCK/UNLOCK)
+  // 4. UI HANDLER
   const allInputs = form.querySelectorAll("input, select");
-  allInputs.forEach((i) => (i.disabled = true)); // Kunci semua dulu
+  allInputs.forEach((i) => {
+    // Checkbox jangan di-disable lagi di sini
+    if (i.type !== "checkbox") i.disabled = true;
+  });
 
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
   if (btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
 
-  // Tombol "Ubah Data" (Unlock)
   let btnUnlock = document.getElementById(`btn-unlock-${type}`);
   if (!btnUnlock) {
     const btnContainer = btnSaveOriginal.parentNode;
@@ -1811,15 +1817,13 @@ function editData(type, rowDataStr) {
   }
   btnUnlock.classList.remove("hidden");
 
-  // Tombol "Cancel"
   const btnCancel = document.getElementById(`btn-cancel-${type}`);
   if (btnCancel) btnCancel.classList.remove("hidden");
 
-  // Sembunyikan tombol Update dulu
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
 
-  showPopup("Mode Edit. Klik 'UBAH DATA' untuk mengedit.", "info");
+  showPopup("Mode Edit. Data dimuat.", "info");
 }
 function enableEditMode(type) {
   const formId =
