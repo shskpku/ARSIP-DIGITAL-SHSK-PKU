@@ -1966,33 +1966,66 @@ let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
 let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1, EXIBHITUM: 1 };
 const ROWS_PER_PAGE = 10;
 
+// ====================================================================
+// FUNGSI LOAD DATA (SMART SORTING: TANGGAL -> NAMA KAPAL)
+// ====================================================================
 async function loadData(type) {
   let tbodyId;
   if (type === "SHSK") tbodyId = "tbody-shsk";
   else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi";
   else if (type === "SERVICE") tbodyId = "tbody-service";
   else tbodyId = "tbody-exibhitum";
+  
   const tbody = document.getElementById(tbodyId);
-  tbody.innerHTML =
-    '<tr><td colspan="16" style="text-align:center;">Sedang Memuat Data...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Sedang Memuat Data...</td></tr>';
+  
   let action = "";
   if (type === "SHSK") action = "getDataSHSK";
   else if (type === "SERTIFIKASI") action = "getDataSertifikasi";
   else if (type === "SERVICE") action = "getDataService";
   else action = "getDataExibhitum";
+  
   const res = await postData({ action: action });
+  
   if (res.status === "SUCCESS") {
-    rawData[type] = res.data.reverse();
+    let data = res.data;
+
+    // --- LOGIKA SORTING FRONTEND ---
+    let dateKey = '', nameKey = '';
+    if (type === 'SHSK') { dateKey = 'TANGGAL_PENGUKUHAN'; nameKey = 'NAMA_KAPAL'; }
+    else if (type === 'SERTIFIKASI') { dateKey = 'TANGGAL_TERBIT'; nameKey = 'NAMA_KAPAL'; }
+    else if (type === 'SERVICE') { dateKey = 'TANGGAL_VALIDASI_SERVICE_REPORT'; nameKey = 'NAMA_KAPAL'; }
+    else if (type === 'EXIBHITUM') { dateKey = 'TANGGAL'; nameKey = 'NAMA_KAPAL'; }
+
+    data.sort((a, b) => {
+        // 1. Tanggal (Terbaru/Newest di Atas)
+        const dateA = new Date(a[dateKey]);
+        const dateB = new Date(b[dateKey]);
+        if (dateA > dateB) return -1; 
+        if (dateA < dateB) return 1;
+
+        // 2. Nama Kapal (A-Z) - Biar paket sertifikat nempel
+        const nameA = String(a[nameKey]).toUpperCase();
+        const nameB = String(b[nameKey]).toUpperCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+
+        return 0;
+    });
+    // ----------------------------------
+
+    rawData[type] = data; 
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
-    let keyName = "";
     updateSmartData(rawData[type], type);
     renderTable(type);
+    
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else {
     tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`;
   }
 }
+
 
 function populateFilterOptions(data) {
   const select = document.getElementById("filterSertJenis");
@@ -2139,6 +2172,9 @@ function renderTable(type) {
   });
   renderPagination(type);
 }
+// ====================================================================
+// FUNGSI PAGINATION (MODEL SMART: 1 ... 5 6 7 ... 10)
+// ====================================================================
 function renderPagination(type) {
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
@@ -2147,7 +2183,6 @@ function renderPagination(type) {
   const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
   const current = currentPage[type];
 
-  // Kalau datanya kosong atau cuma 1 halaman, kosongkan pagination
   if (totalPages <= 1) {
     container.innerHTML = "";
     return;
@@ -2155,43 +2190,46 @@ function renderPagination(type) {
 
   let html = "";
 
-  // 1. TOMBOL PREV (<)
+  // PREV
   const prevDisabled = current === 1 ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${
-    current - 1
-  })"><i class="fa fa-chevron-left"></i></button>`;
+  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${current - 1})"><i class="fa fa-chevron-left"></i></button>`;
 
-  // 2. TOMBOL ANGKA (1 2 3...)
-  let startPage = 1;
-  let endPage = totalPages;
+  // DOTS LOGIC
+  const delta = 2; 
+  const range = [];
+  const rangeWithDots = [];
+  let l;
 
-  // Logika memotong halaman jika terlalu banyak (Max 5 tombol angka)
-  if (totalPages > 5) {
-    if (current <= 3) {
-      startPage = 1;
-      endPage = 5;
-    } else if (current + 2 >= totalPages) {
-      startPage = totalPages - 4;
-      endPage = totalPages;
-    } else {
-      startPage = current - 2;
-      endPage = current + 2;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= current - delta && i <= current + delta)) {
+      range.push(i);
     }
   }
 
-  for (let i = startPage; i <= endPage; i++) {
-    const activeClass = i === current ? "active" : "";
-    html += `<button class="page-btn ${activeClass}" onclick="goToPage('${type}', ${i})">${i}</button>`;
+  for (let i of range) {
+    if (l) {
+      if (i - l === 2) rangeWithDots.push(l + 1); 
+      else if (i - l !== 1) rangeWithDots.push('...'); 
+    }
+    rangeWithDots.push(i);
+    l = i;
   }
 
-  // 3. TOMBOL NEXT (>)
-  const nextDisabled = current === totalPages ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${
-    current + 1
-  })"><i class="fa fa-chevron-right"></i></button>`;
+  rangeWithDots.forEach((i) => {
+      if (i === '...') {
+          html += `<span style="padding: 0 5px; color:#aaa;">...</span>`;
+      } else {
+          const activeClass = i === current ? "active" : "";
+          html += `<button class="page-btn ${activeClass}" onclick="goToPage('${type}', ${i})">${i}</button>`;
+      }
+  });
 
-  // 4. INFO TOTAL DATA
-  html += `<span style="margin-left:10px; font-size:12px; color:#666;">Total: ${totalRows} Data</span>`;
+  // NEXT
+  const nextDisabled = current === totalPages ? "disabled" : "";
+  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${current + 1})"><i class="fa fa-chevron-right"></i></button>`;
+
+  // INFO
+  html += `<span style="margin-left:10px; font-size:12px; color:#666;"><b>${totalRows}</b> Data</span>`;
 
   container.innerHTML = html;
 }
