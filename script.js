@@ -1093,7 +1093,7 @@ function renderBulkForm(type) {
                     </select></label>
                     <label>Keterangan <select name="keterangan_${i}" class="form-control">
                         <option value="">- Pilih -</option>
-                        <option value="KOSONG">KOSONG</option>
+                        <option value=""></option>
                         <option value="DOCKING">DOCKING</option>
                         <option value="1 X PELAYARAN">1 X PELAYARAN</option>
                     </select></label>
