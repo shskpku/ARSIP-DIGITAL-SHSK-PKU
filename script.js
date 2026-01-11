@@ -1225,7 +1225,7 @@ function renderBulkForm(type) {
             </div>
         </div>
 
-        <div class="accordion-item>
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body">
                 <div class="grid-form">
