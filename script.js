@@ -1,5 +1,6 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (V13.1)
+   SCRIPT.JS - ULTIMATE MASTER (V13.1 - FIXED FORMS & CINEMATIC)
+   Status: Cinematic Intro + Form Lengkap (Upload Laporan/Billing/Ket)
    ==================================================================== */
 
 // ---- API URL GOOGLE APPSCRIPT ---
@@ -746,34 +747,39 @@ function loadProfilePetugas() {
 // ====================================================================
 
 window.togglePacketMode = function (index, mode, btn) {
-  const parent = btn.parentNode;
+  const parent = btn.parentNode.parentNode; // Naik ke parent container tombol
   const isAlreadyActive = btn.classList.contains("active");
+
+  // Reset semua tombol paket di baris ini
   parent
     .querySelectorAll(".btn-packet")
     .forEach((b) => b.classList.remove("active"));
+
   const checkboxes = document.querySelectorAll(
     `input[name="cert_select_${index}"]`
   );
 
   if (isAlreadyActive) {
     packetModeState[index] = null; // Matikan Paket
-    const targets =
-      mode === "NTR"
-        ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"]
-        : ["KONSTRUKSI", "PERLENGKAPAN"];
+    // Enable semua checkbox
     checkboxes.forEach((cb) => {
-      if (targets.includes(cb.value)) {
-        cb.checked = false;
-      }
+      cb.checked = false;
       cb.disabled = false;
     });
   } else {
-    packetModeState[index] = mode; // Aktifkan Paket
+    packetModeState[index] = mode; // Set Mode Baru
     btn.classList.add("active");
-    const targets =
-      mode === "NTR"
-        ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"]
-        : ["KONSTRUKSI", "PERLENGKAPAN"];
+
+    // Tentukan target sertifikat berdasarkan mode
+    let targets = [];
+    if (mode === "NTR") targets = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
+    else if (mode === "OB") targets = ["KONSTRUKSI", "PERLENGKAPAN"];
+    else if (mode === "ENDORS_NTR")
+      targets = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN", "ENDORS RADIO"];
+    else if (mode === "ENDORS_OB")
+      targets = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
+
+    // Centang otomatis & kunci checkbox target
     checkboxes.forEach((cb) => {
       if (targets.includes(cb.value)) {
         cb.checked = true;
@@ -801,19 +807,34 @@ window.renderCertForms = function (index) {
   const currentYear = new Date().getFullYear();
   const currentMode = packetModeState[index];
 
-  // 1. RENDER FORM PAKET (SHARED)
+  // --- 1. RENDER FORM PAKET (SHARED SECTION) ---
   if (currentMode) {
-    const title =
-      currentMode === "NTR" ? "FORMULIR PAKET NTR" : "FORMULIR PAKET OIL BARGE";
-    const packetCerts =
-      currentMode === "NTR"
-        ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"]
-        : ["KONSTRUKSI", "PERLENGKAPAN"];
+    let title = "";
+    let packetCerts = [];
+
+    // Tentukan Judul & Isi Paket
+    if (currentMode === "NTR") {
+      title = "PAKET NTR";
+      packetCerts = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
+    } else if (currentMode === "OB") {
+      title = "PAKET OIL BARGE";
+      packetCerts = ["KONSTRUKSI", "PERLENGKAPAN"];
+    } else if (currentMode === "ENDORS_NTR") {
+      title = "PAKET ENDORS NTR";
+      packetCerts = [
+        "ENDORS KONSTRUKSI",
+        "ENDORS PERLENGKAPAN",
+        "ENDORS RADIO",
+      ];
+    } else if (currentMode === "ENDORS_OB") {
+      title = "PAKET ENDORS OIL BARGE";
+      packetCerts = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
+    }
 
     html += `
         <div class="shared-form-section">
             <div style="font-weight:bold; color:var(--navy); margin-bottom:10px; border-bottom:1px solid var(--gold); padding-bottom:5px;">
-                <i class="fa fa-box-open"></i> ${title}
+                <i class="fa fa-box-open"></i> FORMULIR ${title}
             </div>
             <div class="grid-form">
                 <label>Kode Billing (Shared) <input type="text" name="billing_shared_${index}" class="form-control" placeholder="1 Kode untuk semua"></label>
@@ -830,7 +851,7 @@ window.renderCertForms = function (index) {
     // Loop Item Paket (Hanya Upload Sertifikat & No Sert)
     selectedCerts.forEach((cert) => {
       if (packetCerts.includes(cert)) {
-        let defaultNo = cert === "RADIO" ? "AL.502" : "AL.501";
+        let defaultNo = cert.includes("RADIO") ? "AL.502" : "AL.501";
         html += `
                 <div class="cert-dynamic-card">
                     <span class="cert-card-badge">${cert}</span>
@@ -844,14 +865,25 @@ window.renderCertForms = function (index) {
     });
   }
 
-  // 2. RENDER FORM ECERAN (SISANYA)
+  // --- 2. RENDER FORM ECERAN (SISANYA) ---
   selectedCerts.forEach((cert) => {
+    // Cek apakah sertifikat ini termasuk dalam paket yang sedang aktif
     if (currentMode) {
-      const packetCerts =
-        currentMode === "NTR"
-          ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"]
-          : ["KONSTRUKSI", "PERLENGKAPAN"];
-      if (packetCerts.includes(cert)) return; // Skip yang sudah dipaket
+      let packetCerts = [];
+      if (currentMode === "NTR")
+        packetCerts = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
+      else if (currentMode === "OB")
+        packetCerts = ["KONSTRUKSI", "PERLENGKAPAN"];
+      else if (currentMode === "ENDORS_NTR")
+        packetCerts = [
+          "ENDORS KONSTRUKSI",
+          "ENDORS PERLENGKAPAN",
+          "ENDORS RADIO",
+        ];
+      else if (currentMode === "ENDORS_OB")
+        packetCerts = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
+
+      if (packetCerts.includes(cert)) return; // Skip yang sudah di-handle oleh paket
     }
 
     let defaultNo =
@@ -1067,11 +1099,22 @@ function renderBulkForm(type) {
         <div class="accordion-item open">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Pilih Jenis Sertifikat</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
-                <div class="packet-btn-group">
-                    <div class="btn-packet ntr" onclick="togglePacketMode(${i}, 'NTR', this)"><i class="fa fa-layer-group"></i> PAKET NTR</div>
-                    <div class="btn-packet ob" onclick="togglePacketMode(${i}, 'OB', this)"><i class="fa fa-ship"></i> PAKET OIL BARGE</div>
+                <div class="packet-btn-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div class="btn-packet ntr" onclick="togglePacketMode(${i}, 'NTR', this)">
+                        <i class="fa fa-layer-group"></i> PAKET NTR
+                    </div>
+                    <div class="btn-packet ob" onclick="togglePacketMode(${i}, 'OB', this)">
+                        <i class="fa fa-ship"></i> PAKET OIL BARGE
+                    </div>
+                    <div class="btn-packet ntr" onclick="togglePacketMode(${i}, 'ENDORS_NTR', this)">
+                        <i class="fa fa-check-double"></i> ENDORS NTR
+                    </div>
+                    <div class="btn-packet ob" onclick="togglePacketMode(${i}, 'ENDORS_OB', this)">
+                        <i class="fa fa-oil-can"></i> ENDORS OB
+                    </div>
                 </div>
-                <div class="cert-grid-container">
+                
+                <div class="cert-grid-container" style="margin-top:15px;">
                     ${CERT_LIST.map(
                       (cert) => `
                         <label class="cert-check-card">
@@ -1261,14 +1304,25 @@ async function handleBulkSubmit(type) {
           jenisSertifikat: cert,
           files: [...sharedFiles],
         };
-        const packetCerts =
-          isPacket === "NTR"
-            ? ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"]
-            : isPacket === "OB"
-            ? ["KONSTRUKSI", "PERLENGKAPAN"]
-            : [];
 
+        // Tentukan Sertifikat mana saja yang masuk paket Shared
+        let packetCerts = [];
+        if (isPacket === "NTR")
+          packetCerts = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
+        else if (isPacket === "OB")
+          packetCerts = ["KONSTRUKSI", "PERLENGKAPAN"];
+        else if (isPacket === "ENDORS_NTR")
+          packetCerts = [
+            "ENDORS KONSTRUKSI",
+            "ENDORS PERLENGKAPAN",
+            "ENDORS RADIO",
+          ];
+        else if (isPacket === "ENDORS_OB")
+          packetCerts = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
+
+        // LOGIKA PENYIMPANAN
         if (isPacket && packetCerts.includes(cert)) {
+          // PAKET SHARED
           rowItem.kodeBilling = form.querySelector(
             `[name="billing_shared_${i}"]`
           ).value;
@@ -1278,6 +1332,7 @@ async function handleBulkSubmit(type) {
           rowItem.noSertifikat = form.querySelector(
             `[name="no_sert_${cert}_${i}"]`
           ).value;
+
           const fPerm = getFile(`permohonan_shared_${i}`);
           if (fPerm)
             rowItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
@@ -1287,7 +1342,6 @@ async function handleBulkSubmit(type) {
               jenis: "laporan_pemeriksaan",
               ...(await read(fLap)),
             });
-          // UPDATE V13.1: Bukti Billing Shared
           const fBilling = getFile(`bukti_billing_shared_${i}`);
           if (fBilling)
             rowItem.files.push({
@@ -1295,6 +1349,7 @@ async function handleBulkSubmit(type) {
               ...(await read(fBilling)),
             });
         } else {
+          // ECERAN / NON-PAKET
           rowItem.kodeBilling = form.querySelector(
             `[name="billing_${cert}_${i}"]`
           ).value;
@@ -1304,17 +1359,16 @@ async function handleBulkSubmit(type) {
           rowItem.noSertifikat = form.querySelector(
             `[name="no_sert_${cert}_${i}"]`
           ).value;
+
           const fPerm = getFile(`permohonan_${cert}_${i}`);
           if (fPerm)
             rowItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
-          // UPDATE V13.1: Laporan Eceran
           const fLap = getFile(`laporan_${cert}_${i}`);
           if (fLap)
             rowItem.files.push({
               jenis: "laporan_pemeriksaan",
               ...(await read(fLap)),
             });
-          // UPDATE V13.1: Bukti Billing Eceran
           const fBilling = getFile(`bukti_billing_${cert}_${i}`);
           if (fBilling)
             rowItem.files.push({
@@ -1322,9 +1376,12 @@ async function handleBulkSubmit(type) {
               ...(await read(fBilling)),
             });
         }
+
+        // File Sertifikat (Selalu Unik per Sertifikat)
         const fSert = getFile(`file_sert_${cert}_${i}`);
         if (fSert)
           rowItem.files.push({ jenis: "sertifikat", ...(await read(fSert)) });
+
         items.push(rowItem);
       }
     } else if (type === "SHSK") {
