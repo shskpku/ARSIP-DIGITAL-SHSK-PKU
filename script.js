@@ -560,7 +560,21 @@ function toggleSubmenu(id) {
 }
 
 window.toggleAccordion = function (headerElement) {
-  headerElement.closest(".accordion-item").classList.toggle("open");
+  // Cari elemen bapaknya (accordion-item)
+  const item = headerElement.closest(".accordion-item");
+
+  // Toggle class 'open' (Kalau ada dihapus, kalau gak ada ditambah)
+  item.classList.toggle("open");
+
+  // Variasi Icon Panah (Opsional: Biar panahnya muter)
+  const icon = headerElement.querySelector("i.fa-chevron-down");
+  if (icon) {
+    if (item.classList.contains("open")) {
+      icon.style.transform = "rotate(180deg)";
+    } else {
+      icon.style.transform = "rotate(0deg)";
+    }
+  }
 };
 
 // ====================================================================
@@ -1015,11 +1029,11 @@ function renderBulkForm(type) {
 
     if (type === "SHSK") {
       html += `
-      <div class="accordion-item open">
+      <div class="accordion-item">
         <div class="accordion-header" onclick="toggleAccordion(this)"><span>Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
         <div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div>
       </div>
-      <div class="accordion-item open"> <div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div>
+      <div class="accordion-item"> <div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div>
         <div class="accordion-body" style="display:block;"> <div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div>
             <div class="grid-form" style="margin-top:10px;"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control">
                 <option value="">-- Pilih --</option>
@@ -1054,7 +1068,7 @@ function renderBulkForm(type) {
       </div>`;
     } else if (type === "SERTIFIKASI") {
       html += `
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>1. Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="grid-form">
@@ -1096,7 +1110,7 @@ function renderBulkForm(type) {
             </div>
         </div>
 
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>2. Pilih Jenis Sertifikat</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="packet-btn-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -1129,7 +1143,7 @@ function renderBulkForm(type) {
         <div id="dynamic-cert-forms-${i}" style="margin-top:20px;"></div>`;
     } else if (type === "SERVICE") {
       html += `
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Info Service</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
@@ -1149,7 +1163,7 @@ function renderBulkForm(type) {
                 </div>
             </div>
         </div>
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="grid-form">
@@ -1161,13 +1175,13 @@ function renderBulkForm(type) {
         </div>`;
     } else if (type === "EXIBHITUM") {
       html += `
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div>
             </div>
         </div>
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${[
@@ -1196,7 +1210,7 @@ function renderBulkForm(type) {
                 <div id="dynamic-nomor-${i}"></div>
             </div>
         </div>
-        <div class="accordion-item open">
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body" style="display:block;">
                 <div class="grid-form">
