@@ -701,9 +701,12 @@ body.petugas-page {
   transition: 0.3s ease;
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
 }
+
 .sidebar-content {
-  height: 100%;
+  flex-grow: 1; 
   overflow-y: auto;
   padding: 20px 0;
 }
@@ -824,6 +827,60 @@ body.petugas-page {
 .sidebar-overlay.active {
   display: block;
 }
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.shortcut-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px; 
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.shortcut-btn i {
+  font-size: 16px;
+}
+.btn-sheet {
+  background: #27ae60;
+  color: white;
+  border: 1px solid #2ecc71;
+}
+.btn-sheet:hover {
+  background: #2ecc71;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+}
+.btn-drive {
+  background: var(--gold);
+  color: var(--navy);
+  border: 1px solid #e1b12c;
+}
+.btn-drive:hover {
+  background: #f1c40f;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(241, 196, 15, 0.3);
+}
+
 .main-content {
   margin-left: 260px;
   margin-top: 70px;
