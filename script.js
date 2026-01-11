@@ -2278,4 +2278,49 @@ function closeLoginModal() {
   }
 }
 
+// ====================================================================
+// FITUR AUTO-SYNC: SINKRONISASI DROPDOWN OTOMATIS (SERVER KE DEVICE)
+// ====================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  // Hanya jalan di halaman Petugas (Dashboard Admin)
+  if (document.querySelector(".petugas-page")) {
+    console.log("🔄 Memulai Auto-Sync Database Dropdown...");
+
+    // Jalankan fungsi sync secara paralel (Biar cepat)
+    Promise.all([
+      postData({ action: "getDataSertifikasi" }), // Ambil Perusahaan & Bahan
+      postData({ action: "getDataSHSK" }), // Ambil Pemilik
+      postData({ action: "getDataService" }), // Ambil Service Station
+      postData({ action: "getDataExibhitum" }), // Ambil Perusahaan Exibhitum
+    ])
+      .then((results) => {
+        // results[0] = Sertifikasi, results[1] = SHSK, dst...
+
+        const [resSert, resSHSK, resServ, resExib] = results;
+
+        // 1. Masukkan Data Sertifikasi (Perusahaan & Bahan Kapal)
+        if (resSert.status === "SUCCESS")
+          updateSmartData(resSert.data, "SERTIFIKASI");
+
+        // 2. Masukkan Data SHSK (Pemilik)
+        if (resSHSK.status === "SUCCESS") updateSmartData(resSHSK.data, "SHSK");
+
+        // 3. Masukkan Data Service (Service Station)
+        if (resServ.status === "SUCCESS")
+          updateSmartData(resServ.data, "SERVICE");
+
+        // 4. Masukkan Data Exibhitum (Perusahaan)
+        if (resExib.status === "SUCCESS")
+          updateSmartData(resExib.data, "EXIBHITUM");
+
+        console.log("✅ Auto-Sync Selesai! Database Dropdown Siap Digunakan.");
+        // Opsional: Tampilkan notifikasi kecil kalau mau
+        // showPopup("Database Perusahaan Terupdate!", "success");
+      })
+      .catch((err) => {
+        console.error("Gagal Auto-Sync:", err);
+      });
+  }
+});
+
 // --- END SCRIPT.JS V13.1 ---
