@@ -1180,36 +1180,52 @@ function renderBulkForm(type) {
                 <div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div>
             </div>
         </div>
+        
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body">
-                <div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${[
-                  "DECK",
-                  "MESIN",
-                  "OIL",
-                  "SAMPAH",
-                  "GMDSS",
-                ]
-                  .map(
-                    (b) =>
-                      `<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`
-                  )
-                  .join("")}</div><div><b>PENGESAHAN</b><br>${[
-        "DECK",
-        "MESIN",
-        "OIL",
-        "SAMPAH",
-        "GMDSS",
-      ]
-        .map(
-          (b) =>
-            `<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`
-        )
-        .join("")}</div></div></div>
-                <div id="dynamic-nomor-${i}"></div>
+                <div class="service-selection-box">
+                    <div class="exib-grid-wrapper" style="display:grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                        
+                        <div class="group-ex">
+                            <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
+                            <div class="book-grid-container">
+                                ${["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"]
+                                  .map(
+                                    (b) => `
+                                    <label class="book-checkbox">
+                                        <input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})">
+                                        <div class="book-ui">${b}</div>
+                                    </label>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+
+                        <div class="group-psh">
+                            <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
+                            <div class="book-grid-container">
+                                ${["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"]
+                                  .map(
+                                    (b) => `
+                                    <label class="book-checkbox">
+                                        <input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})">
+                                        <div class="book-ui">${b}</div>
+                                    </label>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div id="dynamic-nomor-${i}" style="margin-top:15px;"></div>
             </div>
         </div>
-        <div class="accordion-item">
+
+        <div class="accordion-item>
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
             <div class="accordion-body">
                 <div class="grid-form">
@@ -1219,7 +1235,6 @@ function renderBulkForm(type) {
             </div>
         </div>`;
     }
-
     html += `</div>`; // Close Bulk Card
     container.innerHTML += html;
   }
