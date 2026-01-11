@@ -1791,12 +1791,16 @@ function cancelEdit(type) {
   showSection(`${type.toLowerCase()}-data`);
 }
 
+// ====================================================================
+// FITUR: EXPORT LAPORAN (UPDATE V13.4 - SUPPORT BASE64 & URL)
+// ====================================================================
 async function exportTriple(type) {
   const btn = event.currentTarget;
   const originalHtml = btn.innerHTML;
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
   btn.disabled = true;
   showPopup("Menyiapkan Laporan...", "info");
+
   const filters = {};
   if (type === "SHSK") {
     filters.bulan = document.getElementById("filterSHSKBulan").value;
@@ -1824,11 +1828,25 @@ async function exportTriple(type) {
       type: type,
       filters: filters,
     });
+
     if (res.status === "SUCCESS" && res.files) {
-      showPopup("Laporan Siap!", "success");
+      showPopup("Laporan Siap! Mendownload...", "success");
+
+      // --- LOGIKA BARU: SUPPORT BASE64 (ANTI BLOKIR) ---
       res.files.forEach((f, index) => {
-        if (f.url) {
-          setTimeout(() => {
+        setTimeout(() => {
+          if (f.base64) {
+            // DOWNLOAD VIA BASE64 (Prioritas Utama)
+            const link = document.createElement("a");
+            link.href =
+              "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," +
+              f.base64;
+            link.download = f.fileName || `Laporan_${type}_${index}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } else if (f.url) {
+            // DOWNLOAD VIA URL (Fallback)
             const a = document.createElement("a");
             a.href = f.url;
             a.setAttribute("download", "");
@@ -1836,13 +1854,14 @@ async function exportTriple(type) {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-          }, index * 1500);
-        }
+          }
+        }, index * 1000); // Jeda 1 detik per file biar browser gak kaget
       });
     } else {
       showPopup(res.message || "Gagal export", "error");
     }
   } catch (e) {
+    console.error(e);
     showPopup("Gagal koneksi", "error");
   }
   btn.innerHTML = originalHtml;
