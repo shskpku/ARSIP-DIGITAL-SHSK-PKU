@@ -1583,9 +1583,14 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
   }
 }
 
+// ====================================================================
+// FUNGSI EDIT DATA (VERSI LENGKAP & ROBUST V13.5)
+// ====================================================================
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   let formId, countId;
+
+  // 1. Buka Section Input
   if (type === "SHSK") {
     formId = "formSHSK";
     countId = "bulkCountSHSK";
@@ -1601,99 +1606,163 @@ function editData(type, rowDataStr) {
   }
 
   showSection(`${type.toLowerCase()}-input`);
+
+  // 2. Reset Form ke Mode Single (1 Data)
   const countSelect = document.getElementById(countId);
-  countSelect.value = "1";
-  renderBulkForm(type);
+  if (countSelect) countSelect.value = "1";
+  renderBulkForm(type); // Render ulang form kosong
+
   const form = document.getElementById(formId);
+
+  // --- HELPER UNTUK MENGISI NILAI ---
+  // Fungsi ini mencari input dan mengisi nilainya (Smart Match)
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
     if (el) {
-      if (el.type === "date") el.value = formatDateForInput(val);
-      else el.value = val;
-      el.disabled = true;
+      // Cek jika val-nya kosong/undefined
+      let finalVal =
+        val === undefined || val === null || val === "undefined" ? "" : val;
+
+      if (el.type === "date") {
+        el.value = formatDateForInput(finalVal);
+      } else {
+        el.value = finalVal;
+      }
+      el.disabled = true; // Kunci dulu biar user klik "Ubah Data"
     }
   };
 
-  setVal("noUrut", rowData.NO_URUT || rowData["NO"]);
+  // --- HELPER UNTUK MENCARI KUNCI DATA (ANTI TYPO HEADER) ---
+  // Mencari value dari rowData meskipun header di Sheet beda dikit
+  const getRowVal = (keys) => {
+    for (let k of keys) {
+      if (rowData[k] !== undefined) return rowData[k];
+    }
+    return "";
+  };
+
+  // 3. MULAI ISI DATA (MAPPING LENGKAP)
+
+  // Data Umum (Semua Tipe Ada)
+  setVal("noUrut", getRowVal(["NO_URUT", "NO URUT", "NO", "No"]));
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
   if (type === "SHSK") {
-    setVal("namaKapal", rowData.NAMA_KAPAL);
-    setVal("tonase", rowData.TONASE_GT);
-    setVal("tandaPendaftaran", rowData.TANDA_PENDAFTARAN);
-    setVal("pemilik", rowData.PEMILIK);
-    setVal("tempatStkk", rowData.TEMPAT_STKK);
-    setVal("tglStkk", rowData.TANGGAL_STKK);
-    setVal("noUrutStkk", rowData.NO_URUT_STKK);
-    setVal("noHalStkk", rowData.NO_HAL_STKK);
-    setVal("noBukuStkk", rowData.NO_BUKU_STKK);
-    setVal("statusPengukuhan", rowData.STATUS_PENGUKUHAN);
-    setVal("tglPengukuhan", rowData.TANGGAL_PENGUKUHAN);
-  } else if (type === "SERTIFIKASI") {
-    setVal("perusahaan", rowData.NAMA_PERUSAHAAN);
-    setVal("namaKapal", rowData.NAMA_KAPAL);
-    setVal("ukuran", rowData.UKURAN_GT);
-    setVal("callSign", rowData.CALL_SIGN);
-    setVal("bahan", rowData.BAHAN_KAPAL);
-    setVal("daerahPelayaran", rowData.DAERAH_PELAYARAN);
-    setVal("tglTerbit", rowData.TANGGAL_TERBIT);
-    setVal("pemeriksa", rowData.NAMA_PEMERIKSA);
-    setVal("keterangan", rowData.KETERANGAN);
-    const certCheck = form.querySelector(
-      `input[name="cert_select_1"][value="${rowData.JENIS_SERTIFIKAT}"]`
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "NAMA KAPAL", "KAPAL"]));
+    setVal("tonase", getRowVal(["TONASE_GT", "TONASE", "GT", "UKURAN"]));
+    setVal(
+      "tandaPendaftaran",
+      getRowVal(["TANDA_PENDAFTARAN", "TANDA PENDAFTARAN"])
     );
+    setVal("pemilik", getRowVal(["PEMILIK", "NAMA PEMILIK"]));
+    setVal("tempatStkk", getRowVal(["TEMPAT_STKK", "TEMPAT STKK"]));
+    setVal("tglStkk", getRowVal(["TANGGAL_STKK", "TGL STKK", "TANGGAL"]));
+    setVal("noUrutStkk", getRowVal(["NO_URUT_STKK", "NO URUT STKK"]));
+    setVal("noHalStkk", getRowVal(["NO_HAL_STKK", "NO HAL STKK", "HALAMAN"]));
+    setVal("noBukuStkk", getRowVal(["NO_BUKU_STKK", "NO BUKU STKK", "BUKU"]));
+    setVal("statusPengukuhan", getRowVal(["STATUS_PENGUKUHAN", "STATUS"]));
+    setVal(
+      "tglPengukuhan",
+      getRowVal(["TANGGAL_PENGUKUHAN", "TGL PENGUKUHAN"])
+    );
+  } else if (type === "SERTIFIKASI") {
+    setVal(
+      "perusahaan",
+      getRowVal(["NAMA_PERUSAHAAN", "PERUSAHAAN", "PEMILIK"])
+    );
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "NAMA KAPAL"]));
+    setVal("ukuran", getRowVal(["UKURAN_GT", "GT", "TONASE"]));
+    setVal("callSign", getRowVal(["CALL_SIGN", "CALL SIGN", "CS"]));
+    setVal("bahan", getRowVal(["BAHAN_KAPAL", "BAHAN"]));
+    setVal("daerahPelayaran", getRowVal(["DAERAH_PELAYARAN", "DAERAH"]));
+    setVal("tglTerbit", getRowVal(["TANGGAL_TERBIT", "TGL TERBIT"]));
+    setVal("pemeriksa", getRowVal(["NAMA_PEMERIKSA", "PEMERIKSA"]));
+    setVal("keterangan", getRowVal(["KETERANGAN", "KET"]));
+
+    // Khusus Sertifikat (Checkbox & Input Dinamis)
+    const jenisSert = getRowVal(["JENIS_SERTIFIKAT", "JENIS"]);
+    const certCheck = form.querySelector(
+      `input[name="cert_select_1"][value="${jenisSert}"]`
+    );
+
     if (certCheck) {
       certCheck.checked = true;
-      renderCertForms(1);
-      setVal(`no_sert_${rowData.JENIS_SERTIFIKAT}`, rowData.NOMOR_SERTIFIKAT);
+      renderCertForms(1); // Render form eceran
+
+      // Isi data spesifik sertifikat
       setVal(
-        `berlaku_${rowData.JENIS_SERTIFIKAT}`,
-        rowData.TANGGAL_MASA_BERLAKU
+        `no_sert_${jenisSert}`,
+        getRowVal(["NOMOR_SERTIFIKAT", "NO SERTIFIKAT"])
       );
-      setVal(`billing_${rowData.JENIS_SERTIFIKAT}`, rowData.KODE_BILLING);
+      setVal(
+        `berlaku_${jenisSert}`,
+        getRowVal(["TANGGAL_MASA_BERLAKU", "MASA BERLAKU"])
+      );
+      setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING", "BILLING"]));
+
+      // Disable checkbox biar gak diubah sembarangan
       form
         .querySelectorAll(`input[name="cert_select_1"]`)
         .forEach((c) => (c.disabled = true));
     }
   } else if (type === "SERVICE") {
-    setVal("namaPenyediaJasa", rowData.NAMA_PENYEDIA_JASA);
-    setVal("namaKapal", rowData.NAMA_KAPAL);
-    setVal("tglValidasi", rowData.TANGGAL_VALIDASI_SERVICE_REPORT);
-    const jenisStr = rowData.JENIS_ALAT_YANG_DISERVICE || "";
-    const jumlahStr = rowData.JUMLAH || "";
-    const jumlahArr = jumlahStr.split("\n");
+    setVal(
+      "namaPenyediaJasa",
+      getRowVal(["NAMA_PENYEDIA_JASA", "PENYEDIA JASA", "PERUSAHAAN"])
+    );
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "KAPAL"]));
+    setVal(
+      "tglValidasi",
+      getRowVal(["TANGGAL_VALIDASI_SERVICE_REPORT", "TGL VALIDASI"])
+    );
+
+    const jenisStr =
+      getRowVal(["JENIS_ALAT_YANG_DISERVICE", "JENIS ALAT"]) || "";
+    const jumlahStr = getRowVal(["JUMLAH", "QTY"]) || "";
+    const jumlahArr = String(jumlahStr).split("\n");
+    let idx = 0;
+
     if (jenisStr.includes("LIFERAFT")) {
       const ck = form.querySelector('[name="check_liferaft_1"]');
-      if (ck) ck.checked = true;
+      if (ck) {
+        ck.checked = true;
+        updateServiceQty(1); // Munculkan input jumlah
+        const lrInput = form.querySelector('[name="jumlah_LIFERAFT_1"]');
+        if (lrInput) {
+          lrInput.value = jumlahArr[idx] || 0;
+          lrInput.disabled = true;
+        }
+        idx++;
+      }
     }
+
     if (jenisStr.includes("FIRE EXTINGUISHER")) {
       const ck = form.querySelector('[name="check_fe_1"]');
-      if (ck) ck.checked = true;
-    }
-    updateServiceQty(1);
-    let idx = 0;
-    const lrInput = form.querySelector('[name="jumlah_LIFERAFT_1"]');
-    if (lrInput && jenisStr.includes("LIFERAFT")) {
-      lrInput.value = jumlahArr[idx] || 0;
-      lrInput.disabled = true;
-      idx++;
-    }
-    const feInput = form.querySelector('[name="jumlah_FE_1"]');
-    if (feInput && jenisStr.includes("FIRE EXTINGUISHER")) {
-      feInput.value = jumlahArr[idx] || 0;
-      feInput.disabled = true;
+      if (ck) {
+        ck.checked = true;
+        updateServiceQty(1);
+        const feInput = form.querySelector('[name="jumlah_FE_1"]');
+        if (feInput) {
+          feInput.value = jumlahArr[idx] || 0;
+          feInput.disabled = true;
+        }
+      }
     }
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
   } else if (type === "EXIBHITUM") {
-    setVal("tanggal", rowData.TANGGAL);
-    setVal("perusahaan", rowData.PERUSAHAAN);
-    setVal("namaKapal", rowData.NAMA_KAPAL);
-    setVal("pup", rowData.PUP);
-    const jb = rowData.JENIS_BUKU || "";
-    let prefix = "";
-    let bookType = "";
+    setVal("tanggal", getRowVal(["TANGGAL", "TGL"]));
+    setVal("perusahaan", getRowVal(["PERUSAHAAN", "NAMA PERUSAHAAN"]));
+    setVal("namaKapal", getRowVal(["NAMA_KAPAL", "KAPAL"]));
+    setVal("pup", getRowVal(["PUP"]));
+
+    const jb = getRowVal(["JENIS_BUKU", "JENIS"]) || "";
+    const nomor = getRowVal(["PENOMORAN", "NO SURAT"]) || "";
+
+    // Parse Jenis Buku (EX. DECK atau PSH. DECK)
+    let prefix = "",
+      bookType = "";
     if (jb.startsWith("EX")) {
       prefix = "EX";
       bookType = jb.replace("EX. ", "").trim();
@@ -1701,27 +1770,36 @@ function editData(type, rowDataStr) {
       prefix = "PSH";
       bookType = jb.replace("PSH. ", "").trim();
     }
+
     const targetCheck = form.querySelector(
       `input[name="check_${prefix}_${bookType}_1"]`
     );
-    if (targetCheck) targetCheck.checked = true;
-    updateExibhitumForms(1);
-    const noSuratInput = form.querySelector(
-      `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
-    );
-    if (noSuratInput) {
-      noSuratInput.value = rowData.PENOMORAN;
-      noSuratInput.disabled = true;
+    if (targetCheck) {
+      targetCheck.checked = true;
+      updateExibhitumForms(1); // Munculkan input nomor
+
+      // Isi Nomor Surat
+      const noSuratInput = form.querySelector(
+        `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
+      );
+      if (noSuratInput) {
+        noSuratInput.value = nomor;
+        noSuratInput.disabled = true;
+      }
     }
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
   }
 
+  // 4. AKTIFKAN MODE EDIT (UI LOCK/UNLOCK)
   const allInputs = form.querySelectorAll("input, select");
-  allInputs.forEach((i) => (i.disabled = true));
+  allInputs.forEach((i) => (i.disabled = true)); // Kunci semua dulu
+
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
   if (btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
+
+  // Tombol "Ubah Data" (Unlock)
   let btnUnlock = document.getElementById(`btn-unlock-${type}`);
   if (!btnUnlock) {
     const btnContainer = btnSaveOriginal.parentNode;
@@ -1734,13 +1812,17 @@ function editData(type, rowDataStr) {
     btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
+
+  // Tombol "Cancel"
   const btnCancel = document.getElementById(`btn-cancel-${type}`);
   if (btnCancel) btnCancel.classList.remove("hidden");
+
+  // Sembunyikan tombol Update dulu
   let btnUpdate = document.getElementById(`btn-update-${type}`);
   if (btnUpdate) btnUpdate.classList.add("hidden");
-  showPopup("Mode Edit (Terkunci). Klik 'Ubah Data' untuk mengedit.", "info");
-}
 
+  showPopup("Mode Edit. Klik 'UBAH DATA' untuk mengedit.", "info");
+}
 function enableEditMode(type) {
   const formId =
     type === "SHSK"
