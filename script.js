@@ -1874,14 +1874,14 @@ function cancelEdit(type) {
 }
 
 // ====================================================================
-// FITUR: EXPORT LAPORAN (UPDATE V13.4 - SUPPORT BASE64 & URL)
+// FITUR: EXPORT (TEKNIK HIDDEN IFRAME - DIRECT DOWNLOAD)
 // ====================================================================
 async function exportTriple(type) {
   const btn = event.currentTarget;
   const originalHtml = btn.innerHTML;
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating...';
   btn.disabled = true;
-  showPopup("Menyiapkan Laporan...", "info");
+  showPopup("Sedang membuat laporan... Mohon tunggu.", "info");
 
   const filters = {};
   if (type === "SHSK") {
@@ -1912,42 +1912,44 @@ async function exportTriple(type) {
     });
 
     if (res.status === "SUCCESS" && res.files) {
-      showPopup("Laporan Siap! Mendownload...", "success");
+      showPopup("Laporan Siap! Download dimulai...", "success");
 
-      // --- LOGIKA BARU: SUPPORT BASE64 (ANTI BLOKIR) ---
       res.files.forEach((f, index) => {
-        setTimeout(() => {
-          if (f.base64) {
-            // DOWNLOAD VIA BASE64 (Prioritas Utama)
-            const link = document.createElement("a");
-            link.href =
-              "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," +
-              f.base64;
-            link.download = f.fileName || `Laporan_${type}_${index}.xlsx`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          } else if (f.url) {
-            // DOWNLOAD VIA URL (Fallback)
-            const a = document.createElement("a");
-            a.href = f.url;
-            a.setAttribute("download", "");
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
-        }, index * 1000); // Jeda 1 detik per file biar browser gak kaget
+        // Cek Error Backend
+        if (f.error) {
+          console.error(f.name + " Error: " + f.error);
+          showPopup("Gagal: " + f.name, "error");
+        }
+        // Lakukan Download jika ada URL
+        else if (f.url) {
+          // JEDA 2 DETIK PER FILE (BIAR STABIL)
+          setTimeout(() => {
+            downloadDirectly(f.url);
+            showPopup("Mendownload: " + f.name, "info");
+          }, index * 2000);
+        }
       });
     } else {
       showPopup(res.message || "Gagal export", "error");
     }
   } catch (e) {
-    console.error(e);
     showPopup("Gagal koneksi", "error");
   }
   btn.innerHTML = originalHtml;
   btn.disabled = false;
+}
+
+// --- FUNGSI RAHASIA: DOWNLOAD LEWAT IFRAME ---
+function downloadDirectly(url) {
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none"; // Sembunyikan
+  iframe.src = url; // Tembak URL Download
+  document.body.appendChild(iframe);
+
+  // Hapus iframe setelah 1 menit (bersih-bersih memori)
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+  }, 60000);
 }
 
 let rawData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
