@@ -68,6 +68,7 @@ const CERT_CODES = {
 };
 
 let globalCompanySet = new Set();
+let globalMaterialSet = new Set();
 let packetModeState = {};
 
 // ====================================================================
@@ -215,19 +216,47 @@ function initSmartSearch() {
     dl.id = "companyList";
     document.body.appendChild(dl);
   }
+  if (!document.getElementById("materialList")) {
+    const dl2 = document.createElement("datalist");
+    dl2.id = "materialList";
+    document.body.appendChild(dl2);
+  }
 }
 
-function updateCompanyDatalist(dataArray, keyName) {
+function updateSmartData(dataArray, type) {
   dataArray.forEach((item) => {
-    if (item[keyName]) globalCompanySet.add(item[keyName].trim().toUpperCase());
+    let compKey = "";
+    if (type === "SHSK") compKey = "PEMILIK";
+    else if (type === "SERTIFIKASI") compKey = "NAMA_PERUSAHAAN";
+    else if (type === "SERVICE") compKey = "NAMA_PENYEDIA_JASA";
+    else if (type === "EXIBHITUM") compKey = "PERUSAHAAN";
+
+    if (compKey && item[compKey])
+      globalCompanySet.add(item[compKey].trim().toUpperCase());
+
+    if (type === "SERTIFIKASI" && item["BAHAN_KAPAL"]) {
+      globalMaterialSet.add(item["BAHAN_KAPAL"].trim().toUpperCase());
+    }
   });
-  const dl = document.getElementById("companyList");
-  if (dl) {
-    dl.innerHTML = "";
+
+  const dlComp = document.getElementById("companyList");
+  if (dlComp) {
+    dlComp.innerHTML = "";
     globalCompanySet.forEach((name) => {
       const opt = document.createElement("option");
       opt.value = name;
-      dl.appendChild(opt);
+      dlComp.appendChild(opt);
+    });
+  }
+
+  // Update DOM Material List
+  const dlMat = document.getElementById("materialList");
+  if (dlMat) {
+    dlMat.innerHTML = "";
+    globalMaterialSet.forEach((mat) => {
+      const opt = document.createElement("option");
+      opt.value = mat;
+      dlMat.appendChild(opt);
     });
   }
 }
@@ -1074,7 +1103,7 @@ function renderBulkForm(type) {
                     <label>Nama Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label>
                     <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
                     <label>Call Sign <input type="text" name="callSign_${i}" class="form-control" style="text-transform:uppercase"></label>
-                    <label>Bahan Kapal <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase"></label>
+                    <label>Bahan Kapal <input type="text" name="bahan_${i}" class="form-control" style="text-transform:uppercase" list="materialList"></label>
                     <label>Ukuran (GT) <input type="text" name="ukuran_${i}" class="form-control"></label>
                     <label>Daerah Pelayaran <select name="daerahPelayaran_${i}" class="form-control">
                         <option value="">-- Pilih --</option>
@@ -1845,11 +1874,7 @@ async function loadData(type) {
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
     let keyName = "";
-    if (type === "SHSK") keyName = "PEMILIK";
-    else if (type === "SERTIFIKASI") keyName = "NAMA_PERUSAHAAN";
-    else if (type === "SERVICE") keyName = "NAMA_PENYEDIA_JASA";
-    else keyName = "PERUSAHAAN";
-    if (keyName) updateCompanyDatalist(rawData[type], keyName);
+    updateSmartData(rawData[type], type);
     renderTable(type);
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else {
