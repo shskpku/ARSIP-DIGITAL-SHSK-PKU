@@ -2025,22 +2025,74 @@ function renderTable(type) {
     tr += `<td><div style="display:flex; justify-content:center; gap:5px;"><button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button><button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button><button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button></div></td></tr>`;
     tbody.innerHTML += tr;
   });
-  document.getElementById(
-    `page-info-${type}`
-  ).innerText = `Hal ${currentPage[type]}`;
+  renderPagination(type);
+}
+function renderPagination(type) {
+  const container = document.getElementById(`pagination-${type}`);
+  if (!container) return;
+
+  const totalRows = filteredData[type].length;
+  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
+  const current = currentPage[type];
+
+  // Kalau datanya kosong atau cuma 1 halaman, kosongkan pagination
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  let html = "";
+
+  // 1. TOMBOL PREV (<)
+  const prevDisabled = current === 1 ? "disabled" : "";
+  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${
+    current - 1
+  })"><i class="fa fa-chevron-left"></i></button>`;
+
+  // 2. TOMBOL ANGKA (1 2 3...)
+  let startPage = 1;
+  let endPage = totalPages;
+
+  // Logika memotong halaman jika terlalu banyak (Max 5 tombol angka)
+  if (totalPages > 5) {
+    if (current <= 3) {
+      startPage = 1;
+      endPage = 5;
+    } else if (current + 2 >= totalPages) {
+      startPage = totalPages - 4;
+      endPage = totalPages;
+    } else {
+      startPage = current - 2;
+      endPage = current + 2;
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const activeClass = i === current ? "active" : "";
+    html += `<button class="page-btn ${activeClass}" onclick="goToPage('${type}', ${i})">${i}</button>`;
+  }
+
+  // 3. TOMBOL NEXT (>)
+  const nextDisabled = current === totalPages ? "disabled" : "";
+  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${
+    current + 1
+  })"><i class="fa fa-chevron-right"></i></button>`;
+
+  // 4. INFO TOTAL DATA
+  html += `<span style="margin-left:10px; font-size:12px; color:#666;">Total: ${totalRows} Data</span>`;
+
+  container.innerHTML = html;
 }
 
-function prevPage(t) {
-  if (currentPage[t] > 1) {
-    currentPage[t]--;
-    renderTable(t);
-  }
-}
-function nextPage(t) {
-  if (currentPage[t] * ROWS_PER_PAGE < filteredData[t].length) {
-    currentPage[t]++;
-    renderTable(t);
-  }
+// FUNGSI PINDAH HALAMAN
+function goToPage(type, pageNum) {
+  const totalRows = filteredData[type].length;
+  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
+
+  if (pageNum < 1 || pageNum > totalPages) return;
+
+  currentPage[type] = pageNum;
+  renderTable(type); // Render ulang tabel dan pagination
 }
 
 let pendingDelete = null;
