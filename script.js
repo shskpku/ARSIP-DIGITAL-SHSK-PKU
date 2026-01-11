@@ -1,6 +1,5 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (V13.1 - FIXED FORMS & CINEMATIC)
-   Status: Cinematic Intro + Form Lengkap (Upload Laporan/Billing/Ket)
+   SCRIPT.JS - ULTIMATE MASTER (V13.1)
    ==================================================================== */
 
 // ---- API URL GOOGLE APPSCRIPT ---
@@ -949,6 +948,9 @@ window.handleFileSelect = function (input) {
   }
 };
 
+// ====================================================================
+// FUNGSI RENDER FORM (PERBAIKAN V13.2)
+// ====================================================================
 function renderBulkForm(type) {
   let countSelectId, containerId;
   if (type === "SHSK") {
@@ -980,36 +982,44 @@ function renderBulkForm(type) {
     `;
 
     if (type === "SHSK") {
-      html += `<div class="accordion-item open"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div></div>
-      <div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div><div class="grid-form" style="margin-top:10px;"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control">
-        <option value="">-- Pilih --</option>
-        <option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option>
-        <option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option>
-        <option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option>
-        <option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option>
-        <option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option>
-        <option value="DAFTAR UKUR">DAFTAR UKUR</option>
-        <option value="PAS BESAR">PAS BESAR</option>
-        <option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option>
-        <option value="PAS BESAR ENDORSTMENT">PAS BESAR ENDORSTMENT</option>
-        <option value="SURAT LAUT ENDORSTMENT">SURAT LAUT ENDORSTMENT</option>
-        <option value="PAS KECIL">PAS KECIL</option>
-        <option value="PAS KECIL ENDORSTMENT">PAS KECIL ENDORSTMENT</option>
-        <option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option>
-        <option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option>
-        <option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option>
-        <option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option>
-        <option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option>
-        <option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option>
-        <option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option>
-      </select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div>
-      <div class="grid-form" style="margin-top:10px;">
-        <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>Grosse <div class="file-dropzone"><input type="file" name="grosse_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>Surat Ukur <div class="file-dropzone"><input type="file" name="ukur_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>PNBP <div class="file-dropzone"><input type="file" name="pnbp_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-      </div></div></div>`;
+      html += `
+      <div class="accordion-item open">
+        <div class="accordion-header" onclick="toggleAccordion(this)"><span>Informasi Kapal</span> <i class="fa fa-chevron-down"></i></div>
+        <div class="accordion-body" style="display:block;"><div class="grid-form"><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label><label>Tonase <input type="text" name="tonase_${i}" class="form-control"></label><label>Tanda Pendaftaran <input type="text" name="tandaPendaftaran_${i}" class="form-control" style="text-transform:uppercase"></label><label>Pemilik <input type="text" name="pemilik_${i}" class="form-control" style="text-transform:uppercase" list="companyList"></label></div></div>
+      </div>
+      <div class="accordion-item open"> <div class="accordion-header" onclick="toggleAccordion(this)"><span>Dokumen & Upload</span> <i class="fa fa-chevron-down"></i></div>
+        <div class="accordion-body" style="display:block;"> <div class="grid-form"><label>Tempat STKK <input type="text" name="tempatStkk_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tgl STKK <input type="date" name="tglStkk_${i}" class="form-control"></label><label>No Urut <input type="text" name="noUrutStkk_${i}" class="form-control"></label><label>No Hal <input type="text" name="noHalStkk_${i}" class="form-control"></label><label>No Buku <input type="text" name="noBukuStkk_${i}" class="form-control"></label></div>
+            <div class="grid-form" style="margin-top:10px;"><label>Jenis Dokumen <select name="statusPengukuhan_${i}" class="form-control">
+                <option value="">-- Pilih --</option>
+                <option value="SURAT UKUR DALAM NEGERI">SURAT UKUR DALAM NEGERI</option>
+                <option value="SURAT UKUR DALAM NEGERI SEMENTARA">SURAT UKUR DALAM NEGERI SEMENTARA</option>
+                <option value="SURAT UKUR INTERNASIONAL">SURAT UKUR INTERNASIONAL</option>
+                <option value="SURAT UKUR INTERNASIONAL SEMENTARA">SURAT UKUR INTERNASIONAL SEMENTARA</option>
+                <option value="SALINAN SURAT UKUR">SALINAN SURAT UKUR</option>
+                <option value="DAFTAR UKUR">DAFTAR UKUR</option>
+                <option value="PAS BESAR">PAS BESAR</option>
+                <option value="PAS BESAR SEMENTARA">PAS BESAR SEMENTARA</option>
+                <option value="PAS BESAR ENDORSTMENT">PAS BESAR ENDORSTMENT</option>
+                <option value="SURAT LAUT ENDORSTMENT">SURAT LAUT ENDORSTMENT</option>
+                <option value="PAS KECIL">PAS KECIL</option>
+                <option value="PAS KECIL ENDORSTMENT">PAS KECIL ENDORSTMENT</option>
+                <option value="PENDAFTARAN KAPAL">PENDAFTARAN KAPAL</option>
+                <option value="SURAT KET. STATUS HUKUM">SURAT KET. STATUS HUKUM</option>
+                <option value="SURAT KET. PENGHAPUSAN KAPAL">SURAT KET. PENGHAPUSAN KAPAL</option>
+                <option value="HALAMAN TAMBAHAN">HALAMAN TAMBAHAN</option>
+                <option value="BALIKNAMA KAPAL">BALIKNAMA KAPAL</option>
+                <option value="HIPOTEK KAPAL">HIPOTEK KAPAL</option>
+                <option value="ROYA HIPOTEK KAPAL">ROYA HIPOTEK KAPAL</option>
+            </select></label><label>Tgl Pengukuhan <input type="date" name="tglPengukuhan_${i}" class="form-control"></label></div>
+            <div class="grid-form" style="margin-top:10px;">
+                <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                <label>Grosse <div class="file-dropzone"><input type="file" name="grosse_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                <label>Surat Ukur <div class="file-dropzone"><input type="file" name="ukur_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                <label>PNBP <div class="file-dropzone"><input type="file" name="pnbp_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+            </div>
+        </div>
+      </div>`;
     } else if (type === "SERTIFIKASI") {
       html += `
         <div class="accordion-item open">
@@ -1075,45 +1085,60 @@ function renderBulkForm(type) {
         </div>
         <div id="dynamic-cert-forms-${i}" style="margin-top:20px;"></div>`;
     } else if (type === "SERVICE") {
-      html += `<div class="accordion-item open"><div class="accordion-header"><span>Info Service</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
-        <div class="service-selection-box">
-            <label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label>
-            <div class="service-options-container">
-                <label class="tool-checkbox-card">
-                    <input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})">
-                    <div class="tool-card-design">
-                        <div class="tool-icon"><i class="fa fa-life-ring"></i></div>
-                        <span class="tool-text">1. LIFERAFT</span>
+      html += `
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Info Service</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                <div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
+                <div class="service-selection-box">
+                    <label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label>
+                    <div class="service-options-container">
+                        <label class="tool-checkbox-card">
+                            <input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})">
+                            <div class="tool-card-design"><div class="tool-icon"><i class="fa fa-life-ring"></i></div><span class="tool-text">1. LIFERAFT</span></div>
+                        </label>
+                        <label class="tool-checkbox-card">
+                            <input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})">
+                            <div class="tool-card-design"><div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div><span class="tool-text">2. FIRE EXTINGUISHER</span></div>
+                        </label>
                     </div>
-                </label>
-                <label class="tool-checkbox-card">
-                    <input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})">
-                    <div class="tool-card-design">
-                        <div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div>
-                        <span class="tool-text">2. FIRE EXTINGUISHER</span>
-                    </div>
-                </label>
+                    <div id="qty-container-${i}" class="qty-dynamic-area"></div>
+                </div>
             </div>
-            <div id="qty-container-${i}" class="qty-dynamic-area"></div>
-        </div></div></div>
-        <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
-        <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>Sertifikat ILR/PMK <div class="file-dropzone"><input type="file" name="sertifikat_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        </div></div></div>`;
+        </div>
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                <div class="grid-form">
+                    <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                    <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                    <label>Sertifikat ILR/PMK <div class="file-dropzone"><input type="file" name="sertifikat_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                </div>
+            </div>
+        </div>`;
     } else if (type === "EXIBHITUM") {
-      html += `<div class="accordion-item open"><div class="accordion-header"><span>Data Exibhitum</span></div><div class="accordion-body" style="display:block;"><div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div></div></div><div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div><div class="accordion-body"><div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${[
-        "DECK",
-        "MESIN",
-        "OIL",
-        "SAMPAH",
-        "GMDSS",
-      ]
-        .map(
-          (b) =>
-            `<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`
-        )
-        .join("")}</div><div><b>PENGESAHAN</b><br>${[
+      html += `
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                <div class="grid-form"><label>Tanggal <input type="date" name="tanggal_${i}" class="form-control"></label><label>Perusahaan <input type="text" name="perusahaan_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>PUP <input type="text" name="pup_${i}" class="form-control"></label></div>
+            </div>
+        </div>
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Pilih Buku</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                <div class="service-selection-box"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div><b>EXIBHITUM</b><br>${[
+                  "DECK",
+                  "MESIN",
+                  "OIL",
+                  "SAMPAH",
+                  "GMDSS",
+                ]
+                  .map(
+                    (b) =>
+                      `<label><input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`
+                  )
+                  .join("")}</div><div><b>PENGESAHAN</b><br>${[
         "DECK",
         "MESIN",
         "OIL",
@@ -1124,13 +1149,19 @@ function renderBulkForm(type) {
           (b) =>
             `<label><input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})"> ${b}</label><br>`
         )
-        .join(
-          ""
-        )}</div></div></div><div id="dynamic-nomor-${i}"></div></div></div>
-        <div class="accordion-item"><div class="accordion-header"><span>Upload</span></div><div class="accordion-body"><div class="grid-form">
-        <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        <label>Billing <div class="file-dropzone"><input type="file" name="billing_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-        </div></div></div>`;
+        .join("")}</div></div></div>
+                <div id="dynamic-nomor-${i}"></div>
+            </div>
+        </div>
+        <div class="accordion-item open">
+            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
+            <div class="accordion-body" style="display:block;">
+                <div class="grid-form">
+                    <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                    <label>Billing <div class="file-dropzone"><input type="file" name="billing_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
+                </div>
+            </div>
+        </div>`;
     }
 
     html += `</div>`; // Close Bulk Card
