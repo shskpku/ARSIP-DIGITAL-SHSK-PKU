@@ -1282,7 +1282,7 @@ function renderBulkForm(type) {
                 </div>
             </div>
         </div>`;
-    } // 4. EXIBHITUM (FIX: TAMBAH VALUE DI CHECKBOX)
+    } // 4. EXIBHITUM (FIX UI: PENGESAHAN DI KIRI, EXIBHITUM DI KANAN)
     else if (type === "EXIBHITUM") {
       initExibhitumNumber();
       html += `
@@ -1299,22 +1299,6 @@ function renderBulkForm(type) {
                 <div class="service-selection-box">
                     <div class="exib-grid-wrapper" style="display:grid; grid-template-columns: 1fr 1fr; gap: 25px;">
                         
-                        <div class="group-ex">
-                            <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
-                            <div class="book-grid-container">
-                                ${["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"]
-                                  .map(
-                                    (b) => `
-                                    <label class="book-checkbox">
-                                        <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms(${i})">
-                                        <div class="book-ui">${b}</div>
-                                    </label>
-                                `
-                                  )
-                                  .join("")}
-                            </div>
-                        </div>
-
                         <div class="group-psh">
                             <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
                             <div class="book-grid-container">
@@ -1323,6 +1307,22 @@ function renderBulkForm(type) {
                                     (b) => `
                                     <label class="book-checkbox">
                                         <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms(${i})">
+                                        <div class="book-ui">${b}</div>
+                                    </label>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+
+                        <div class="group-ex">
+                            <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
+                            <div class="book-grid-container">
+                                ${["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"]
+                                  .map(
+                                    (b) => `
+                                    <label class="book-checkbox">
+                                        <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms(${i})">
                                         <div class="book-ui">${b}</div>
                                     </label>
                                 `
