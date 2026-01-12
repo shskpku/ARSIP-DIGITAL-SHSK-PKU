@@ -1526,6 +1526,7 @@ async function handleBulkSubmit(type) {
     // 4. EXIBHITUM
     else if (type === "EXIBHITUM") {
       const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
+
       if (nama.trim()) {
         itemData.namaKapal = nama.toUpperCase();
         itemData.tanggal = form.querySelector(`[name="tanggal_${i}"]`).value;
@@ -1533,24 +1534,47 @@ async function handleBulkSubmit(type) {
           .querySelector(`[name="perusahaan_${i}"]`)
           .value.toUpperCase();
         itemData.pup = form.querySelector(`[name="pup_${i}"]`).value;
+
+        // PENTING: Ambil No Urut untuk Edit Mode
         itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
         itemData.oldFolderUrl = form.querySelector(
           `[name="oldFolderUrl_${i}"]`
         ).value;
+
+        // --- AMBIL CHECKBOX BUKU (SEBAGAI ARRAY) ---
         const jenisBukuArray = [];
-        const nomorSuratArray = [];
-        const inputs = form.querySelectorAll(
-          `input[name^="nomorSurat_"][name$="_${i}"]`
+        const checkedBoxes = form.querySelectorAll(
+          `input[type="checkbox"][name*="_${i}"]:checked`
         );
-        inputs.forEach((inp) => {
-          const keyParts = inp.name.split("_");
-          const jenisKey = keyParts[1];
-          let formattedJenis = jenisKey.replace(".", ". ");
-          jenisBukuArray.push(formattedJenis);
-          nomorSuratArray.push(inp.value);
+        checkedBoxes.forEach((cb) => {
+          jenisBukuArray.push(cb.value); // Misal: ["PSH. DECK LOG BOOK", "EX. OIL RECORD BOOK"]
         });
+
+        // --- AMBIL NOMOR SURAT (JIKA ADA INPUT MANUAL/EDIT) ---
+        // Kita simpan array input nomor surat yang sesuai dengan buku yang dipilih
+        const nomorSuratArray = [];
+        jenisBukuArray.forEach((jb) => {
+          // Cari input name="nomorSurat_PSH.DECK LOG BOOK_1" (nama unik yang digenerate di updateExibhitumForms)
+          // Perhatikan replace titik dan spasi harus sama dengan di fungsi updateExibhitumForms
+          let safeName = jb.replace(". ", ".");
+          const inputNomor = form.querySelector(
+            `input[name="nomorSurat_${safeName}_${i}"]`
+          );
+          if (inputNomor) {
+            nomorSuratArray.push(inputNomor.value);
+          } else {
+            nomorSuratArray.push(""); // Fallback kosong
+          }
+        });
+
+        // Simpan ke Object Data
         itemData.jenisBukuArray = jenisBukuArray;
         itemData.nomorSuratArray = nomorSuratArray;
+
+        // Gabungan string untuk kompatibilitas tampilan tabel lama (optional)
+        itemData.jenisBuku = jenisBukuArray.join(", ");
+
+        // Upload File
         itemData.files = [];
         const fPerm = getFile(`permohonan_${i}`);
         if (fPerm)
@@ -1558,6 +1582,7 @@ async function handleBulkSubmit(type) {
         const fBilling = getFile(`billing_${i}`);
         if (fBilling)
           itemData.files.push({ jenis: "billing", ...(await read(fBilling)) });
+
         items.push(itemData);
       }
     }
@@ -1975,57 +2000,67 @@ async function loadData(type) {
   else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi";
   else if (type === "SERVICE") tbodyId = "tbody-service";
   else tbodyId = "tbody-exibhitum";
-  
+
   const tbody = document.getElementById(tbodyId);
-  tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Sedang Memuat Data...</td></tr>';
-  
+  tbody.innerHTML =
+    '<tr><td colspan="16" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Sedang Memuat Data...</td></tr>';
+
   let action = "";
   if (type === "SHSK") action = "getDataSHSK";
   else if (type === "SERTIFIKASI") action = "getDataSertifikasi";
   else if (type === "SERVICE") action = "getDataService";
   else action = "getDataExibhitum";
-  
+
   const res = await postData({ action: action });
-  
+
   if (res.status === "SUCCESS") {
     let data = res.data;
 
     // --- LOGIKA SORTING FRONTEND ---
-    let dateKey = '', nameKey = '';
-    if (type === 'SHSK') { dateKey = 'TANGGAL_PENGUKUHAN'; nameKey = 'NAMA_KAPAL'; }
-    else if (type === 'SERTIFIKASI') { dateKey = 'TANGGAL_TERBIT'; nameKey = 'NAMA_KAPAL'; }
-    else if (type === 'SERVICE') { dateKey = 'TANGGAL_VALIDASI_SERVICE_REPORT'; nameKey = 'NAMA_KAPAL'; }
-    else if (type === 'EXIBHITUM') { dateKey = 'TANGGAL'; nameKey = 'NAMA_KAPAL'; }
+    let dateKey = "",
+      nameKey = "";
+    if (type === "SHSK") {
+      dateKey = "TANGGAL_PENGUKUHAN";
+      nameKey = "NAMA_KAPAL";
+    } else if (type === "SERTIFIKASI") {
+      dateKey = "TANGGAL_TERBIT";
+      nameKey = "NAMA_KAPAL";
+    } else if (type === "SERVICE") {
+      dateKey = "TANGGAL_VALIDASI_SERVICE_REPORT";
+      nameKey = "NAMA_KAPAL";
+    } else if (type === "EXIBHITUM") {
+      dateKey = "TANGGAL";
+      nameKey = "NAMA_KAPAL";
+    }
 
     data.sort((a, b) => {
-        // 1. Tanggal (Terbaru/Newest di Atas)
-        const dateA = new Date(a[dateKey]);
-        const dateB = new Date(b[dateKey]);
-        if (dateA > dateB) return -1; 
-        if (dateA < dateB) return 1;
+      // 1. Tanggal (Terbaru/Newest di Atas)
+      const dateA = new Date(a[dateKey]);
+      const dateB = new Date(b[dateKey]);
+      if (dateA > dateB) return -1;
+      if (dateA < dateB) return 1;
 
-        // 2. Nama Kapal (A-Z) - Biar paket sertifikat nempel
-        const nameA = String(a[nameKey]).toUpperCase();
-        const nameB = String(b[nameKey]).toUpperCase();
-        if (nameA < nameB) return -1;
-        if (nameA > nameB) return 1;
+      // 2. Nama Kapal (A-Z) - Biar paket sertifikat nempel
+      const nameA = String(a[nameKey]).toUpperCase();
+      const nameB = String(b[nameKey]).toUpperCase();
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
 
-        return 0;
+      return 0;
     });
     // ----------------------------------
 
-    rawData[type] = data; 
+    rawData[type] = data;
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
     updateSmartData(rawData[type], type);
     renderTable(type);
-    
+
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else {
     tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;color:red">${res.message}</td></tr>`;
   }
 }
-
 
 function populateFilterOptions(data) {
   const select = document.getElementById("filterSertJenis");
@@ -2192,41 +2227,49 @@ function renderPagination(type) {
 
   // PREV
   const prevDisabled = current === 1 ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${current - 1})"><i class="fa fa-chevron-left"></i></button>`;
+  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${
+    current - 1
+  })"><i class="fa fa-chevron-left"></i></button>`;
 
   // DOTS LOGIC
-  const delta = 2; 
+  const delta = 2;
   const range = [];
   const rangeWithDots = [];
   let l;
 
   for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || (i >= current - delta && i <= current + delta)) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      (i >= current - delta && i <= current + delta)
+    ) {
       range.push(i);
     }
   }
 
   for (let i of range) {
     if (l) {
-      if (i - l === 2) rangeWithDots.push(l + 1); 
-      else if (i - l !== 1) rangeWithDots.push('...'); 
+      if (i - l === 2) rangeWithDots.push(l + 1);
+      else if (i - l !== 1) rangeWithDots.push("...");
     }
     rangeWithDots.push(i);
     l = i;
   }
 
   rangeWithDots.forEach((i) => {
-      if (i === '...') {
-          html += `<span style="padding: 0 5px; color:#aaa;">...</span>`;
-      } else {
-          const activeClass = i === current ? "active" : "";
-          html += `<button class="page-btn ${activeClass}" onclick="goToPage('${type}', ${i})">${i}</button>`;
-      }
+    if (i === "...") {
+      html += `<span style="padding: 0 5px; color:#aaa;">...</span>`;
+    } else {
+      const activeClass = i === current ? "active" : "";
+      html += `<button class="page-btn ${activeClass}" onclick="goToPage('${type}', ${i})">${i}</button>`;
+    }
   });
 
   // NEXT
   const nextDisabled = current === totalPages ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${current + 1})"><i class="fa fa-chevron-right"></i></button>`;
+  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${
+    current + 1
+  })"><i class="fa fa-chevron-right"></i></button>`;
 
   // INFO
   html += `<span style="margin-left:10px; font-size:12px; color:#666;"><b>${totalRows}</b> Data</span>`;
