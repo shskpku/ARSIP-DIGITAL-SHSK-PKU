@@ -65,6 +65,46 @@ const CERT_CODES = {
   NTR: "SPECIAL",
   "OIL BARGE": "SPECIAL",
 };
+// GLOBAL VARIABLE UNTUK NOMOR SURAT
+let cachedLastNumber = null;
+
+// FUNGSI GENERATOR NOMOR VERSI JS (MIRROR BACKEND)
+function generateNextNumberJS(lastNumberStr, offset = 1) {
+  const currentYear = new Date().getFullYear();
+  const suffix = `KSOP.PKU.${currentYear}`;
+  let x = 1,
+    y = 0; // Default
+
+  if (lastNumberStr && lastNumberStr.includes(suffix)) {
+    try {
+      const parts = lastNumberStr.split("/");
+      x = parseInt(parts[1]) || 1;
+      y = parseInt(parts[2]) || 0;
+    } catch (e) {}
+  }
+
+  // Tambahkan Offset (Urutan ke berapa yang sedang diklik)
+  let totalY = y + offset;
+
+  // Logika Rotasi /25
+  // Rumus Matematika biar X nambah tiap kelipatan 25
+  let addX = Math.floor((totalY - 1) / 25);
+  let finalX = x + addX;
+  let finalY = totalY - addX * 25;
+
+  return `AL.531/${finalX}/${finalY}/${suffix}`;
+}
+
+// FETCH NOMOR DARI SERVER SAAT BUKA MENU EXIBHITUM
+async function initExibhitumNumber() {
+  if (!cachedLastNumber) {
+    const res = await postData({ action: "getLastNumberExibhitum" });
+    if (res.status === "SUCCESS") {
+      cachedLastNumber = res.lastNumber;
+      console.log("Last Number Fetched:", cachedLastNumber);
+    }
+  }
+}
 
 let globalCompanySet = new Set();
 let globalMaterialSet = new Set();
@@ -952,44 +992,86 @@ window.renderCertForms = function (index) {
   container.innerHTML = html;
 };
 
-window.updateExibhitumForms = function (index) {
-  const container = document.getElementById(`dynamic-nomor-${index}`);
-  const books = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
-  const currentYear = new Date().getFullYear();
-  const defaultNomor = `AL.531///KSOP.PKU.${currentYear}`;
-  let htmlEx = "";
-  let htmlPsh = "";
+window.updateExibhitumForms = function (currentIndex) {
+  // 1. Kumpulkan SEMUA Checkbox yang aktif di SELURUH Form (Bukan cuma index ini)
+  // Tujuannya biar urutannya nyambung dari Form #1 ke Form #2 dst.
+  const allForms = document.querySelectorAll(".bulk-card");
 
-  books.forEach((buku) => {
-    const ck = document.querySelector(
-      `input[name="check_EX_${buku}_${index}"]`
-    );
-    if (ck && ck.checked) {
-      htmlEx += `<div style="margin-bottom:8px;"><label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">${buku}</label><input type="text" name="nomorSurat_EX.${buku}_${index}" class="form-control" value="${defaultNomor}" style="font-size:12px; padding:6px;"><input type="hidden" name="jenisBukuGenerate_${index}[]" value="EX. ${buku}"></div>`;
+  let globalSequence = 0; // Urutan global dimulai dari 0 (nanti ditambah lastNum)
+
+  allForms.forEach((card, idx) => {
+    const i = idx + 1; // Index form (1, 2, 3...)
+    const container = document.getElementById(`dynamic-nomor-${i}`);
+    if (!container) return;
+
+    const books = ["DECK", "MESIN", "OIL", "SAMPAH", "GMDSS"];
+    let pshList = [];
+    let exList = [];
+
+    // Cek Pengesahan (Prioritas 1)
+    books.forEach((b) => {
+      const ck = document.querySelector(`input[name="check_PSH_${b}_${i}"]`);
+      if (ck && ck.checked)
+        pshList.push({ name: b, code: `PSH. ${b}`, key: `PSH.${b}` });
+    });
+
+    // Cek Exibhitum (Prioritas 2)
+    books.forEach((b) => {
+      const ck = document.querySelector(`input[name="check_EX_${b}_${i}"]`);
+      if (ck && ck.checked)
+        exList.push({ name: b, code: `EX. ${b}`, key: `EX.${b}` });
+    });
+
+    // Render HTML
+    let htmlPsh = "";
+    let htmlEx = "";
+
+    // GENERATOR NOMOR PENGESAHAN
+    pshList.forEach((item) => {
+      globalSequence++; // Nambah antrian
+      const nomorLive = generateNextNumberJS(cachedLastNumber, globalSequence);
+      htmlPsh += `
+            <div style="margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:bold; color:#ff9f43; display:block; margin-bottom:2px;">${item.name}</label>
+                <input type="text" name="nomorSurat_${item.key}_${i}" class="form-control" value="${nomorLive}" style="font-size:12px; padding:6px; font-weight:bold;">
+            </div>`;
+    });
+
+    // GENERATOR NOMOR EXIBHITUM
+    exList.forEach((item) => {
+      globalSequence++; // Nambah antrian
+      const nomorLive = generateNextNumberJS(cachedLastNumber, globalSequence);
+      htmlEx += `
+            <div style="margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:bold; color:var(--neon-blue); display:block; margin-bottom:2px;">${item.name}</label>
+                <input type="text" name="nomorSurat_${item.key}_${i}" class="form-control" value="${nomorLive}" style="font-size:12px; padding:6px; font-weight:bold;">
+            </div>`;
+    });
+
+    // Update Tampilan Container
+    if (htmlEx === "" && htmlPsh === "") {
+      container.innerHTML =
+        "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
+    } else {
+      container.innerHTML = `
+        <div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <div style="background:#fff8f0; padding:12px; border-radius:8px; border:1px dashed #ff9f43;">
+                <div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">PENGESAHAN</div>
+                ${
+                  htmlPsh ||
+                  '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
+                }
+            </div>
+            <div style="background:#f0f8ff; padding:12px; border-radius:8px; border:1px dashed var(--neon-blue);">
+                <div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">EXIBHITUM</div>
+                ${
+                  htmlEx ||
+                  '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
+                }
+            </div>
+        </div>`;
     }
   });
-
-  books.forEach((buku) => {
-    const ck = document.querySelector(
-      `input[name="check_PSH_${buku}_${index}"]`
-    );
-    if (ck && ck.checked) {
-      htmlPsh += `<div style="margin-bottom:8px;"><label style="font-size:11px; font-weight:bold; color:var(--navy); display:block; margin-bottom:2px;">${buku}</label><input type="text" name="nomorSurat_PSH.${buku}_${index}" class="form-control" value="${defaultNomor}" style="font-size:12px; padding:6px;"><input type="hidden" name="jenisBukuGenerate_${index}[]" value="PSH. ${buku}"></div>`;
-    }
-  });
-
-  if (htmlEx === "" && htmlPsh === "") {
-    container.innerHTML =
-      "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
-  } else {
-    container.innerHTML = `<div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;"><div style="background:#f0f8ff; padding:12px; border-radius:8px; border:1px dashed var(--neon-blue);"><div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">NO. SURAT EXIBHITUM</div>${
-      htmlEx ||
-      '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
-    }</div><div style="background:#fff8f0; padding:12px; border-radius:8px; border:1px dashed #ff9f43;"><div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">NO. SURAT PENGESAHAN</div>${
-      htmlPsh ||
-      '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
-    }</div></div>`;
-  }
 };
 
 window.updateServiceQty = function (i) {
@@ -1200,7 +1282,9 @@ function renderBulkForm(type) {
                 </div>
             </div>
         </div>`;
-    } else if (type === "EXIBHITUM") {
+    } // 4. EXIBHITUM (FIX: TAMBAH VALUE DI CHECKBOX)
+    else if (type === "EXIBHITUM") {
+      initExibhitumNumber();
       html += `
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
@@ -1222,7 +1306,7 @@ function renderBulkForm(type) {
                                   .map(
                                     (b) => `
                                     <label class="book-checkbox">
-                                        <input type="checkbox" name="check_EX_${b}_${i}" onchange="updateExibhitumForms(${i})">
+                                        <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms(${i})">
                                         <div class="book-ui">${b}</div>
                                     </label>
                                 `
@@ -1238,7 +1322,7 @@ function renderBulkForm(type) {
                                   .map(
                                     (b) => `
                                     <label class="book-checkbox">
-                                        <input type="checkbox" name="check_PSH_${b}_${i}" onchange="updateExibhitumForms(${i})">
+                                        <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms(${i})">
                                         <div class="book-ui">${b}</div>
                                     </label>
                                 `
