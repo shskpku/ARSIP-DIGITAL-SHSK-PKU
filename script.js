@@ -2262,34 +2262,36 @@ async function loadData(type) {
     else if (type === "SERVICE") dateKey = "TANGGAL_VALIDASI_SERVICE_REPORT";
     else if (type === "EXIBHITUM") dateKey = "TANGGAL";
 
-    data.sort((a, b) => {
-      // 1. PRIMARY: Tanggal (Terbaru di Atas / Descending)
-      const dateA = new Date(a[dateKey]);
-      const dateB = new Date(b[dateKey]);
-      if (dateA > dateB) return -1;
-      if (dateA < dateB) return 1;
+    try {
+      data.sort((a, b) => {
+        // Kalau tanggal kosong/error, anggap tahun 1970 (biar ditaruh paling bawah)
+        const dateA = a[dateKey] ? new Date(a[dateKey]) : new Date(0);
+        const dateB = b[dateKey] ? new Date(b[dateKey]) : new Date(0);
 
-      // 2. SECONDARY (KONDISIONAL)
-      if (type === "EXIBHITUM") {
-        // Khusus Exibhitum: Urutkan Nomor Surat (Numerik Ascending)
-        const getVal = (str) => {
-          try {
-            let parts = str.split("/");
-            return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
-          } catch (e) {
-            return 0;
-          }
-        };
-        // Pakai PENOMORAN
-        return getVal(a["PENOMORAN"]) - getVal(b["PENOMORAN"]);
-      } else {
-        // Lainnya (Sertifikasi/SHSK): Urutkan NO_URUT (Ascending)
-        // Biar Paket Kapal tetap nempel rapi
-        const noA = parseInt(a["NO_URUT"]) || 0;
-        const noB = parseInt(b["NO_URUT"]) || 0;
-        return noA - noB;
-      }
-    });
+        if (dateA > dateB) return -1;
+        if (dateA < dateB) return 1;
+
+        // ... logika secondary sort ... (EXIBHITUM dll)
+        if (type === "EXIBHITUM") {
+          const getVal = (str) => {
+            try {
+              if (!str) return 0;
+              let parts = str.split("/");
+              return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
+            } catch (e) {
+              return 0;
+            }
+          };
+          return getVal(a["PENOMORAN"]) - getVal(b["PENOMORAN"]);
+        } else {
+          const noA = parseInt(a["NO_URUT"]) || 0;
+          const noB = parseInt(b["NO_URUT"]) || 0;
+          return noA - noB;
+        }
+      });
+    } catch (err) {
+      console.warn("Sorting error, menampilkan data mentah", err);
+    }
     // ----------------------------------
 
     rawData[type] = data;
