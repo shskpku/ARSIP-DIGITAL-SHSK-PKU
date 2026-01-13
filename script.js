@@ -2101,8 +2101,9 @@ async function loadData(type) {
     let data = res.data;
 
     // --- LOGIKA SORTING FRONTEND ---
-    let dateKey = "", nameKey = ""; // nameKey dipakai kalau date & no urut sama (jarang)
-    
+    let dateKey = "",
+      nameKey = ""; // nameKey dipakai kalau date & no urut sama (jarang)
+
     if (type === "SHSK") dateKey = "TANGGAL_PENGUKUHAN";
     else if (type === "SERTIFIKASI") dateKey = "TANGGAL_TERBIT";
     else if (type === "SERVICE") dateKey = "TANGGAL_VALIDASI_SERVICE_REPORT";
@@ -2117,21 +2118,23 @@ async function loadData(type) {
 
       // 2. SECONDARY (KONDISIONAL)
       if (type === "EXIBHITUM") {
-          // Khusus Exibhitum: Urutkan Nomor Surat (Numerik Ascending)
-          const getVal = (str) => {
-             try {
-               let parts = str.split('/');
-               return parseInt(parts[1]) * 1000 + parseInt(parts[2]); 
-             } catch(e) { return 0; }
-          };
-          // Pakai PENOMORAN
-          return getVal(a['PENOMORAN']) - getVal(b['PENOMORAN']);
+        // Khusus Exibhitum: Urutkan Nomor Surat (Numerik Ascending)
+        const getVal = (str) => {
+          try {
+            let parts = str.split("/");
+            return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
+          } catch (e) {
+            return 0;
+          }
+        };
+        // Pakai PENOMORAN
+        return getVal(a["PENOMORAN"]) - getVal(b["PENOMORAN"]);
       } else {
-          // Lainnya (Sertifikasi/SHSK): Urutkan NO_URUT (Ascending)
-          // Biar Paket Kapal tetap nempel rapi
-          const noA = parseInt(a['NO_URUT']) || 0;
-          const noB = parseInt(b['NO_URUT']) || 0;
-          return noA - noB;
+        // Lainnya (Sertifikasi/SHSK): Urutkan NO_URUT (Ascending)
+        // Biar Paket Kapal tetap nempel rapi
+        const noA = parseInt(a["NO_URUT"]) || 0;
+        const noB = parseInt(b["NO_URUT"]) || 0;
+        return noA - noB;
       }
     });
     // ----------------------------------
