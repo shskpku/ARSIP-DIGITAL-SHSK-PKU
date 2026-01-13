@@ -73,7 +73,7 @@ function generateNextNumberJS(lastNumberStr, offset = 1) {
   const currentYear = new Date().getFullYear();
   const suffix = `KSOP.PKU.${currentYear}`;
   let x = 1,
-    y = 0; // Default
+    y = 0;
 
   if (lastNumberStr && lastNumberStr.includes(suffix)) {
     try {
@@ -83,16 +83,15 @@ function generateNextNumberJS(lastNumberStr, offset = 1) {
     } catch (e) {}
   }
 
-  // Tambahkan Offset (Urutan ke berapa yang sedang diklik)
   let totalY = y + offset;
-
-  // Logika Rotasi /25
-  // Rumus Matematika biar X nambah tiap kelipatan 25
   let addX = Math.floor((totalY - 1) / 25);
   let finalX = x + addX;
   let finalY = totalY - addX * 25;
 
-  return `AL.531/${finalX}/${finalY}/${suffix}`;
+  // FORMATTER: Tambah 0 di depan
+  const pad = (num) => num.toString().padStart(2, "0");
+
+  return `AL.531/${pad(finalX)}/${pad(finalY)}/${suffix}`;
 }
 
 // FETCH NOMOR DARI SERVER SAAT BUKA MENU EXIBHITUM
@@ -1080,7 +1079,12 @@ window.updateExibhitumForms = function () {
 
     // Fungsi helper untuk cetak nomor dan naikkan counter
     const getNextAndIncrement = () => {
-      const numStr = `AL.531/${currentX}/${currentY}/${suffix}`;
+      // FORMATTER: Tambah '0' di depan jika angka < 10
+      const pad = (num) => num.toString().padStart(2, "0");
+
+      // Gunakan pad() pada X dan Y
+      const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
+
       // Logika Rotasi: Jika 25, pindah bundel
       currentY++;
       if (currentY > 25) {
@@ -2154,10 +2158,9 @@ function downloadDirectly(url) {
 let rawData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
 let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
 let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1, EXIBHITUM: 1 };
-const ROWS_PER_PAGE = 10;
 
 // ====================================================================
-// FUNGSI LOAD DATA (SMART SORTING: TANGGAL -> NAMA KAPAL)
+// FUNGSI LOAD DATA (UPDATE: SORTING EXIBHITUM DESCENDING)
 // ====================================================================
 async function loadData(type) {
   let tbodyId;
@@ -2181,50 +2184,54 @@ async function loadData(type) {
   if (res.status === "SUCCESS") {
     let data = res.data;
 
-    // --- LOGIKA SORTING FRONTEND ---
-    let dateKey = "",
-      nameKey = ""; // nameKey dipakai kalau date & no urut sama (jarang)
-
+    let dateKey = "";
     if (type === "SHSK") dateKey = "TANGGAL_PENGUKUHAN";
     else if (type === "SERTIFIKASI") dateKey = "TANGGAL_TERBIT";
     else if (type === "SERVICE") dateKey = "TANGGAL_VALIDASI_SERVICE_REPORT";
     else if (type === "EXIBHITUM") dateKey = "TANGGAL";
 
+    // --- SORTING LOGIC UPDATE ---
     data.sort((a, b) => {
-      // 1. PRIMARY: Tanggal (Terbaru di Atas / Descending)
+      // 1. Primary: Tanggal (Newest First)
       const dateA = new Date(a[dateKey]);
       const dateB = new Date(b[dateKey]);
-      if (dateA > dateB) return -1;
-      if (dateA < dateB) return 1;
 
-      // 2. SECONDARY (KONDISIONAL)
+      // Kalau tanggal beda, urutkan berdasarkan tanggal
+      // Tapi khusus Exibhitum, kita utamakan Nomor Surat dulu di bawah
+      if (type !== "EXIBHITUM") {
+        if (dateA > dateB) return -1;
+        if (dateA < dateB) return 1;
+      }
+
+      // 2. Secondary (Untuk Exibhitum: Sort by Number DESCENDING)
       if (type === "EXIBHITUM") {
-        // Khusus Exibhitum: Urutkan Nomor Surat (Numerik Ascending)
         const getVal = (str) => {
           try {
-            let parts = str.split("/");
+            let parts = String(str).split("/");
+            // Format: AL.531/X/Y/... -> X*1000 + Y
+            // Contoh: 02/20 -> 2020, 01/01 -> 1001
             return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
           } catch (e) {
             return 0;
           }
         };
-        // Pakai PENOMORAN
-        return getVal(a["PENOMORAN"]) - getVal(b["PENOMORAN"]);
+
+        // 🔥 INI PERUBAHANNYA GENK (DIBALIK: b - a) 🔥
+        // Biar nomor besar (baru) di atas, nomor kecil (lama) di bawah
+        return getVal(b["PENOMORAN"]) - getVal(a["PENOMORAN"]);
       } else {
-        // Lainnya (Sertifikasi/SHSK): Urutkan NO_URUT (Ascending)
-        // Biar Paket Kapal tetap nempel rapi
+        // Untuk tipe lain (SHSK, dll) tetap urut nomor input (Ascending)
         const noA = parseInt(a["NO_URUT"]) || 0;
         const noB = parseInt(b["NO_URUT"]) || 0;
         return noA - noB;
       }
     });
-    // ----------------------------------
 
     rawData[type] = data;
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
     updateSmartData(rawData[type], type);
-    renderTable(type);
+    renderTable(type); // <-- Render akan panggil pagination logic baru
 
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else {
@@ -2315,10 +2322,16 @@ function renderTable(type) {
   else if (type === "SERTIFIKASI") tbodyId = "tbody-sertifikasi";
   else if (type === "SERVICE") tbodyId = "tbody-service";
   else tbodyId = "tbody-exibhitum";
+
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
-  const start = (currentPage[type] - 1) * ROWS_PER_PAGE;
-  const pageData = filteredData[type].slice(start, start + ROWS_PER_PAGE);
+
+  // 🔥 LOGIKA BARIS: Kalau Exibhitum 25, Lainnya 10 🔥
+  const limit = type === "EXIBHITUM" ? 25 : 10;
+
+  const start = (currentPage[type] - 1) * limit;
+  const pageData = filteredData[type].slice(start, start + limit);
+
   if (pageData.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="16" style="text-align:center;">Data Tidak Ditemukan</td></tr>';
@@ -2327,7 +2340,9 @@ function renderTable(type) {
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-    let tr = `<tr><td>${start + i + 1}</td>`;
+    let tr = `<tr><td>${start + i + 1}</td>`; // Nomor urut tabel (visual)
+
+    // ... (Bagian render kolom di bawah ini TETAP SAMA dengan kodemu) ...
     if (type === "SHSK") {
       tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${
         row["TANDA_PENDAFTARAN"]
@@ -2384,8 +2399,11 @@ function renderPagination(type) {
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
 
+  // 🔥 LOGIKA BARIS: 25 vs 10 🔥
+  const limit = type === "EXIBHITUM" ? 25 : 10;
+
   const totalRows = filteredData[type].length;
-  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
+  const totalPages = Math.ceil(totalRows / limit); // Hitung total halaman
   const current = currentPage[type];
 
   if (totalPages <= 1) {
@@ -2394,14 +2412,11 @@ function renderPagination(type) {
   }
 
   let html = "";
-
-  // PREV
   const prevDisabled = current === 1 ? "disabled" : "";
   html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${
     current - 1
   })"><i class="fa fa-chevron-left"></i></button>`;
 
-  // DOTS LOGIC
   const delta = 2;
   const range = [];
   const rangeWithDots = [];
@@ -2416,7 +2431,6 @@ function renderPagination(type) {
       range.push(i);
     }
   }
-
   for (let i of range) {
     if (l) {
       if (i - l === 2) rangeWithDots.push(l + 1);
@@ -2435,13 +2449,10 @@ function renderPagination(type) {
     }
   });
 
-  // NEXT
   const nextDisabled = current === totalPages ? "disabled" : "";
   html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${
     current + 1
   })"><i class="fa fa-chevron-right"></i></button>`;
-
-  // INFO
   html += `<span style="margin-left:10px; font-size:12px; color:#666;"><b>${totalRows}</b> Data</span>`;
 
   container.innerHTML = html;
@@ -2449,13 +2460,16 @@ function renderPagination(type) {
 
 // FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
+  // 🔥 LOGIKA BARIS: 25 vs 10 🔥
+  const limit = type === "EXIBHITUM" ? 25 : 10;
+
   const totalRows = filteredData[type].length;
-  const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
+  const totalPages = Math.ceil(totalRows / limit);
 
   if (pageNum < 1 || pageNum > totalPages) return;
 
   currentPage[type] = pageNum;
-  renderTable(type); // Render ulang tabel dan pagination
+  renderTable(type);
 }
 
 let pendingDelete = null;
