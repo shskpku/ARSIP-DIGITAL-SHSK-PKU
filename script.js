@@ -583,15 +583,47 @@ function toggleSidebar() {
 }
 
 function showSection(id, el) {
+  // 1. SEMBUNYIKAN SEMUA HALAMAN
   document
     .querySelectorAll(".main-content > div")
     .forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
-  document
-    .querySelectorAll(".menu-item")
-    .forEach((m) => m.classList.remove("active"));
-  if (el) el.classList.add("active");
 
+  // 2. RESET CLASS ACTIVE
+  // Hapus active & parent-active dari menu utama
+  document.querySelectorAll(".menu-item").forEach((m) => {
+    m.classList.remove("active");
+    m.classList.remove("parent-active"); 
+  });
+
+  // Hapus active dari submenu
+  document
+    .querySelectorAll(".submenu-item")
+    .forEach((m) => m.classList.remove("active"));
+
+  // 3. SET ACTIVE KE TOMBOL YANG DIKLIK
+  if (el) {
+    el.classList.add("active");
+
+    // 🔥 LOGIKA BARU: NYALAKAN PARENT MENU 🔥
+    if (el.classList.contains("submenu-item")) {
+      // Cari wadah submenu (submenu-container)
+      const container = el.closest(".submenu-container");
+      if (container) {
+        // Parent menu adalah elemen tepat sebelum container
+        const parentMenu = container.previousElementSibling;
+
+        // Jika ketemu, kasih class 'parent-active' & pastikan panah kebuka
+        if (parentMenu && parentMenu.classList.contains("menu-item")) {
+          parentMenu.classList.add("parent-active");
+          parentMenu.classList.add("open"); 
+          container.classList.add("show"); 
+        }
+      }
+    }
+  }
+
+  // 4. LOAD DATA JIKA HALAMAN DATA
   if (id.includes("data")) {
     const type = id.includes("shsk")
       ? "SHSK"
@@ -603,12 +635,25 @@ function showSection(id, el) {
     loadData(type);
   }
 
+  // Reset tampilan submenu kalau balik ke dashboard
   if (id === "dashboard") {
     document.querySelectorAll(".submenu-container").forEach((el) => {
       el.classList.remove("show");
-      if (el.previousElementSibling)
+      if (el.previousElementSibling) {
         el.previousElementSibling.classList.remove("open");
+        el.previousElementSibling.classList.remove("parent-active");
+      }
     });
+  }
+
+  // 5. AUTO CLOSE SIDEBAR DI MOBILE
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar.classList.contains("show")) {
+      sidebar.classList.remove("show");
+      overlay.classList.remove("active");
+    }
   }
 }
 
