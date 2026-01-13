@@ -95,77 +95,20 @@ function generateNextNumberJS(lastNumberStr, offset = 1) {
   return `AL.531/${finalX}/${finalY}/${suffix}`;
 }
 
-// ======================================================
-// FITUR BARU: AUTO NUMBER EXIBHITUM (LIVE CALCULATION)
-// ======================================================
+// FETCH NOMOR DARI SERVER SAAT BUKA MENU EXIBHITUM
 async function initExibhitumNumber() {
-  try {
-    const res = await postData({ action: "getNextExibNumber" });
-
+  if (!cachedLastNumber) {
+    const res = await postData({ action: "getLastNumberExibhitum" });
     if (res.status === "SUCCESS") {
-      let x = parseInt(res.startX);
-      let y = parseInt(res.startY);
-      let year = res.year;
-
-      // 🔥 UPDATE GLOBAL VARIABLE (PENTING BIAR CHECKBOX BISA BACA)
-      // Kita simpan format "raw" terakhir biar generator JS bisa lanjutin
-      // Format dummy: AL.531/X/Y/KSOP.PKU.TAHUN (dikurangi 1 sequence biar pas loop nambah sendiri)
-      cachedLastNumber = `AL.531/${x}/${y - 1}/KSOP.PKU.${year}`;
-
-      const countInput = document.getElementById("bulkCountExibhitum");
-      const count = countInput ? parseInt(countInput.value) : 1;
-
-      // 2. LOOPING KE SETIAP FORM INPUT (VISUALISASI SAJA)
-      // Note: Ini cuma tampilan awal. Data asli di-generate pas centang checkbox.
-      let tempX = x;
-      let tempY = y;
-
-      for (let i = 0; i < count; i++) {
-        const container = document.getElementById(`dynamic-nomor-${i + 1}`); // Index HTML mulai dari 1
-
-        if (container) {
-          // PENGESAHAN
-          const pshX = tempX;
-          const pshY = tempY;
-          const valPsh = `AL.531/${pshX}/${pshY}/KSOP.PKU.${year}`;
-          tempY++;
-          if (tempY > 25) {
-            tempX++;
-            tempY = 1;
-          }
-
-          // EXIBHITUM
-          const exX = tempX;
-          const exY = tempY;
-          const valEx = `AL.531/${exX}/${exY}/KSOP.PKU.${year}`;
-          tempY++;
-          if (tempY > 25) {
-            tempX++;
-            tempY = 1;
-          }
-
-          // Render Preview
-          container.innerHTML = `
-             <div class="exib-grid-wrapper" style="display:grid; grid-template-columns: 1fr 1fr; gap: 25px;">
-                <div class="group-psh">
-                   <label style="font-size:12px; color:var(--gold); font-weight:bold;">PREDIKSI PENGESAHAN</label>
-                   <input type="text" class="form-control" value="${valPsh}" readonly style="opacity:0.7"> 
-                </div>
-                <div class="group-ex">
-                   <label style="font-size:12px; color:var(--neon-blue); font-weight:bold;">PREDIKSI EXIBHITUM</label>
-                   <input type="text" class="form-control" value="${valEx}" readonly style="opacity:0.7">
-                </div>
-             </div>
-             <div style="text-align:center; font-size:10px; color:#aaa; margin-top:5px;">*Nomor final akan muncul saat Anda memilih buku di atas.</div>
-            `;
-        }
-      }
-      console.log("Auto Number Init Success. Cached:", cachedLastNumber);
+      cachedLastNumber = res.lastNumber;
+      console.log("Last Number Fetched:", cachedLastNumber);
     }
-  } catch (error) {
-    console.log("Gagal ambil nomor otomatis", error);
   }
 }
+
+let globalCompanySet = new Set();
+let globalMaterialSet = new Set();
+let packetModeState = {};
 
 // ====================================================================
 // 1. UTILITIES & HELPER
@@ -640,47 +583,15 @@ function toggleSidebar() {
 }
 
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN
   document
     .querySelectorAll(".main-content > div")
     .forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
-
-  // 2. RESET CLASS ACTIVE
-  // Hapus active & parent-active dari menu utama
-  document.querySelectorAll(".menu-item").forEach((m) => {
-    m.classList.remove("active");
-    m.classList.remove("parent-active");
-  });
-
-  // Hapus active dari submenu
   document
-    .querySelectorAll(".submenu-item")
+    .querySelectorAll(".menu-item")
     .forEach((m) => m.classList.remove("active"));
+  if (el) el.classList.add("active");
 
-  // 3. SET ACTIVE KE TOMBOL YANG DIKLIK
-  if (el) {
-    el.classList.add("active");
-
-    // 🔥 LOGIKA BARU: NYALAKAN PARENT MENU 🔥
-    if (el.classList.contains("submenu-item")) {
-      // Cari wadah submenu (submenu-container)
-      const container = el.closest(".submenu-container");
-      if (container) {
-        // Parent menu adalah elemen tepat sebelum container
-        const parentMenu = container.previousElementSibling;
-
-        // Jika ketemu, kasih class 'parent-active' & pastikan panah kebuka
-        if (parentMenu && parentMenu.classList.contains("menu-item")) {
-          parentMenu.classList.add("parent-active");
-          parentMenu.classList.add("open");
-          container.classList.add("show");
-        }
-      }
-    }
-  }
-
-  // 4. LOAD DATA JIKA HALAMAN DATA
   if (id.includes("data")) {
     const type = id.includes("shsk")
       ? "SHSK"
@@ -692,25 +603,12 @@ function showSection(id, el) {
     loadData(type);
   }
 
-  // Reset tampilan submenu kalau balik ke dashboard
   if (id === "dashboard") {
     document.querySelectorAll(".submenu-container").forEach((el) => {
       el.classList.remove("show");
-      if (el.previousElementSibling) {
+      if (el.previousElementSibling)
         el.previousElementSibling.classList.remove("open");
-        el.previousElementSibling.classList.remove("parent-active");
-      }
     });
-  }
-
-  // 5. AUTO CLOSE SIDEBAR DI MOBILE
-  if (window.innerWidth <= 768) {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebar-overlay");
-    if (sidebar.classList.contains("show")) {
-      sidebar.classList.remove("show");
-      overlay.classList.remove("active");
-    }
   }
 }
 
@@ -1415,6 +1313,7 @@ function renderBulkForm(type) {
         </div>`;
     } // 4. EXIBHITUM (FIX UI: PENGESAHAN DI KIRI, EXIBHITUM DI KANAN)
     else if (type === "EXIBHITUM") {
+      initExibhitumNumber();
       html += `
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
@@ -1479,12 +1378,6 @@ function renderBulkForm(type) {
     }
     html += `</div>`; // Close Bulk Card
     container.innerHTML += html;
-  }
-  if (type === "EXIBHITUM") {
-    // Kita kasih jeda sedikit biar DOM render dulu
-    setTimeout(() => {
-      initExibhitumNumber();
-    }, 100);
   }
 }
 
@@ -2262,36 +2155,34 @@ async function loadData(type) {
     else if (type === "SERVICE") dateKey = "TANGGAL_VALIDASI_SERVICE_REPORT";
     else if (type === "EXIBHITUM") dateKey = "TANGGAL";
 
-    try {
-      data.sort((a, b) => {
-        // Kalau tanggal kosong/error, anggap tahun 1970 (biar ditaruh paling bawah)
-        const dateA = a[dateKey] ? new Date(a[dateKey]) : new Date(0);
-        const dateB = b[dateKey] ? new Date(b[dateKey]) : new Date(0);
+    data.sort((a, b) => {
+      // 1. PRIMARY: Tanggal (Terbaru di Atas / Descending)
+      const dateA = new Date(a[dateKey]);
+      const dateB = new Date(b[dateKey]);
+      if (dateA > dateB) return -1;
+      if (dateA < dateB) return 1;
 
-        if (dateA > dateB) return -1;
-        if (dateA < dateB) return 1;
-
-        // ... logika secondary sort ... (EXIBHITUM dll)
-        if (type === "EXIBHITUM") {
-          const getVal = (str) => {
-            try {
-              if (!str) return 0;
-              let parts = str.split("/");
-              return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
-            } catch (e) {
-              return 0;
-            }
-          };
-          return getVal(a["PENOMORAN"]) - getVal(b["PENOMORAN"]);
-        } else {
-          const noA = parseInt(a["NO_URUT"]) || 0;
-          const noB = parseInt(b["NO_URUT"]) || 0;
-          return noA - noB;
-        }
-      });
-    } catch (err) {
-      console.warn("Sorting error, menampilkan data mentah", err);
-    }
+      // 2. SECONDARY (KONDISIONAL)
+      if (type === "EXIBHITUM") {
+        // Khusus Exibhitum: Urutkan Nomor Surat (Numerik Ascending)
+        const getVal = (str) => {
+          try {
+            let parts = str.split("/");
+            return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
+          } catch (e) {
+            return 0;
+          }
+        };
+        // Pakai PENOMORAN
+        return getVal(a["PENOMORAN"]) - getVal(b["PENOMORAN"]);
+      } else {
+        // Lainnya (Sertifikasi/SHSK): Urutkan NO_URUT (Ascending)
+        // Biar Paket Kapal tetap nempel rapi
+        const noA = parseInt(a["NO_URUT"]) || 0;
+        const noB = parseInt(b["NO_URUT"]) || 0;
+        return noA - noB;
+      }
+    });
     // ----------------------------------
 
     rawData[type] = data;
