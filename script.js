@@ -592,84 +592,69 @@ function toggleSidebar() {
 }
 
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN (KONTEN)
+  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
   document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
 
-  // ============================================================
-  // 🔥 DEEP CLEAN: BERSIHKAN SEMUA STATUS AKTIF SEBELUMNYA 🔥
-  // ============================================================
-
-  // A. Hapus active, parent-active, dan open (panah) dari Menu Utama
-  document.querySelectorAll(".menu-item").forEach((m) => {
-    m.classList.remove("active");
-    m.classList.remove("parent-active");
-    m.classList.remove("open"); // Penting: Biar panah balik normal
-  });
-
-  // B. Hapus active dari semua Submenu
-  document.querySelectorAll(".submenu-item").forEach((m) => {
+  // 2. RESET SEMUA TOMBOL ACTIVE (Biar gak ada 2 tombol nyala)
+  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
     m.classList.remove("active");
   });
 
-  // C. Tutup semua Submenu Container (Biar gak ada yang nyangkut kebuka)
-  // Kecuali nanti kalau yang diklik adalah submenu, kita buka lagi di bawah
-  document.querySelectorAll(".submenu-container").forEach((c) => {
-    c.classList.remove("show");
-  });
-
-  // ============================================================
-  // ✨ SET STATUS AKTIF BARU ✨
-  // ============================================================
-
+  // 3. LOGIKA HANDLING MENU
   if (el) {
-    // 1. Aktifkan tombol yang diklik
+    // Nyalakan tombol yang diklik
     el.classList.add("active");
 
-    // 2. CEK APAKAH INI SUBMENU?
+    // --- KASUS A: YANG DIKLIK ADALAH SUBMENU (Anak) ---
     if (el.classList.contains("submenu-item")) {
-      // Cari wadah submenu (bapaknya)
-      const container = el.closest(".submenu-container");
+      // Cari wadah bapaknya (Container)
+      const myContainer = el.closest(".submenu-container");
       
-      if (container) {
-        // Buka wadahnya
-        container.classList.add("show");
+      // Tutup semua container LAIN (Kecuali punya kita sendiri)
+      document.querySelectorAll(".submenu-container").forEach((c) => {
+        if (c !== myContainer) c.classList.remove("show");
+      });
 
-        // Cari Menu Utama (Parent) di atasnya
-        const parentMenu = container.previousElementSibling;
-        
-        // Nyalakan Parent-nya
-        if (parentMenu && parentMenu.classList.contains("menu-item")) {
-          parentMenu.classList.add("parent-active"); // Warna emas
-          parentMenu.classList.add("open");          // Panah muter
+      // Reset semua Parent Menu LAIN
+      document.querySelectorAll(".menu-item").forEach((m) => {
+        // Cek apakah menu ini adalah bapak kita?
+        // Bapak kita adalah elemen tepat sebelum container kita
+        if (myContainer && m === myContainer.previousElementSibling) {
+           // Kalau ini bapak kita, BIARKAN (atau nyalakan)
+           m.classList.add("open");
+           m.classList.add("parent-active");
+        } else {
+           // Kalau bukan bapak kita, Matikan
+           m.classList.remove("open");
+           m.classList.remove("parent-active");
         }
-      }
+      });
+
+      // Pastikan wadah kita terbuka
+      if (myContainer) myContainer.classList.add("show");
+    } 
+    
+    // --- KASUS B: YANG DIKLIK ADALAH MENU UTAMA BIASA (Dashboard, Logout) ---
+    else {
+      // Tutup SEMUA submenu karena kita pindah ke menu utama
+      document.querySelectorAll(".submenu-container").forEach((c) => c.classList.remove("show"));
+      document.querySelectorAll(".menu-item").forEach((m) => {
+        m.classList.remove("open");
+        m.classList.remove("parent-active");
+      });
     }
   }
 
   // 4. LOAD DATA (KHUSUS HALAMAN DATA)
   if (id.includes("data")) {
-    const type = id.includes("shsk")
-      ? "SHSK"
-      : id.includes("sertifikasi")
-      ? "SERTIFIKASI"
-      : id.includes("service")
-      ? "SERVICE"
-      : "EXIBHITUM";
+    const type = id.includes("shsk") ? "SHSK" :
+                 id.includes("sertifikasi") ? "SERTIFIKASI" :
+                 id.includes("service") ? "SERVICE" : "EXIBHITUM";
     loadData(type);
   }
 
-  // 5. BALIK KE DASHBOARD (RESET TOTAL)
-  if (id === "dashboard") {
-    // Pastikan semua submenu tertutup rapat
-    document.querySelectorAll(".submenu-container").forEach((el) => el.classList.remove("show"));
-    document.querySelectorAll(".menu-item").forEach((m) => {
-        m.classList.remove("open");
-        m.classList.remove("parent-active");
-    });
-  }
-
-  // 6. AUTO CLOSE SIDEBAR (MOBILE ONLY)
+  // 5. AUTO CLOSE SIDEBAR (MOBILE)
   if (window.innerWidth <= 768) {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
