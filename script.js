@@ -2397,7 +2397,7 @@ async function executeDelete() {
     "#modal-delete .btn-confirm-logout"
   );
   const originalHtml = btnConfirm.innerHTML;
-  btnConfirm.innerHTML = '<i class="fa fa-spinner fa-spin"></i>...';
+  btnConfirm.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   btnConfirm.disabled = true;
   let action = "";
   if (pendingDelete.type === "SHSK") action = "deleteSHSK";
