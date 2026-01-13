@@ -95,20 +95,72 @@ function generateNextNumberJS(lastNumberStr, offset = 1) {
   return `AL.531/${finalX}/${finalY}/${suffix}`;
 }
 
-// FETCH NOMOR DARI SERVER SAAT BUKA MENU EXIBHITUM
+// ======================================================
+// FITUR BARU: AUTO NUMBER EXIBHITUM (LIVE CALCULATION)
+// Mengambil Start X/Y dari server, lalu loop sesuai jumlah input
+// ======================================================
 async function initExibhitumNumber() {
-  if (!cachedLastNumber) {
-    const res = await postData({ action: "getLastNumberExibhitum" });
+  try {
+    // 1. Minta Data Start Number (X & Y) dari Server
+    // Pastikan action di Code.gs namanya "getNextExibNumber"
+    const res = await postData({ action: "getNextExibNumber" });
+    
     if (res.status === "SUCCESS") {
-      cachedLastNumber = res.lastNumber;
-      console.log("Last Number Fetched:", cachedLastNumber);
+      let x = parseInt(res.startX); // Bundel
+      let y = parseInt(res.startY); // Urut
+      let year = res.year;
+      
+      // Ambil jumlah form yang sedang aktif (misal 10)
+      const countInput = document.getElementById("bulkCountExibhitum");
+      const count = countInput ? parseInt(countInput.value) : 1;
+      
+      // 2. LOOPING KE SETIAP FORM INPUT
+      for (let i = 0; i < count; i++) {
+        const container = document.getElementById(`dynamic-nomor-${i}`);
+        
+        if(container) {
+            // --- GENERATE NOMOR UNTUK PENGESAHAN (KIRI) ---
+            const pshX = x;
+            const pshY = y;
+            const valPsh = `AL.531/${pshX}/${pshY}/KSOP.PKU.${year}`;
+            
+            // Increment logic: Kalau y > 25, reset y=1, x nambah 1
+            y++; 
+            if (y > 25) { x++; y = 1; } 
+
+            // --- GENERATE NOMOR UNTUK EXIBHITUM (KANAN) ---
+            const exX = x;
+            const exY = y;
+            const valEx = `AL.531/${exX}/${exY}/KSOP.PKU.${year}`;
+
+            // Increment lagi untuk persiapan baris selanjutnya (loop i+1)
+            y++;
+            if (y > 25) { x++; y = 1; }
+
+            // RENDER HTML KE DALAM CONTAINER
+            container.innerHTML = `
+             <div class="exib-grid-wrapper" style="display:grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                <div class="group-psh">
+                   <label style="font-size:12px; color:var(--gold); font-weight:bold;">NO. PENGESAHAN</label>
+                   <input type="text" name="nomor_PSH_${i}" class="form-control" 
+                          value="${valPsh}" readonly> 
+                   </div>
+
+                <div class="group-ex">
+                   <label style="font-size:12px; color:var(--neon-blue); font-weight:bold;">NO. EXIBHITUM</label>
+                   <input type="text" name="nomor_EX_${i}" class="form-control" 
+                          value="${valEx}" readonly>
+                </div>
+             </div>
+            `;
+        }
+      }
+      console.log("Auto Number Exibhitum Berhasil Di-generate!");
     }
+  } catch (error) {
+    console.log("Gagal ambil nomor otomatis", error);
   }
 }
-
-let globalCompanySet = new Set();
-let globalMaterialSet = new Set();
-let packetModeState = {};
 
 // ====================================================================
 // 1. UTILITIES & HELPER
