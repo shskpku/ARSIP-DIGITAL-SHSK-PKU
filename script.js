@@ -592,15 +592,62 @@ function toggleSidebar() {
 }
 
 function showSection(id, el) {
-  document
-    .querySelectorAll(".main-content > div")
-    .forEach((d) => d.classList.add("hidden"));
+  // 1. SEMBUNYIKAN SEMUA HALAMAN (KONTEN)
+  document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
-  document
-    .querySelectorAll(".menu-item")
-    .forEach((m) => m.classList.remove("active"));
-  if (el) el.classList.add("active");
 
+  // ============================================================
+  // 🔥 DEEP CLEAN: BERSIHKAN SEMUA STATUS AKTIF SEBELUMNYA 🔥
+  // ============================================================
+
+  // A. Hapus active, parent-active, dan open (panah) dari Menu Utama
+  document.querySelectorAll(".menu-item").forEach((m) => {
+    m.classList.remove("active");
+    m.classList.remove("parent-active");
+    m.classList.remove("open"); // Penting: Biar panah balik normal
+  });
+
+  // B. Hapus active dari semua Submenu
+  document.querySelectorAll(".submenu-item").forEach((m) => {
+    m.classList.remove("active");
+  });
+
+  // C. Tutup semua Submenu Container (Biar gak ada yang nyangkut kebuka)
+  // Kecuali nanti kalau yang diklik adalah submenu, kita buka lagi di bawah
+  document.querySelectorAll(".submenu-container").forEach((c) => {
+    c.classList.remove("show");
+  });
+
+  // ============================================================
+  // ✨ SET STATUS AKTIF BARU ✨
+  // ============================================================
+
+  if (el) {
+    // 1. Aktifkan tombol yang diklik
+    el.classList.add("active");
+
+    // 2. CEK APAKAH INI SUBMENU?
+    if (el.classList.contains("submenu-item")) {
+      // Cari wadah submenu (bapaknya)
+      const container = el.closest(".submenu-container");
+      
+      if (container) {
+        // Buka wadahnya
+        container.classList.add("show");
+
+        // Cari Menu Utama (Parent) di atasnya
+        const parentMenu = container.previousElementSibling;
+        
+        // Nyalakan Parent-nya
+        if (parentMenu && parentMenu.classList.contains("menu-item")) {
+          parentMenu.classList.add("parent-active"); // Warna emas
+          parentMenu.classList.add("open");          // Panah muter
+        }
+      }
+    }
+  }
+
+  // 4. LOAD DATA (KHUSUS HALAMAN DATA)
   if (id.includes("data")) {
     const type = id.includes("shsk")
       ? "SHSK"
@@ -612,47 +659,26 @@ function showSection(id, el) {
     loadData(type);
   }
 
+  // 5. BALIK KE DASHBOARD (RESET TOTAL)
   if (id === "dashboard") {
-    document.querySelectorAll(".submenu-container").forEach((el) => {
-      el.classList.remove("show");
-      if (el.previousElementSibling)
-        el.previousElementSibling.classList.remove("open");
+    // Pastikan semua submenu tertutup rapat
+    document.querySelectorAll(".submenu-container").forEach((el) => el.classList.remove("show"));
+    document.querySelectorAll(".menu-item").forEach((m) => {
+        m.classList.remove("open");
+        m.classList.remove("parent-active");
     });
   }
-}
 
-function toggleSubmenu(id) {
-  document.querySelectorAll(".submenu-container").forEach((el) => {
-    if (el.id !== id) {
-      el.classList.remove("show");
-      if (el.previousElementSibling)
-        el.previousElementSibling.classList.remove("open");
-    }
-  });
-
-  const t = document.getElementById(id);
-  t.classList.toggle("show");
-  if (t.previousElementSibling)
-    t.previousElementSibling.classList.toggle("open");
-}
-
-window.toggleAccordion = function (headerElement) {
-  // Cari elemen bapaknya (accordion-item)
-  const item = headerElement.closest(".accordion-item");
-
-  // Toggle class 'open' (Kalau ada dihapus, kalau gak ada ditambah)
-  item.classList.toggle("open");
-
-  // Variasi Icon Panah (Opsional: Biar panahnya muter)
-  const icon = headerElement.querySelector("i.fa-chevron-down");
-  if (icon) {
-    if (item.classList.contains("open")) {
-      icon.style.transform = "rotate(180deg)";
-    } else {
-      icon.style.transform = "rotate(0deg)";
+  // 6. AUTO CLOSE SIDEBAR (MOBILE ONLY)
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar.classList.contains("show")) {
+      sidebar.classList.remove("show");
+      overlay.classList.remove("active");
     }
   }
-};
+}
 
 // ====================================================================
 // 5. CHART UI
