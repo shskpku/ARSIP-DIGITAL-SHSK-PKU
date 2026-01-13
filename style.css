@@ -705,7 +705,7 @@ body.petugas-page {
 }
 
 .sidebar-content {
-  flex-grow: 1; 
+  flex-grow: 1;
   overflow-y: auto;
   padding: 20px 0;
 }
@@ -851,9 +851,9 @@ body.petugas-page {
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 12px; 
+  font-size: 12px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .shortcut-btn i {
@@ -2496,4 +2496,29 @@ body.gateway-mode {
   opacity: 0.5;
   cursor: not-allowed;
   background: #eee;
+}
+
+/* BADGE COUNT DI SIDEBAR */
+.submenu-item {
+  display: flex;
+  justify-content: space-between; /* Biar teks di kiri, badge di kanan */
+  align-items: center;
+}
+
+.badge-count {
+  background: var(--gold); /* Warna Emas biar nyala */
+  color: var(--navy); /* Teks Gelap */
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px; /* Bentuk Kapsul/Lingkaran */
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+/* Animasi pas angka berubah */
+.badge-bump {
+  transform: scale(1.3);
 }
