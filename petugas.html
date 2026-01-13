@@ -59,7 +59,11 @@
     <nav class="navbar glass-nav">
       <div class="nav-left">
         <i class="fa fa-bars mobile-toggle" onclick="toggleSidebar()"></i>
-        <div class="logo-area">
+        <div
+          class="logo-area"
+          onclick="showSection('dashboard')"
+          style="cursor: pointer"
+        >
           <i class="fa-solid fa-anchor" style="color: var(--gold)"></i>
           <span>SEKSI SHSK KSOP PEKANBARU</span>
         </div>
@@ -200,21 +204,33 @@
         </div>
 
         <div class="info-grid">
-          <div class="info-card">
+          <div
+            class="info-card"
+            onclick="showSection('shsk-input')"
+            style="cursor: pointer"
+          >
             <div class="icon-box"><i class="fa fa-gavel"></i></div>
             <div>
               <h3>Status Hukum Kapal</h3>
               <p>Legalitas kepemilikan, pendaftaran, dan balik nama kapal.</p>
             </div>
           </div>
-          <div class="info-card">
+          <div
+            class="info-card"
+            onclick="showSection('sertifikasi-input')"
+            style="cursor: pointer"
+          >
             <div class="icon-box"><i class="fa fa-file-contract"></i></div>
             <div>
               <h3>Sertifikasi Kapal</h3>
               <p>Pemeriksaan teknis kelaiklautan dan keselamatan kapal.</p>
             </div>
           </div>
-          <div class="info-card">
+          <div
+            class="info-card"
+            onclick="showSection('service-input')"
+            style="cursor: pointer"
+          >
             <div class="icon-box"><i class="fa fa-tools"></i></div>
             <div>
               <h3>Service Station</h3>
@@ -223,7 +239,11 @@
               </p>
             </div>
           </div>
-          <div class="info-card">
+          <div
+            class="info-card"
+            onclick="showSection('exibhitum-input')"
+            style="cursor: pointer"
+          >
             <div class="icon-box"><i class="fa fa-book-open"></i></div>
             <div>
               <h3>Exibhitum & Pengesahan</h3>
