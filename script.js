@@ -553,6 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initAutoLogout();
   } else if (document.querySelector(".petugas-page")) {
     loadProfilePetugas();
+    updateSidebarCounts();
     if (document.querySelector(".filter-btn.active"))
       updateChartFilter("year", document.querySelector(".filter-btn.active"));
     if (document.getElementById("chartExibhitum"))
@@ -821,6 +822,34 @@ function loadProfilePetugas() {
       "2px solid var(--gold)";
   }
   speakWelcome(user.nama);
+}
+// ====================================================================
+// FITUR: UPDATE SIDEBAR BADGE COUNT
+// ====================================================================
+async function updateSidebarCounts() {
+  try {
+    const res = await postData({ action: "getAllTotalCounts" });
+    if (res.status === "SUCCESS") {
+      const d = res.data;
+
+      // Helper animasii
+      const setBadge = (id, count) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerText = count;
+          el.classList.add("badge-bump"); // Efek membal
+          setTimeout(() => el.classList.remove("badge-bump"), 300);
+        }
+      };
+
+      setBadge("badge-shsk", d.SHSK);
+      setBadge("badge-sertifikasi", d.SERTIFIKASI);
+      setBadge("badge-service", d.SERVICE);
+      setBadge("badge-exibhitum", d.EXIBHITUM);
+    }
+  } catch (e) {
+    console.log("Gagal update badge count");
+  }
 }
 
 // ====================================================================
@@ -1727,13 +1756,30 @@ async function handleBulkSubmit(type) {
 function handleResponse(res, type, form, btnText, btnEl, isEdit) {
   btnEl.innerHTML = btnText;
   btnEl.disabled = false;
+
   if (res.status === "SUCCESS") {
     showPopup("Berhasil!", "success");
     form.reset();
     renderBulkForm(type);
     loadData(type);
+
     if (isEdit) {
       cancelEdit(type);
+    }
+
+    if (typeof updateChartFilter === "function") {
+      updateChartFilter(currentFilter);
+      updateSidebarCounts();
+
+      // 2. Refresh Grafik Statistik Exibhitum (Jika ada)
+      const btnEx = document.querySelector(".filter-btn-ex.active");
+      if (btnEx) updateExibChart(currentFilter, btnEx, "ex");
+
+      // 3. Refresh Grafik Statistik Pengesahan (Jika ada)
+      const btnPsh = document.querySelector(".filter-btn-psh.active");
+      if (btnPsh) updateExibChart(currentFilter, btnPsh, "psh");
+
+      console.log("Grafik Dashboard Diperbarui Otomatis!");
     }
   } else {
     showPopup(res.message, "error");
@@ -2412,6 +2458,7 @@ async function executeDelete() {
     if (res.status === "SUCCESS") {
       showPopup("Data Berhasil Dihapus!", "success");
       loadData(pendingDelete.type);
+      updateSidebarCounts();
       if (typeof updateChartFilter === "function")
         updateChartFilter(currentFilter);
     } else {
