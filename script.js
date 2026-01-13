@@ -592,78 +592,67 @@ function toggleSidebar() {
 }
 
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
-  document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
+  document
+    .querySelectorAll(".main-content > div")
+    .forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
+  document
+    .querySelectorAll(".menu-item")
+    .forEach((m) => m.classList.remove("active"));
+  if (el) el.classList.add("active");
 
-  // 2. RESET SEMUA TOMBOL ACTIVE (Biar gak ada 2 tombol nyala)
-  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
-    m.classList.remove("active");
-  });
-
-  // 3. LOGIKA HANDLING MENU
-  if (el) {
-    // Nyalakan tombol yang diklik
-    el.classList.add("active");
-
-    // --- KASUS A: YANG DIKLIK ADALAH SUBMENU (Anak) ---
-    if (el.classList.contains("submenu-item")) {
-      // Cari wadah bapaknya (Container)
-      const myContainer = el.closest(".submenu-container");
-      
-      // Tutup semua container LAIN (Kecuali punya kita sendiri)
-      document.querySelectorAll(".submenu-container").forEach((c) => {
-        if (c !== myContainer) c.classList.remove("show");
-      });
-
-      // Reset semua Parent Menu LAIN
-      document.querySelectorAll(".menu-item").forEach((m) => {
-        // Cek apakah menu ini adalah bapak kita?
-        // Bapak kita adalah elemen tepat sebelum container kita
-        if (myContainer && m === myContainer.previousElementSibling) {
-           // Kalau ini bapak kita, BIARKAN (atau nyalakan)
-           m.classList.add("open");
-           m.classList.add("parent-active");
-        } else {
-           // Kalau bukan bapak kita, Matikan
-           m.classList.remove("open");
-           m.classList.remove("parent-active");
-        }
-      });
-
-      // Pastikan wadah kita terbuka
-      if (myContainer) myContainer.classList.add("show");
-    } 
-    
-    // --- KASUS B: YANG DIKLIK ADALAH MENU UTAMA BIASA (Dashboard, Logout) ---
-    else {
-      // Tutup SEMUA submenu karena kita pindah ke menu utama
-      document.querySelectorAll(".submenu-container").forEach((c) => c.classList.remove("show"));
-      document.querySelectorAll(".menu-item").forEach((m) => {
-        m.classList.remove("open");
-        m.classList.remove("parent-active");
-      });
-    }
-  }
-
-  // 4. LOAD DATA (KHUSUS HALAMAN DATA)
   if (id.includes("data")) {
-    const type = id.includes("shsk") ? "SHSK" :
-                 id.includes("sertifikasi") ? "SERTIFIKASI" :
-                 id.includes("service") ? "SERVICE" : "EXIBHITUM";
+    const type = id.includes("shsk")
+      ? "SHSK"
+      : id.includes("sertifikasi")
+      ? "SERTIFIKASI"
+      : id.includes("service")
+      ? "SERVICE"
+      : "EXIBHITUM";
     loadData(type);
   }
 
-  // 5. AUTO CLOSE SIDEBAR (MOBILE)
-  if (window.innerWidth <= 768) {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebar-overlay");
-    if (sidebar.classList.contains("show")) {
-      sidebar.classList.remove("show");
-      overlay.classList.remove("active");
-    }
+  if (id === "dashboard") {
+    document.querySelectorAll(".submenu-container").forEach((el) => {
+      el.classList.remove("show");
+      if (el.previousElementSibling)
+        el.previousElementSibling.classList.remove("open");
+    });
   }
 }
+
+function toggleSubmenu(id) {
+  document.querySelectorAll(".submenu-container").forEach((el) => {
+    if (el.id !== id) {
+      el.classList.remove("show");
+      if (el.previousElementSibling)
+        el.previousElementSibling.classList.remove("open");
+    }
+  });
+
+  const t = document.getElementById(id);
+  t.classList.toggle("show");
+  if (t.previousElementSibling)
+    t.previousElementSibling.classList.toggle("open");
+}
+
+window.toggleAccordion = function (headerElement) {
+  // Cari elemen bapaknya (accordion-item)
+  const item = headerElement.closest(".accordion-item");
+
+  // Toggle class 'open' (Kalau ada dihapus, kalau gak ada ditambah)
+  item.classList.toggle("open");
+
+  // Variasi Icon Panah (Opsional: Biar panahnya muter)
+  const icon = headerElement.querySelector("i.fa-chevron-down");
+  if (icon) {
+    if (item.classList.contains("open")) {
+      icon.style.transform = "rotate(180deg)";
+    } else {
+      icon.style.transform = "rotate(0deg)";
+    }
+  }
+};
 
 // ====================================================================
 // 5. CHART UI
