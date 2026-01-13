@@ -97,65 +97,70 @@ function generateNextNumberJS(lastNumberStr, offset = 1) {
 
 // ======================================================
 // FITUR BARU: AUTO NUMBER EXIBHITUM (LIVE CALCULATION)
-// Mengambil Start X/Y dari server, lalu loop sesuai jumlah input
 // ======================================================
 async function initExibhitumNumber() {
   try {
-    // 1. Minta Data Start Number (X & Y) dari Server
-    // Pastikan action di Code.gs namanya "getNextExibNumber"
     const res = await postData({ action: "getNextExibNumber" });
-    
+
     if (res.status === "SUCCESS") {
-      let x = parseInt(res.startX); // Bundel
-      let y = parseInt(res.startY); // Urut
+      let x = parseInt(res.startX);
+      let y = parseInt(res.startY);
       let year = res.year;
-      
-      // Ambil jumlah form yang sedang aktif (misal 10)
+
+      // 🔥 UPDATE GLOBAL VARIABLE (PENTING BIAR CHECKBOX BISA BACA)
+      // Kita simpan format "raw" terakhir biar generator JS bisa lanjutin
+      // Format dummy: AL.531/X/Y/KSOP.PKU.TAHUN (dikurangi 1 sequence biar pas loop nambah sendiri)
+      cachedLastNumber = `AL.531/${x}/${y - 1}/KSOP.PKU.${year}`;
+
       const countInput = document.getElementById("bulkCountExibhitum");
       const count = countInput ? parseInt(countInput.value) : 1;
-      
-      // 2. LOOPING KE SETIAP FORM INPUT
+
+      // 2. LOOPING KE SETIAP FORM INPUT (VISUALISASI SAJA)
+      // Note: Ini cuma tampilan awal. Data asli di-generate pas centang checkbox.
+      let tempX = x;
+      let tempY = y;
+
       for (let i = 0; i < count; i++) {
-        const container = document.getElementById(`dynamic-nomor-${i}`);
-        
-        if(container) {
-            // --- GENERATE NOMOR UNTUK PENGESAHAN (KIRI) ---
-            const pshX = x;
-            const pshY = y;
-            const valPsh = `AL.531/${pshX}/${pshY}/KSOP.PKU.${year}`;
-            
-            // Increment logic: Kalau y > 25, reset y=1, x nambah 1
-            y++; 
-            if (y > 25) { x++; y = 1; } 
+        const container = document.getElementById(`dynamic-nomor-${i + 1}`); // Index HTML mulai dari 1
 
-            // --- GENERATE NOMOR UNTUK EXIBHITUM (KANAN) ---
-            const exX = x;
-            const exY = y;
-            const valEx = `AL.531/${exX}/${exY}/KSOP.PKU.${year}`;
+        if (container) {
+          // PENGESAHAN
+          const pshX = tempX;
+          const pshY = tempY;
+          const valPsh = `AL.531/${pshX}/${pshY}/KSOP.PKU.${year}`;
+          tempY++;
+          if (tempY > 25) {
+            tempX++;
+            tempY = 1;
+          }
 
-            // Increment lagi untuk persiapan baris selanjutnya (loop i+1)
-            y++;
-            if (y > 25) { x++; y = 1; }
+          // EXIBHITUM
+          const exX = tempX;
+          const exY = tempY;
+          const valEx = `AL.531/${exX}/${exY}/KSOP.PKU.${year}`;
+          tempY++;
+          if (tempY > 25) {
+            tempX++;
+            tempY = 1;
+          }
 
-            // RENDER HTML KE DALAM CONTAINER
-            container.innerHTML = `
+          // Render Preview
+          container.innerHTML = `
              <div class="exib-grid-wrapper" style="display:grid; grid-template-columns: 1fr 1fr; gap: 25px;">
                 <div class="group-psh">
-                   <label style="font-size:12px; color:var(--gold); font-weight:bold;">NO. PENGESAHAN</label>
-                   <input type="text" name="nomor_PSH_${i}" class="form-control" 
-                          value="${valPsh}" readonly> 
-                   </div>
-
+                   <label style="font-size:12px; color:var(--gold); font-weight:bold;">PREDIKSI PENGESAHAN</label>
+                   <input type="text" class="form-control" value="${valPsh}" readonly style="opacity:0.7"> 
+                </div>
                 <div class="group-ex">
-                   <label style="font-size:12px; color:var(--neon-blue); font-weight:bold;">NO. EXIBHITUM</label>
-                   <input type="text" name="nomor_EX_${i}" class="form-control" 
-                          value="${valEx}" readonly>
+                   <label style="font-size:12px; color:var(--neon-blue); font-weight:bold;">PREDIKSI EXIBHITUM</label>
+                   <input type="text" class="form-control" value="${valEx}" readonly style="opacity:0.7">
                 </div>
              </div>
+             <div style="text-align:center; font-size:10px; color:#aaa; margin-top:5px;">*Nomor final akan muncul saat Anda memilih buku di atas.</div>
             `;
         }
       }
-      console.log("Auto Number Exibhitum Berhasil Di-generate!");
+      console.log("Auto Number Init Success. Cached:", cachedLastNumber);
     }
   } catch (error) {
     console.log("Gagal ambil nomor otomatis", error);
@@ -645,7 +650,7 @@ function showSection(id, el) {
   // Hapus active & parent-active dari menu utama
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("active");
-    m.classList.remove("parent-active"); 
+    m.classList.remove("parent-active");
   });
 
   // Hapus active dari submenu
@@ -668,8 +673,8 @@ function showSection(id, el) {
         // Jika ketemu, kasih class 'parent-active' & pastikan panah kebuka
         if (parentMenu && parentMenu.classList.contains("menu-item")) {
           parentMenu.classList.add("parent-active");
-          parentMenu.classList.add("open"); 
-          container.classList.add("show"); 
+          parentMenu.classList.add("open");
+          container.classList.add("show");
         }
       }
     }
@@ -1410,7 +1415,6 @@ function renderBulkForm(type) {
         </div>`;
     } // 4. EXIBHITUM (FIX UI: PENGESAHAN DI KIRI, EXIBHITUM DI KANAN)
     else if (type === "EXIBHITUM") {
-      initExibhitumNumber();
       html += `
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
@@ -1475,6 +1479,12 @@ function renderBulkForm(type) {
     }
     html += `</div>`; // Close Bulk Card
     container.innerHTML += html;
+  }
+  if (type === "EXIBHITUM") {
+    // Kita kasih jeda sedikit biar DOM render dulu
+    setTimeout(() => {
+      initExibhitumNumber();
+    }, 100);
   }
 }
 
