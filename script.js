@@ -416,20 +416,13 @@ function debouncedMonitoringLoad() {
     }, 500); // Tunggu 0.5 detik setelah ngetik baru load
 }
 
-async function loadMonitoringData(page = 1) {
+async function loadMonitoringData() {
     const tbody = document.getElementById("tbody-monitoring");
     if (!tbody) return;
 
     const bulan = document.getElementById("monFilterBulan").value;
     const tahun = document.getElementById("monFilterTahun").value;
     const search = document.getElementById("monSearch").value;
-
-    // KUNCINYA DI SINI:
-    // Jika kita klik pagination (page > 1) dan cache data sudah ada, jangan tarik API lagi.
-    if (page > 1 && monitoringDataCache.length > 0) {
-        renderMonitoringTable(page);
-        return;
-    }
 
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Memproses Data Pelayanan...</td></tr>';
 
@@ -442,8 +435,10 @@ async function loadMonitoringData(page = 1) {
         });
 
         if (res.status === "SUCCESS") {
-            monitoringDataCache = res.data; // Simpan ke cache
-            renderMonitoringTable(page);
+            // Simpan hasil ke cache global agar bisa dipakai pagination tanpa narik data lagi
+            monitoringDataCache = res.data; 
+            // Gambar halaman 1
+            renderMonitoringTable(1);
         } else {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
         }
@@ -455,11 +450,15 @@ async function loadMonitoringData(page = 1) {
 
 function renderMonitoringTable(page) {
     const tbody = document.getElementById("tbody-monitoring");
+    if (!tbody) return;
+    
     tbody.innerHTML = "";
 
     const limit = 10;
     const start = (page - 1) * limit;
     const end = start + limit;
+    
+    // Ambil potongan data dari cache sesuai halaman
     const pageData = monitoringDataCache.slice(start, end);
 
     if (pageData.length === 0) {
@@ -473,20 +472,16 @@ function renderMonitoringTable(page) {
     const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
     pageData.forEach((row, i) => {
-        // 1. Cek Separator TAHUN
+        // Logika Batas Tahun & Bulan
         if (lastYear !== null && row.tahun !== lastYear) {
             tbody.innerHTML += `<tr class="row-separator-year"><td colspan="9">BATAS TAHUN ${lastYear} KE ${row.tahun}</td></tr>`;
         }
-        
-        // 2. Cek Separator BULAN (Hanya jika dalam tahun yg sama atau ganti tahun)
-        // Reset lastMonth kalau ganti tahun
         if (row.tahun !== lastYear) lastMonth = null; 
-
         if (lastMonth !== null && row.bulan !== lastMonth) {
             tbody.innerHTML += `<tr class="row-separator-month"><td colspan="9">DATA BULAN ${monthNames[row.bulan]}</td></tr>`;
         }
 
-        const tr = `
+        tbody.innerHTML += `
             <tr>
                 <td>${start + i + 1}</td>
                 <td>${row.tahun}</td>
@@ -499,13 +494,12 @@ function renderMonitoringTable(page) {
                 <td>${row.total}</td>
             </tr>
         `;
-        tbody.innerHTML += tr;
-
         lastYear = row.tahun;
         lastMonth = row.bulan;
     });
 
-renderPagination("MONITORING", monitoringDataCache.length, page, 10);
+    // Panggil fungsi pagination dengan target 'MONITORING_NAV'
+    renderPagination("MONITORING", monitoringDataCache.length, page, limit);
 }
 
 // ====================================================================
@@ -2658,21 +2652,23 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
 
 // FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
-  // Kalau yang dipanggil Monitoring, oper ke fungsinya sendiri
-  if(type === 'MONITORING') {
-      loadMonitoringData(pageNum);
-      return;
-  }
+    if (type === 'MONITORING') {
+        // Jangan panggil loadMonitoringData (karena itu narik API), 
+        // tapi panggil renderMonitoringTable (Hanya ganti tampilan)
+        renderMonitoringTable(pageNum);
+        return;
+    }
 
-  const limit = type === "EXIBHITUM" ? 25 : 10;
-  const totalRows = filteredData[type].length;
-  const totalPages = Math.ceil(totalRows / limit);
+    const limit = type === "EXIBHITUM" ? 25 : 10;
+    const totalRows = filteredData[type].length;
+    const totalPages = Math.ceil(totalRows / limit);
 
-  if (pageNum < 1 || pageNum > totalPages) return;
+    if (pageNum < 1 || pageNum > totalPages) return;
 
-  currentPage[type] = pageNum;
-  renderTable(type);
+    currentPage[type] = pageNum;
+    renderTable(type);
 }
+
 
 
 let pendingDelete = null;
