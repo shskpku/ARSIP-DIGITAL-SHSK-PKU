@@ -592,15 +592,60 @@ function toggleSidebar() {
 }
 
 function showSection(id, el) {
+  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
   document
     .querySelectorAll(".main-content > div")
     .forEach((d) => d.classList.add("hidden"));
   document.getElementById(`sec-${id}`).classList.remove("hidden");
-  document
-    .querySelectorAll(".menu-item")
-    .forEach((m) => m.classList.remove("active"));
-  if (el) el.classList.add("active");
 
+  // ============================================================
+  // 🧹 NUCLEAR RESET (BERSIH-BERSIH TOTAL)
+  // ============================================================
+
+  // Matikan semua lampu 'active' (warna background terang)
+  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
+    m.classList.remove("active");
+  });
+
+  // Matikan lampu 'parent-active' (emas) & 'open' (panah) pada Bapak Menu
+  document.querySelectorAll(".menu-item").forEach((m) => {
+    m.classList.remove("parent-active");
+    m.classList.remove("open");
+  });
+
+  // Tutup SEMUA laci submenu dulu (biar rapi)
+  document.querySelectorAll(".submenu-container").forEach((c) => {
+    c.classList.remove("show");
+  });
+
+  // ============================================================
+  // ✨ NYALAKAN MENU BARU
+  // ============================================================
+
+  if (el) {
+    // Nyalakan menu yang diklik
+    el.classList.add("active");
+
+    // Jika yang diklik adalah ANAK (Submenu)
+    if (el.classList.contains("submenu-item")) {
+      const container = el.closest(".submenu-container");
+      if (container) {
+        // Buka laci bapaknya ini saja
+        container.classList.add("show");
+
+        // Nyalakan Bapaknya (Warna Emas + Panah Turun)
+        const parentMenu = container.previousElementSibling;
+        if (parentMenu) {
+          parentMenu.classList.add("parent-active");
+          parentMenu.classList.add("open");
+        }
+      }
+    }
+  }
+
+  // ============================================================
+  // 📥 LOAD DATA (JIKA PERLU)
+  // ============================================================
   if (id.includes("data")) {
     const type = id.includes("shsk")
       ? "SHSK"
@@ -612,47 +657,16 @@ function showSection(id, el) {
     loadData(type);
   }
 
-  if (id === "dashboard") {
-    document.querySelectorAll(".submenu-container").forEach((el) => {
-      el.classList.remove("show");
-      if (el.previousElementSibling)
-        el.previousElementSibling.classList.remove("open");
-    });
-  }
-}
-
-function toggleSubmenu(id) {
-  document.querySelectorAll(".submenu-container").forEach((el) => {
-    if (el.id !== id) {
-      el.classList.remove("show");
-      if (el.previousElementSibling)
-        el.previousElementSibling.classList.remove("open");
-    }
-  });
-
-  const t = document.getElementById(id);
-  t.classList.toggle("show");
-  if (t.previousElementSibling)
-    t.previousElementSibling.classList.toggle("open");
-}
-
-window.toggleAccordion = function (headerElement) {
-  // Cari elemen bapaknya (accordion-item)
-  const item = headerElement.closest(".accordion-item");
-
-  // Toggle class 'open' (Kalau ada dihapus, kalau gak ada ditambah)
-  item.classList.toggle("open");
-
-  // Variasi Icon Panah (Opsional: Biar panahnya muter)
-  const icon = headerElement.querySelector("i.fa-chevron-down");
-  if (icon) {
-    if (item.classList.contains("open")) {
-      icon.style.transform = "rotate(180deg)";
-    } else {
-      icon.style.transform = "rotate(0deg)";
+  // TUTUP SIDEBAR OTOMATIS (DI HP)
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar.classList.contains("show")) {
+      sidebar.classList.remove("show");
+      overlay.classList.remove("active");
     }
   }
-};
+}
 
 // ====================================================================
 // 5. CHART UI
@@ -2702,5 +2716,113 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 });
+
+// ====================================================================
+// NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
+// ====================================================================
+
+// 1. FUNGSI PINDAH HALAMAN & RESET TOTAL (NUCLEAR RESET)
+function showSection(id, el) {
+  // A. SEMBUNYIKAN SEMUA HALAMAN KONTEN
+  document
+    .querySelectorAll(".main-content > div")
+    .forEach((d) => d.classList.add("hidden"));
+
+  // B. MUNCULKAN HALAMAN YANG DITUJU
+  const targetSection = document.getElementById(`sec-${id}`);
+  if (targetSection) {
+    targetSection.classList.remove("hidden");
+  }
+
+  // ============================================================
+  // 🧹 FASE BERSIH-BERSIH (MATIKAN SEMUA LAMPU LAMA)
+  // ============================================================
+
+  // Matikan status 'active' (background terang) dari SEMUA menu
+  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
+    m.classList.remove("active");
+  });
+
+  // Matikan status 'parent-active' (emas) & 'open' (panah) dari SEMUA Bapak Menu
+  document.querySelectorAll(".menu-item").forEach((m) => {
+    m.classList.remove("parent-active");
+    m.classList.remove("open");
+  });
+
+  // Tutup SEMUA laci submenu biar rapi
+  document.querySelectorAll(".submenu-container").forEach((c) => {
+    c.classList.remove("show");
+  });
+
+  // ============================================================
+  // ✨ FASE MENYALAKAN MENU BARU
+  // ============================================================
+
+  if (el) {
+    // 1. Nyalakan menu yang diklik (Anak atau Dashboard)
+    el.classList.add("active");
+
+    // 2. CEK: Apakah yang diklik itu SUBMENU (Anak)?
+    if (el.classList.contains("submenu-item")) {
+      // Cari wadah bapaknya
+      const container = el.closest(".submenu-container");
+
+      if (container) {
+        // Buka laci bapaknya ini saja
+        container.classList.add("show");
+
+        // Cari Tombol Bapaknya (Header Menu)
+        const parentMenu = container.previousElementSibling;
+
+        // Nyalakan Bapaknya (Warna Emas + Panah Turun)
+        if (parentMenu) {
+          parentMenu.classList.add("parent-active");
+          parentMenu.classList.add("open");
+        }
+      }
+    }
+  }
+
+  // ============================================================
+  // 📥 LOGIKA LOAD DATA OTOMATIS
+  // ============================================================
+  if (id.includes("data")) {
+    const type = id.includes("shsk")
+      ? "SHSK"
+      : id.includes("sertifikasi")
+      ? "SERTIFIKASI"
+      : id.includes("service")
+      ? "SERVICE"
+      : "EXIBHITUM";
+    // Pastikan fungsi loadData sudah ada di script.js kamu
+    if (typeof loadData === "function") {
+      loadData(type);
+    }
+  }
+
+  // AUTO CLOSE SIDEBAR (KHUSUS TAMPILAN MOBILE)
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar && sidebar.classList.contains("show")) {
+      sidebar.classList.remove("show");
+      if (overlay) overlay.classList.remove("active");
+    }
+  }
+}
+
+// 2. FUNGSI BUKA/TUTUP LACI SUBMENU (TANPA PINDAH HALAMAN)
+function toggleSubmenu(id) {
+  const submenu = document.getElementById(id);
+  if (!submenu) return;
+
+  const parentMenu = submenu.previousElementSibling; // Tombol Bapaknya
+
+  // Aksi Buka/Tutup (Toggle)
+  submenu.classList.toggle("show"); // Buka/Tutup Laci
+  if (parentMenu) {
+    parentMenu.classList.toggle("open"); // Putar Panah
+  }
+}
 
 // --- END SCRIPT.JS V15.3 ---
