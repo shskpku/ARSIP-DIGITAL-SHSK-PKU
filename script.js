@@ -419,20 +419,20 @@ function debouncedMonitoringLoad() {
 async function loadMonitoringData(page = 1) {
     const tbody = document.getElementById("tbody-monitoring");
     
-    // Ambil nilai dari layar
+    // Ambil nilai filter (Kalau baru buka, nilainya pasti "")
     const bulan = document.getElementById("monFilterBulan").value;
     const tahun = document.getElementById("monFilterTahun").value;
     const search = document.getElementById("monSearch").value;
 
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Mengolah Data Lintas Dimensi...</td></tr>';
 
-    // DISINI KUNCINYA: Kirim aja apa adanya (biar Backend yang urus filternya)
-    const res = await postData({
-        action: "getMonitoringData",
-        bulan: bulan, 
-        tahun: tahun,
-        search: search
-    });
+    try {
+        const res = await postData({
+            action: "getMonitoringData",
+            bulan: bulan, // Kalau "" (kosong), Backend akan kirim SEMUA
+            tahun: tahun, // Kalau "" (kosong), Backend akan kirim SEMUA
+            search: search
+        });
 
         if (res.status === "SUCCESS") {
             monitoringDataCache = res.data; 
@@ -508,40 +508,31 @@ function renderMonitoringTable(page) {
 const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 1 Jam (Ubah ke 10000 kalau mau tes 10 detik)
 const STORAGE_KEY_ACTIVITY = "shsk_last_activity";
 
-// ====================================================================
-// PERBAIKAN AUTO LOGOUT (AGAR BISA LOGIN)
-// ====================================================================
 function initAutoLogout() {
-    // 1. Cek apakah user sedang berada di halaman login (index.html)
-    // Jika di halaman login, JANGAN jalankan auto-logout
-    if (window.location.pathname.includes("index.html") || window.location.pathname === "/") {
-        return; 
-    }
-
-    // 2. Cek status aktif (Hanya jika sudah masuk ke dashboard)
+    // 1. Cek saat halaman dimuat: Apakah sudah expired?
     checkActivityStatus();
 
-    // 3. Pasang pendengar gerakan
+    // 2. Pasang pendengar gerakan
+    // Setiap user gerak/klik, kita reset timer di LocalStorage
     ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
         document.addEventListener(evt, () => {
             resetActivityTimer();
         }, true);
     });
 
-    // 4. Cek berkala tiap 1 menit
+    // 3. Cek berkala tiap 1 menit (Jaga-jaga kalau browser didiamkan terbuka)
     setInterval(checkActivityStatus, 60000); 
 }
 
 function resetActivityTimer() {
+    // Simpan waktu sekarang sebagai waktu terakhir aktif
     localStorage.setItem(STORAGE_KEY_ACTIVITY, Date.now());
 }
 
 function checkActivityStatus() {
-    // Jika tidak ada data user di storage, jangan tendang (biarkan proses login)
-    const user = localStorage.getItem("user");
-    if (!user) return;
-
     const lastActive = localStorage.getItem(STORAGE_KEY_ACTIVITY);
+    
+    // Kalau belum pernah login/aktif, set sekarang
     if (!lastActive) {
         resetActivityTimer();
         return;
@@ -549,12 +540,11 @@ function checkActivityStatus() {
 
     const diff = Date.now() - parseInt(lastActive);
 
-    // 🔥 TENDANG JIKA LEBIH DARI 1 JAM 🔥
+    // 🔥 LOGIKA TENDANGAN MAUT 🔥
     if (diff > INACTIVITY_LIMIT_MS) {
         forceLogout();
     }
 }
-
 
 function forceLogout() {
     // Hapus data sesi
@@ -768,14 +758,16 @@ function toggleSidebar() {
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
 // ====================================================================
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN
+  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
   document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
   
   // 2. MUNCULKAN HALAMAN TARGET
-  const target = document.getElementById(`sec-${id}`);
-  if (target) target.classList.remove("hidden");
+  const targetSection = document.getElementById(`sec-${id}`);
+  if (targetSection) {
+    targetSection.classList.remove("hidden");
+  }
 
-  // 3. RESET MENU (Matikan lampu menu lain)
+  // 3. RESET MENU (Matikan semua lampu active)
   document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => m.classList.remove("active"));
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
@@ -790,32 +782,34 @@ function showSection(id, el) {
       const container = el.closest(".submenu-container");
       if (container) {
         container.classList.add("show");
-        const parent = container.previousElementSibling;
-        if (parent) {
-          parent.classList.add("parent-active");
-          parent.classList.add("open");
+        const parentMenu = container.previousElementSibling;
+        if (parentMenu) {
+          parentMenu.classList.add("parent-active");
+          parentMenu.classList.add("open");
         }
       }
     }
   }
 
   // ============================================================
-  // 🔥 PERBAIKAN TRIGGER DATA (ANTI-NGEGEL) 🔥
+  // 🔥 LOGIKA PEMANGGIL DATA OTOMATIS 🔥
   // ============================================================
   
+  // A. Jika Klik Menu MONITORING
   if (id === "monitoring") {
-      // 1. Paksa nilai filter di layar jadi kosong (Semua)
-      const inputBulan = document.getElementById("monFilterBulan");
-      const inputTahun = document.getElementById("monFilterTahun");
-      const inputSearch = document.getElementById("monSearch");
+      // Pastikan filter visual diset ke "Semua" agar sinkron dengan data yang muncul
+      const fBul = document.getElementById("monFilterBulan");
+      const fTah = document.getElementById("monFilterTahun");
+      const fSea = document.getElementById("monSearch");
       
-      if (inputBulan) inputBulan.value = "";
-      if (inputTahun) inputTahun.value = "";
-      if (inputSearch) inputSearch.value = "";
+      if(fBul) fBul.value = "";
+      if(fTah) fTah.value = "";
+      if(fSea) fSea.value = "";
       
-      // 2. Langsung tarik data dengan parameter kosong (Force Load All)
+      // Langsung panggil data (Load data mentah/tanpa filter)
       loadMonitoringData(1); 
   } 
+  // B. Jika Klik Menu DATA ARSIP LAINNYA
   else if (id.includes("data")) {
       const type = id.includes("shsk") ? "SHSK" : 
                    id.includes("sertifikasi") ? "SERTIFIKASI" : 
@@ -823,16 +817,17 @@ function showSection(id, el) {
       loadData(type);
   }
 
-  // Auto Close Sidebar di HP
+  // AUTO CLOSE SIDEBAR (Khusus tampilan Mobile)
   if (window.innerWidth <= 768) {
-    const sb = document.getElementById("sidebar");
-    const ov = document.getElementById("sidebar-overlay");
-    if (sb && sb.classList.contains("show")) {
-      sb.classList.remove("show");
-      if (ov) ov.classList.remove("active");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar && sidebar.classList.contains("show")) {
+      sidebar.classList.remove("show");
+      if (overlay) overlay.classList.remove("active");
     }
   }
 }
+
 
 // ====================================================================
 // 5. CHART UI
