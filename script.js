@@ -67,6 +67,7 @@ const CERT_CODES = {
 };
 // GLOBAL VARIABLE UNTUK NOMOR SURAT
 let cachedLastNumber = null;
+let globalClickQueue = [];
 
 // FUNGSI GENERATOR NOMOR VERSI JS (MIRROR BACKEND)
 function generateNextNumberJS(lastNumberStr, offset = 1) {
@@ -879,14 +880,13 @@ window.togglePacketMode = function (index, mode, btn) {
   );
 
   if (isAlreadyActive) {
-    packetModeState[index] = null; // Matikan Paket
-    // Enable semua checkbox
+    packetModeState[index] = null; 
     checkboxes.forEach((cb) => {
       cb.checked = false;
       cb.disabled = false;
     });
   } else {
-    packetModeState[index] = mode; // Set Mode Baru
+    packetModeState[index] = mode; 
     btn.classList.add("active");
 
     // Tentukan target sertifikat berdasarkan mode
@@ -986,7 +986,6 @@ window.renderCertForms = function (index) {
 
   // --- 2. RENDER FORM ECERAN (SISANYA) ---
   selectedCerts.forEach((cert) => {
-    // Cek apakah sertifikat ini termasuk dalam paket yang sedang aktif
     if (currentMode) {
       let packetCerts = [];
       if (currentMode === "NTR")
@@ -1002,7 +1001,7 @@ window.renderCertForms = function (index) {
       else if (currentMode === "ENDORS_OB")
         packetCerts = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
 
-      if (packetCerts.includes(cert)) return; // Skip yang sudah di-handle oleh paket
+      if (packetCerts.includes(cert)) return; 
     }
 
     let defaultNo =
@@ -1033,107 +1032,93 @@ window.renderCertForms = function (index) {
 // ====================================================================
 // CORE: GENERATOR NOMOR URUT EXIBHITUM (GLOBAL SEQUENCE)
 // ====================================================================
-window.updateExibhitumForms = function () {
-  // Ambil data Start dari Server yang sudah disimpan di variable global
-  // Format cachedLastNumber dari server: "AL.531/X/Y/KSOP.PKU.TAHUN"
+window.updateExibhitumForms = function (idx, el) {
+  if (el) {
+    const uniqueKey = `${el.value}_${idx}`; 
+    
+    if (el.checked) {
+      if (!globalClickQueue.includes(uniqueKey)) {
+        globalClickQueue.push(uniqueKey);
+      }
+    } else {
+      globalClickQueue = globalClickQueue.filter(k => k !== uniqueKey);
+    }
+  }
+
+  // 2. GENERATOR NOMOR
   if (!cachedLastNumber) return;
+  const parts = cachedLastNumber.split('/');
+  let currentX = parseInt(parts[1]); 
+  let currentY = parseInt(parts[2]); 
+  const suffix = parts[3];
 
-  const parts = cachedLastNumber.split("/");
-  let currentX = parseInt(parts[1]); // Bundel
-  let currentY = parseInt(parts[2]); // Urutan
-  const suffix = parts[3]; // KSOP.PKU.TAHUN (Suffix)
+  const getNextAndIncrement = () => {
+       const pad = (num) => num.toString().padStart(2, '0');
+       const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
+       currentY++;
+       if (currentY > 25) { currentX++; currentY = 1; }
+       return numStr;
+  };
 
-  // Ambil jumlah form yang aktif
+  // 3. GENERATE NOMOR UNTUK SEMUA ITEM DI ANTRIAN
+  let numberMap = {};
+  globalClickQueue.forEach(key => {
+    numberMap[key] = getNextAndIncrement();
+  });
+
+  // 4. RENDER TAMPILAN (LOOPING SEMUA FORM)
   const countInput = document.getElementById("bulkCountExibhitum");
   const count = countInput ? parseInt(countInput.value) : 1;
+  const bookTypes = ["DECK", "MESIN", "RADIO", "ORB", "SAMPAH", "BALLAST"];
 
-  // LOOPING GLOBAL (Dari Form 1 sampai Form Terakhir)
   for (let i = 1; i <= count; i++) {
     const container = document.getElementById(`dynamic-nomor-${i}`);
     if (!container) continue;
 
-    // 1. Definisikan Jenis Buku BARU
-    const bookTypes = ["DECK", "MESIN", "RADIO", "ORB", "SAMPAH", "BALLAST"];
-
-    // 2. Cek mana saja yang dicentang di form ke-i ini
-    let pshChecked = [];
-    let exChecked = [];
-
-    // Cek Pengesahan
-    bookTypes.forEach((b) => {
-      const ck = document.querySelector(`input[name="check_PSH_${b}_${i}"]`);
-      if (ck && ck.checked)
-        pshChecked.push({ name: b, code: `PSH. ${b}`, key: `PSH.${b}` });
-    });
-
-    // Cek Exibhitum
-    bookTypes.forEach((b) => {
-      const ck = document.querySelector(`input[name="check_EX_${b}_${i}"]`);
-      if (ck && ck.checked)
-        exChecked.push({ name: b, code: `EX. ${b}`, key: `EX.${b}` });
-    });
-
-    // 3. Generate HTML & Hitung Nomor
     let htmlPsh = "";
     let htmlEx = "";
 
-    // Fungsi helper untuk cetak nomor dan naikkan counter
-    const getNextAndIncrement = () => {
-      // FORMATTER: Tambah '0' di depan jika angka < 10
-      const pad = (num) => num.toString().padStart(2, "0");
-
-      // Gunakan pad() pada X dan Y
-      const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
-
-      // Logika Rotasi: Jika 25, pindah bundel
-      currentY++;
-      if (currentY > 25) {
-        currentX++;
-        currentY = 1;
+    // Render PENGESAHAN (Kiri)
+    bookTypes.forEach(b => {
+      const val = `PSH. ${b}`;
+      const keyQueue = `${val}_${i}`;
+      
+      // Cek apakah item ini ada di Map Nomor
+      if (numberMap[keyQueue]) {
+        htmlPsh += `
+            <div style="margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:bold; color:#ff9f43; display:block; margin-bottom:2px;">${b}</label>
+                <input type="text" name="nomorSurat_PSH.${b}_${i}" class="form-control" value="${numberMap[keyQueue]}" style="font-size:12px; padding:6px; font-weight:bold;">
+            </div>`;
       }
-      return numStr;
-    };
-
-    // Render Input Pengesahan (Prioritas Pertama)
-    pshChecked.forEach((item) => {
-      const nomer = getNextAndIncrement();
-      htmlPsh += `
-            <div style="margin-bottom:8px;">
-                <label style="font-size:11px; font-weight:bold; color:#ff9f43; display:block; margin-bottom:2px;">${item.name}</label>
-                <input type="text" name="nomorSurat_${item.key}_${i}" class="form-control" value="${nomer}" style="font-size:12px; padding:6px; font-weight:bold;" readonly>
-            </div>`;
     });
 
-    // Render Input Exibhitum (Prioritas Kedua)
-    exChecked.forEach((item) => {
-      const nomer = getNextAndIncrement();
-      htmlEx += `
+    // Render EXIBHITUM (Kanan)
+    bookTypes.forEach(b => {
+      const val = `EX. ${b}`;
+      const keyQueue = `${val}_${i}`;
+      if (numberMap[keyQueue]) {
+        htmlEx += `
             <div style="margin-bottom:8px;">
-                <label style="font-size:11px; font-weight:bold; color:var(--neon-blue); display:block; margin-bottom:2px;">${item.name}</label>
-                <input type="text" name="nomorSurat_${item.key}_${i}" class="form-control" value="${nomer}" style="font-size:12px; padding:6px; font-weight:bold;" readonly>
+                <label style="font-size:11px; font-weight:bold; color:var(--neon-blue); display:block; margin-bottom:2px;">${b}</label>
+                <input type="text" name="nomorSurat_EX.${b}_${i}" class="form-control" value="${numberMap[keyQueue]}" style="font-size:12px; padding:6px; font-weight:bold;">
             </div>`;
+      }
     });
 
-    // 4. Update Tampilan ke Layar
+    // Update HTML
     if (htmlEx === "" && htmlPsh === "") {
-      container.innerHTML =
-        "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
+        container.innerHTML = "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
     } else {
-      container.innerHTML = `
+        container.innerHTML = `
         <div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
             <div style="background:#fff8f0; padding:12px; border-radius:8px; border:1px dashed #ff9f43;">
                 <div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">PENGESAHAN</div>
-                ${
-                  htmlPsh ||
-                  '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
-                }
+                ${htmlPsh || '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'}
             </div>
             <div style="background:#f0f8ff; padding:12px; border-radius:8px; border:1px dashed var(--neon-blue);">
                 <div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">EXIBHITUM</div>
-                ${
-                  htmlEx ||
-                  '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
-                }
+                ${htmlEx || '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'}
             </div>
         </div>`;
     }
@@ -1173,6 +1158,9 @@ window.handleFileSelect = function (input) {
 // FUNGSI RENDER FORM (PERBAIKAN V13.2)
 // ====================================================================
 function renderBulkForm(type) {
+  if (type === "EXIBHITUM") {
+     globalClickQueue = []; 
+  }
   let countSelectId, containerId;
   if (type === "SHSK") {
     countSelectId = "bulkCountSHSK";
@@ -1195,7 +1183,6 @@ function renderBulkForm(type) {
   container.innerHTML = "";
 
   for (let i = 1; i <= count; i++) {
-    // UI: Add 'bulk-card' class for styling
     let html = `
     <div class="bulk-card">
         <div class="bulk-number-badge">#${i}</div>
@@ -1348,8 +1335,7 @@ function renderBulkForm(type) {
                 </div>
             </div>
         </div>`;
-    } // 4. EXIBHITUM (FIX UI: PENGESAHAN DI KIRI, EXIBHITUM DI KANAN)
-    else if (type === "EXIBHITUM") {
+    } else if (type === "EXIBHITUM") {
       html += `
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
@@ -1371,7 +1357,7 @@ function renderBulkForm(type) {
           .map(
             (b) => `
             <label class="book-checkbox">
-                <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms()">
+                <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms(${i}, this)">
                 <div class="book-ui">${b}</div>
             </label>
         `
@@ -1387,7 +1373,7 @@ function renderBulkForm(type) {
           .map(
             (b) => `
             <label class="book-checkbox">
-                <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms()">
+                <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms(${i}, this)">
                 <div class="book-ui">${b}</div>
             </label>
         `
@@ -1412,10 +1398,10 @@ function renderBulkForm(type) {
             </div>
         </div>`;
     }
-    html += `</div>`; // Close Bulk Card
+    html += `</div>`; 
     container.innerHTML += html;
     if (type === "EXIBHITUM") {
-      initExibhitumNumber(); // <--- PANGGIL DI SINI
+      initExibhitumNumber(); 
     }
   }
 }
@@ -1699,15 +1685,12 @@ async function handleBulkSubmit(type) {
           `input[type="checkbox"][name*="_${i}"]:checked`
         );
         checkedBoxes.forEach((cb) => {
-          jenisBukuArray.push(cb.value); // Misal: ["PSH. DECK LOG BOOK", "EX. OIL RECORD BOOK"]
+          jenisBukuArray.push(cb.value); 
         });
 
-        // --- AMBIL NOMOR SURAT (JIKA ADA INPUT MANUAL/EDIT) ---
-        // Kita simpan array input nomor surat yang sesuai dengan buku yang dipilih
+        // --- AMBIL NOMOR SURAT ---
         const nomorSuratArray = [];
         jenisBukuArray.forEach((jb) => {
-          // Cari input name="nomorSurat_PSH.DECK LOG BOOK_1" (nama unik yang digenerate di updateExibhitumForms)
-          // Perhatikan replace titik dan spasi harus sama dengan di fungsi updateExibhitumForms
           let safeName = jb.replace(". ", ".");
           const inputNomor = form.querySelector(
             `input[name="nomorSurat_${safeName}_${i}"]`
@@ -1715,7 +1698,7 @@ async function handleBulkSubmit(type) {
           if (inputNomor) {
             nomorSuratArray.push(inputNomor.value);
           } else {
-            nomorSuratArray.push(""); // Fallback kosong
+            nomorSuratArray.push(""); 
           }
         });
 
@@ -1723,7 +1706,7 @@ async function handleBulkSubmit(type) {
         itemData.jenisBukuArray = jenisBukuArray;
         itemData.nomorSuratArray = nomorSuratArray;
 
-        // Gabungan string untuk kompatibilitas tampilan tabel lama (optional)
+        // Gabungan string untuk kompatibilitas tampilan tabel lama 
         itemData.jenisBuku = jenisBukuArray.join(", ");
 
         // Upload File
@@ -1914,7 +1897,7 @@ function editData(type, rowDataStr) {
       setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING"]));
     }
 
-    // 🔥 PERUBAHAN DI SINI: PAKSA LOCK SEMUA CHECKBOX DI AWAL 🔥
+    //  PAKSA LOCK SEMUA CHECKBOX DI AWAL 
     form
       .querySelectorAll(`input[name="cert_select_1"]`)
       .forEach((c) => (c.disabled = true));
@@ -1951,7 +1934,7 @@ function editData(type, rowDataStr) {
         }
       }
     }
-    // 🔥 LOCK CHECKBOX SERVICE 🔥
+    //  LOCK CHECKBOX SERVICE 
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
@@ -1984,7 +1967,7 @@ function editData(type, rowDataStr) {
       );
       if (noSuratInput) noSuratInput.value = nomor;
     }
-    // 🔥 LOCK CHECKBOX EXIBHITUM 🔥
+    //  LOCK CHECKBOX EXIBHITUM 
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
@@ -1993,7 +1976,7 @@ function editData(type, rowDataStr) {
   // 4. FINAL LOCK: KUNCI SEMUA INPUT (TERMASUK TEXT & SELECT)
   const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => {
-    i.disabled = true; // SEMUA DIKUNCI MATI
+    i.disabled = true; 
   });
 
   // 5. SIAPKAN TOMBOL "UBAH DATA"
@@ -2008,7 +1991,7 @@ function editData(type, rowDataStr) {
     btnUnlock.id = `btn-unlock-${type}`;
     btnUnlock.className = "btn-edit-mode";
     btnUnlock.innerHTML = '<i class="fa fa-pencil-alt"></i> UBAH DATA';
-    btnUnlock.onclick = () => enableEditMode(type); // <--- INI YG BAKAL BUKA GEMBOK
+    btnUnlock.onclick = () => enableEditMode(type); 
     btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
@@ -2030,8 +2013,7 @@ function enableEditMode(type) {
 
   const form = document.getElementById(formId);
 
-  // 🔥 INI MANTRA PEMBUKA GEMBOKNYA:
-  // Membuka input text, select, DAN checkbox sekaligus
+  //  INI MANTRA PEMBUKA GEMBOKNYA:
   const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => (i.disabled = false));
 
@@ -2125,7 +2107,6 @@ async function exportTriple(type) {
         }
         // Lakukan Download jika ada URL
         else if (f.url) {
-          // JEDA 2 DETIK PER FILE (BIAR STABIL)
           setTimeout(() => {
             downloadDirectly(f.url);
             showPopup("Mendownload: " + f.name, "info");
@@ -2145,8 +2126,8 @@ async function exportTriple(type) {
 // --- FUNGSI RAHASIA: DOWNLOAD LEWAT IFRAME ---
 function downloadDirectly(url) {
   const iframe = document.createElement("iframe");
-  iframe.style.display = "none"; // Sembunyikan
-  iframe.src = url; // Tembak URL Download
+  iframe.style.display = "none"; 
+  iframe.src = url; 
   document.body.appendChild(iframe);
 
   // Hapus iframe setelah 1 menit (bersih-bersih memori)
@@ -2197,7 +2178,6 @@ async function loadData(type) {
       const dateB = new Date(b[dateKey]);
 
       // Kalau tanggal beda, urutkan berdasarkan tanggal
-      // Tapi khusus Exibhitum, kita utamakan Nomor Surat dulu di bawah
       if (type !== "EXIBHITUM") {
         if (dateA > dateB) return -1;
         if (dateA < dateB) return 1;
@@ -2216,8 +2196,7 @@ async function loadData(type) {
           }
         };
 
-        // 🔥 INI PERUBAHANNYA GENK (DIBALIK: b - a) 🔥
-        // Biar nomor besar (baru) di atas, nomor kecil (lama) di bawah
+        //  INI (DIBALIK: b - a) 
         return getVal(b["PENOMORAN"]) - getVal(a["PENOMORAN"]);
       } else {
         // Untuk tipe lain (SHSK, dll) tetap urut nomor input (Ascending)
@@ -2231,7 +2210,7 @@ async function loadData(type) {
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
     updateSmartData(rawData[type], type);
-    renderTable(type); // <-- Render akan panggil pagination logic baru
+    renderTable(type); 
 
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else {
