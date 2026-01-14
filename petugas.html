@@ -472,19 +472,32 @@
       </div>
 
       <div id="sec-shsk-data" class="hidden">
-        <div class="section-header">
-          <h2>Data Arsip Status Hukum</h2>
-          <div class="header-actions">
-            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
-              <i class="fa fa-sync"></i> Refresh
-            </button>
-            <button
-              class="btn-action btn-export"
-              onclick="exportTriple('SHSK')"
-            >
-              <i class="fa fa-file-excel"></i> Export Laporan
-            </button>
-          </div>
+        <div class="header-actions">
+          <button
+            id="btn-mode-hapus-SHSK"
+            class="btn-del"
+            onclick="toggleDeleteMode('SHSK')"
+            style="background: #555"
+          >
+            <i class="fa fa-check-square"></i> Mode Hapus
+          </button>
+          <button
+            id="btn-confirm-hapus-SHSK"
+            class="btn-del hidden"
+            onclick="executeBulkDelete('SHSK')"
+            style="background: #ff3d00; animation: pulse 1s infinite"
+          >
+            <i class="fa fa-trash"></i> Hapus (<span id="count-hapus-SHSK"
+              >0</span
+            >)
+          </button>
+
+          <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
+            <i class="fa fa-sync"></i> Refresh
+          </button>
+          <button class="btn-action btn-export" onclick="exportTriple('SHSK')">
+            <i class="fa fa-file-excel"></i> Export
+          </button>
         </div>
         <div class="filter-card" style="border-left: 5px solid var(--gold)">
           <div class="grid-filter">
@@ -600,22 +613,39 @@
       </div>
 
       <div id="sec-sertifikasi-data" class="hidden">
-        <div class="section-header">
-          <h2>Data Arsip Sertifikasi</h2>
-          <div class="header-actions">
-            <button
-              class="btn-action btn-refresh"
-              onclick="loadData('SERTIFIKASI')"
-            >
-              <i class="fa fa-sync"></i> Refresh
-            </button>
-            <button
-              class="btn-action btn-export"
-              onclick="exportTriple('SERTIFIKASI')"
-            >
-              <i class="fa fa-file-excel"></i> Export Laporan
-            </button>
-          </div>
+        <div class="header-actions">
+          <button
+            id="btn-mode-hapus-SERTIFIKASI"
+            class="btn-del"
+            onclick="toggleDeleteMode('SERTIFIKASI')"
+            style="background: #555"
+          >
+            <i class="fa fa-check-square"></i> Mode Hapus
+          </button>
+          <button
+            id="btn-confirm-hapus-SERTIFIKASI"
+            class="btn-del hidden"
+            onclick="executeBulkDelete('SERTIFIKASI')"
+            style="background: #ff3d00; animation: pulse 1s infinite"
+          >
+            <i class="fa fa-trash"></i> Hapus (<span
+              id="count-hapus-SERTIFIKASI"
+              >0</span
+            >)
+          </button>
+
+          <button
+            class="btn-action btn-refresh"
+            onclick="loadData('SERTIFIKASI')"
+          >
+            <i class="fa fa-sync"></i> Refresh
+          </button>
+          <button
+            class="btn-action btn-export"
+            onclick="exportTriple('SERTIFIKASI')"
+          >
+            <i class="fa fa-file-excel"></i> Export
+          </button>
         </div>
         <div
           class="filter-card"
@@ -747,22 +777,35 @@
       </div>
 
       <div id="sec-service-data" class="hidden">
-        <div class="section-header">
-          <h2>Data Arsip ILR & PMK</h2>
-          <div class="header-actions">
-            <button
-              class="btn-action btn-refresh"
-              onclick="loadData('SERVICE')"
-            >
-              <i class="fa fa-sync"></i> Refresh
-            </button>
-            <button
-              class="btn-action btn-export"
-              onclick="exportTriple('SERVICE')"
-            >
-              <i class="fa fa-file-excel"></i> Export Laporan
-            </button>
-          </div>
+        <div class="header-actions">
+          <button
+            id="btn-mode-hapus-SERVICE"
+            class="btn-del"
+            onclick="toggleDeleteMode('SERVICE')"
+            style="background: #555"
+          >
+            <i class="fa fa-check-square"></i> Mode Hapus
+          </button>
+          <button
+            id="btn-confirm-hapus-SERVICE"
+            class="btn-del hidden"
+            onclick="executeBulkDelete('SERVICE')"
+            style="background: #ff3d00; animation: pulse 1s infinite"
+          >
+            <i class="fa fa-trash"></i> Hapus (<span id="count-hapus-SERVICE"
+              >0</span
+            >)
+          </button>
+
+          <button class="btn-action btn-refresh" onclick="loadData('SERVICE')">
+            <i class="fa fa-sync"></i> Refresh
+          </button>
+          <button
+            class="btn-action btn-export"
+            onclick="exportTriple('SERVICE')"
+          >
+            <i class="fa fa-file-excel"></i> Export
+          </button>
         </div>
         <div class="filter-card" style="border-left: 5px solid #00c853">
           <div class="grid-filter">
@@ -871,22 +914,38 @@
       </div>
 
       <div id="sec-exibhitum-data" class="hidden">
-        <div class="section-header">
-          <h2>Data Exibhitum & Pengesahan</h2>
-          <div class="header-actions">
-            <button
-              class="btn-action btn-refresh"
-              onclick="loadData('EXIBHITUM')"
-            >
-              <i class="fa fa-sync"></i> Refresh
-            </button>
-            <button
-              class="btn-action btn-export"
-              onclick="exportTriple('EXIBHITUM')"
-            >
-              <i class="fa fa-file-excel"></i> Export Laporan
-            </button>
-          </div>
+        <div class="header-actions">
+          <button
+            id="btn-mode-hapus-EXIBHITUM"
+            class="btn-del"
+            onclick="toggleDeleteMode('EXIBHITUM')"
+            style="background: #555"
+          >
+            <i class="fa fa-check-square"></i> Mode Hapus
+          </button>
+          <button
+            id="btn-confirm-hapus-EXIBHITUM"
+            class="btn-del hidden"
+            onclick="executeBulkDelete('EXIBHITUM')"
+            style="background: #ff3d00; animation: pulse 1s infinite"
+          >
+            <i class="fa fa-trash"></i> Hapus (<span id="count-hapus-EXIBHITUM"
+              >0</span
+            >)
+          </button>
+
+          <button
+            class="btn-action btn-refresh"
+            onclick="loadData('EXIBHITUM')"
+          >
+            <i class="fa fa-sync"></i> Refresh
+          </button>
+          <button
+            class="btn-action btn-export"
+            onclick="exportTriple('EXIBHITUM')"
+          >
+            <i class="fa fa-file-excel"></i> Export
+          </button>
         </div>
         <div
           class="filter-card"
@@ -949,6 +1008,124 @@
           </div>
         </div>
         <div id="pagination-EXIBHITUM" class="pagination-wrapper"></div>
+      </div>
+    </div>
+    <div
+      id="modal-smart-edit"
+      class="modal-overlay hidden"
+      style="
+        z-index: 9999;
+        padding-top: 50px;
+        align-items: flex-start;
+        overflow-y: auto;
+      "
+    >
+      <div
+        class="modal-box"
+        style="
+          width: 900px;
+          max-width: 95%;
+          text-align: left;
+          position: relative;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--gold);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+          "
+        >
+          <h3 style="margin: 0; color: var(--navy)">
+            <i class="fa fa-magic"></i> SMART BATCH EDIT
+          </h3>
+          <button
+            onclick="closeSmartEdit()"
+            style="
+              background: transparent;
+              border: none;
+              font-size: 20px;
+              cursor: pointer;
+              color: red;
+            "
+          >
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+
+        <div
+          style="
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #90caf9;
+          "
+        >
+          <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 14px">
+            <i class="fa fa-sync"></i> 1. DATA UMUM (Ubah Sekaligus)
+          </h4>
+          <div class="grid-form" style="grid-template-columns: 1fr 1fr 1fr 1fr">
+            <input type="hidden" id="smart-id-batch" />
+            <label
+              >Tanggal <input type="date" id="smart-date" class="form-control"
+            /></label>
+            <label
+              >Perusahaan
+              <input type="text" id="smart-company" class="form-control"
+            /></label>
+            <label
+              >Nama Kapal
+              <input type="text" id="smart-ship" class="form-control"
+            /></label>
+            <label
+              >PUP <input type="text" id="smart-pup" class="form-control"
+            /></label>
+          </div>
+        </div>
+
+        <h4 style="margin: 0 0 10px 0; color: var(--navy); font-size: 14px">
+          <i class="fa fa-list-ol"></i> 2. DAFTAR BUKU & NOMOR SURAT
+        </h4>
+
+        <div
+          style="
+            background: #fff3cd;
+            color: #856404;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            margin-bottom: 10px;
+          "
+        >
+          <i class="fa fa-exclamation-triangle"></i>
+          <b>PERINGATAN DOMINO:</b> Mengubah nomor surat di sini akan otomatis
+          <b>MENGGESER</b> nomor surat kapal lain yang urutannya berada di
+          setelahnya.
+        </div>
+
+        <div
+          id="smart-list-container"
+          style="
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+          "
+        ></div>
+
+        <div
+          class="modal-buttons"
+          style="margin-top: 20px; justify-content: flex-end"
+        >
+          <button class="btn-cancel" onclick="closeSmartEdit()">Batal</button>
+          <button class="btn-gold-save" onclick="saveSmartBatch()">
+            <i class="fa fa-save"></i> SIMPAN PERUBAHAN & GESER NOMOR
+          </button>
+        </div>
       </div>
     </div>
     <script src="script.js"></script>
