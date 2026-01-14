@@ -552,9 +552,6 @@ function forceLogout() {
     window.location.href = "index.html"; 
 }
 
-// PANGGIL INI DI DALAM document.addEventListener('DOMContentLoaded', ...)
-// initAutoLogout(); 
-
 // ====================================================================
 // 3. AUTHENTICATION (LOGIN, REGISTER, OTP)
 // ====================================================================
@@ -717,7 +714,10 @@ async function resetPasswordFinal() {
 // 4. PAGE INITIALIZATION & NAVIGATION
 // ====================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  initSmartSearch();
+   initAutoLogout(); 
+   resetActivityTimer();   
+   initSmartSearch();
+
   if (document.querySelector(".dashboard-page")) {
     initPenggunaDashboard();
     initAutoLogout();
