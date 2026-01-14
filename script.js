@@ -404,22 +404,156 @@ async function handleAnnualReport(btn) {
 }
 
 // ====================================================================
-// 2.5 AUTO LOGOUT & SESSION
+// FITUR 1: MONITORING CONTROLLER
 // ====================================================================
-let idleTime = 0;
-function resetIdleTimer() {
-  idleTime = 0;
+let monitoringDataCache = []; // Simpan data biar pagination ngebut
+let debounceTimer;
+
+function debouncedMonitoringLoad() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        loadMonitoringData(1);
+    }, 500); // Tunggu 0.5 detik setelah ngetik baru load
 }
+
+async function loadMonitoringData(page = 1) {
+    const tbody = document.getElementById("tbody-monitoring");
+    const bulan = document.getElementById("monFilterBulan").value;
+    const tahun = document.getElementById("monFilterTahun").value;
+    const search = document.getElementById("monSearch").value;
+
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Mengolah Data Lintas Dimensi...</td></tr>';
+
+    try {
+        // Panggil Backend
+        const res = await postData({
+            action: "getMonitoringData",
+            bulan: bulan,
+            tahun: tahun,
+            search: search
+        });
+
+        if (res.status === "SUCCESS") {
+            monitoringDataCache = res.data; // Simpan di cache global
+            renderMonitoringTable(page);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
+        }
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi.</td></tr>';
+    }
+}
+
+function renderMonitoringTable(page) {
+    const tbody = document.getElementById("tbody-monitoring");
+    tbody.innerHTML = "";
+
+    const limit = 10;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const pageData = monitoringDataCache.slice(start, end);
+
+    if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Tidak ada data layanan ditemukan.</td></tr>';
+        document.getElementById("pagination-MONITORING").innerHTML = "";
+        return;
+    }
+
+    let lastYear = null;
+    let lastMonth = null;
+    const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+
+    pageData.forEach((row, i) => {
+        // 1. Cek Separator TAHUN
+        if (lastYear !== null && row.tahun !== lastYear) {
+            tbody.innerHTML += `<tr class="row-separator-year"><td colspan="9">BATAS TAHUN ${lastYear} KE ${row.tahun}</td></tr>`;
+        }
+        
+        // 2. Cek Separator BULAN (Hanya jika dalam tahun yg sama atau ganti tahun)
+        // Reset lastMonth kalau ganti tahun
+        if (row.tahun !== lastYear) lastMonth = null; 
+
+        if (lastMonth !== null && row.bulan !== lastMonth) {
+            tbody.innerHTML += `<tr class="row-separator-month"><td colspan="9">DATA BULAN ${monthNames[row.bulan]}</td></tr>`;
+        }
+
+        const tr = `
+            <tr>
+                <td>${start + i + 1}</td>
+                <td>${row.tahun}</td>
+                <td>${monthNames[row.bulan]}</td>
+                <td style="font-weight:600; text-align:left;">${row.perusahaan}</td>
+                <td>${row.shsk}</td>
+                <td>${row.sert}</td>
+                <td>${row.psh}</td>
+                <td>${row.exib}</td>
+                <td>${row.total}</td>
+            </tr>
+        `;
+        tbody.innerHTML += tr;
+
+        lastYear = row.tahun;
+        lastMonth = row.bulan;
+    });
+
+    renderPagination("MONITORING", monitoringDataCache.length, page, limit);
+}
+
+// ====================================================================
+// FITUR 2: AUTO LOGOUT FORCE (1 JAM) - SILENT KILLER
+// ====================================================================
+const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 1 Jam (Ubah ke 10000 kalau mau tes 10 detik)
+const STORAGE_KEY_ACTIVITY = "shsk_last_activity";
+
 function initAutoLogout() {
-  setInterval(() => {
-    idleTime++;
-    if (idleTime >= 60) logout();
-  }, 60000);
-  window.onmousemove = resetIdleTimer;
-  window.onkeypress = resetIdleTimer;
-  window.onclick = resetIdleTimer;
-  window.onscroll = resetIdleTimer;
+    // 1. Cek saat halaman dimuat: Apakah sudah expired?
+    checkActivityStatus();
+
+    // 2. Pasang pendengar gerakan
+    // Setiap user gerak/klik, kita reset timer di LocalStorage
+    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, () => {
+            resetActivityTimer();
+        }, true);
+    });
+
+    // 3. Cek berkala tiap 1 menit (Jaga-jaga kalau browser didiamkan terbuka)
+    setInterval(checkActivityStatus, 60000); 
 }
+
+function resetActivityTimer() {
+    // Simpan waktu sekarang sebagai waktu terakhir aktif
+    localStorage.setItem(STORAGE_KEY_ACTIVITY, Date.now());
+}
+
+function checkActivityStatus() {
+    const lastActive = localStorage.getItem(STORAGE_KEY_ACTIVITY);
+    
+    // Kalau belum pernah login/aktif, set sekarang
+    if (!lastActive) {
+        resetActivityTimer();
+        return;
+    }
+
+    const diff = Date.now() - parseInt(lastActive);
+
+    // 🔥 LOGIKA TENDANGAN MAUT 🔥
+    if (diff > INACTIVITY_LIMIT_MS) {
+        forceLogout();
+    }
+}
+
+function forceLogout() {
+    // Hapus data sesi
+    localStorage.removeItem("shsk_user");
+    localStorage.removeItem(STORAGE_KEY_ACTIVITY);
+    
+    // Redirect langsung (Tanpa Ba-Bi-Bu)
+    window.location.href = "index.html"; 
+}
+
+// PANGGIL INI DI DALAM document.addEventListener('DOMContentLoaded', ...)
+// initAutoLogout(); 
 
 // ====================================================================
 // 3. AUTHENTICATION (LOGIN, REGISTER, OTP)
