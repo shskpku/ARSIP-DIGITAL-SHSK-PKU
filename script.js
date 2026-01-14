@@ -418,19 +418,20 @@ function debouncedMonitoringLoad() {
 
 async function loadMonitoringData(page = 1) {
     const tbody = document.getElementById("tbody-monitoring");
-    
-    // Ambil nilai filter (Kalau baru buka, nilainya pasti "")
+    if (!tbody) return;
+
+    // Ambil nilai filter
     const bulan = document.getElementById("monFilterBulan").value;
     const tahun = document.getElementById("monFilterTahun").value;
     const search = document.getElementById("monSearch").value;
 
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Mengolah Data Lintas Dimensi...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Memproses Data Pelayanan...</td></tr>';
 
     try {
         const res = await postData({
             action: "getMonitoringData",
-            bulan: bulan, // Kalau "" (kosong), Backend akan kirim SEMUA
-            tahun: tahun, // Kalau "" (kosong), Backend akan kirim SEMUA
+            bulan: bulan, // Jika kosong "", backend akan kirim semua
+            tahun: tahun, // Jika kosong "", backend akan kirim semua
             search: search
         });
 
@@ -441,11 +442,9 @@ async function loadMonitoringData(page = 1) {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
         }
     } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi ke database.</td></tr>';
     }
 }
-
-
 
 function renderMonitoringTable(page) {
     const tbody = document.getElementById("tbody-monitoring");
@@ -2946,60 +2945,26 @@ document.addEventListener("DOMContentLoaded", () => {
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
 // ====================================================================
 
-// 1. FUNGSI PINDAH HALAMAN & RESET TOTAL (NUCLEAR RESET)
 function showSection(id, el) {
-  // A. SEMBUNYIKAN SEMUA HALAMAN KONTEN
-  document
-    .querySelectorAll(".main-content > div")
-    .forEach((d) => d.classList.add("hidden"));
-
-  // B. MUNCULKAN HALAMAN YANG DITUJU
+  document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
   const targetSection = document.getElementById(`sec-${id}`);
-  if (targetSection) {
-    targetSection.classList.remove("hidden");
-  }
+  if (targetSection) targetSection.classList.remove("hidden");
 
-  // ============================================================
-  // 🧹 FASE BERSIH-BERSIH (MATIKAN SEMUA LAMPU LAMA)
-  // ============================================================
-
-  // Matikan status 'active' (background terang) dari SEMUA menu
-  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
-    m.classList.remove("active");
-  });
-
-  // Matikan status 'parent-active' (emas) & 'open' (panah) dari SEMUA Bapak Menu
+  // Bersih-bersih menu aktif
+  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => m.classList.remove("active"));
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
     m.classList.remove("open");
   });
-
-  // Tutup SEMUA laci submenu biar rapi
-  document.querySelectorAll(".submenu-container").forEach((c) => {
-    c.classList.remove("show");
-  });
-
-  // ============================================================
-  // ✨ FASE MENYALAKAN MENU BARU
-  // ============================================================
+  document.querySelectorAll(".submenu-container").forEach((c) => c.classList.remove("show"));
 
   if (el) {
-    // 1. Nyalakan menu yang diklik (Anak atau Dashboard)
     el.classList.add("active");
-
-    // 2. CEK: Apakah yang diklik itu SUBMENU (Anak)?
     if (el.classList.contains("submenu-item")) {
-      // Cari wadah bapaknya
       const container = el.closest(".submenu-container");
-
       if (container) {
-        // Buka laci bapaknya ini saja
         container.classList.add("show");
-
-        // Cari Tombol Bapaknya (Header Menu)
         const parentMenu = container.previousElementSibling;
-
-        // Nyalakan Bapaknya (Warna Emas + Panah Turun)
         if (parentMenu) {
           parentMenu.classList.add("parent-active");
           parentMenu.classList.add("open");
@@ -3008,24 +2973,24 @@ function showSection(id, el) {
     }
   }
 
-  // ============================================================
-  // 📥 LOGIKA LOAD DATA OTOMATIS
-  // ============================================================
-  if (id.includes("data")) {
-    const type = id.includes("shsk")
-      ? "SHSK"
-      : id.includes("sertifikasi")
-      ? "SERTIFIKASI"
-      : id.includes("service")
-      ? "SERVICE"
-      : "EXIBHITUM";
-    // Pastikan fungsi loadData sudah ada di script.js kamu
-    if (typeof loadData === "function") {
+  // --- 🔥 LOGIKA AUTO LOAD DATA 🔥 ---
+  if (id === "monitoring") {
+      // Reset filter ke default saat menu diklik
+      if(document.getElementById("monFilterBulan")) document.getElementById("monFilterBulan").value = "";
+      if(document.getElementById("monFilterTahun")) document.getElementById("monFilterTahun").value = "";
+      if(document.getElementById("monSearch")) document.getElementById("monSearch").value = "";
+      
+      // Load data otomatis (Muncul semua)
+      loadMonitoringData(1); 
+  } 
+  else if (id.includes("data")) {
+      const type = id.includes("shsk") ? "SHSK" : 
+                   id.includes("sertifikasi") ? "SERTIFIKASI" : 
+                   id.includes("service") ? "SERVICE" : "EXIBHITUM";
       loadData(type);
-    }
   }
 
-  // AUTO CLOSE SIDEBAR (KHUSUS TAMPILAN MOBILE)
+  // Mobile sidebar auto-close
   if (window.innerWidth <= 768) {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
