@@ -104,7 +104,7 @@ async function initExibhitumNumber() {
       let y = parseInt(res.startY);
       let year = res.year;
       // SIMPAN DATA KE GLOBAL VARIABLE
-      cachedLastNumber = `AL.531/${x}/${y}/KSOP.PKU.${year}`;
+      cachedLastNumber = `AL.531/${x}/${y}/KSOP.PKU/${year}`;
       console.log("Nomor Start dari Server:", cachedLastNumber);
 
       // TRIGGER UPDATE PERTAMA KALI (Biar kalau ada checkbox yg default checked langsung keisi)
@@ -788,7 +788,15 @@ async function updateExibChart(period, btn, type) {
   const res = await postData({ action: "getDashboardStats", period: period });
   if (res.status === "SUCCESS") {
     const d = res.data;
-    const labels = ["DECK", "MESIN", "ORB", "ORB TK. II", "RADIO", "SAMPAH", "BALLAST"];
+    const labels = [
+      "DECK",
+      "MESIN",
+      "ORB",
+      "ORB TK. II",
+      "RADIO",
+      "SAMPAH",
+      "BALLAST",
+    ];
     const dataSet =
       type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
     const color =
@@ -1050,20 +1058,38 @@ window.updateExibhitumForms = function () {
   if (!cachedLastNumber) return;
 
   const parts = cachedLastNumber.split("/");
+  // Format Baru: AL.531 / XX / YY / KSOP.PKU / 2026
+  // index array:   0      1    2       3        4
+
   let currentX = parseInt(parts[1]);
   let currentY = parseInt(parts[2]);
-  const suffix = parts[3];
+
+  // Ambil tahun secara dinamis dari data terakhir, atau pakai tahun sekarang
+  let currentYear = parts[4] || new Date().getFullYear();
 
   const countInput = document.getElementById("bulkCountExibhitum");
   const count = countInput ? parseInt(countInput.value) : 1;
 
-  // URUTAN PATEN (Sesuai SOP)
-  const bookTypes = ["DECK", "MESIN", "ORB", "ORB TK. II", "RADIO", "SAMPAH", "BALLAST"];
+  // URUTAN PATEN
+  const bookTypes = [
+    "DECK",
+    "MESIN",
+    "ORB",
+    "ORB TK. II",
+    "RADIO",
+    "SAMPAH",
+    "BALLAST",
+  ];
 
-  // Fungsi Helper Penomoran
+  // Fungsi Helper Penomoran (FORMAT BARU DENGAN GARIS MIRING)
   const getNextAndIncrement = () => {
     const pad = (num) => num.toString().padStart(2, "0");
-    const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
+
+    // 🔥 PERUBAHAN ADA DI SINI (Ganti titik jadi garis miring) 🔥
+    const numStr = `AL.531/${pad(currentX)}/${pad(
+      currentY
+    )}/KSOP.PKU/${currentYear}`;
+
     currentY++;
     if (currentY > 25) {
       currentX++;
@@ -1080,12 +1106,11 @@ window.updateExibhitumForms = function () {
     let htmlPsh = "";
     let htmlEx = "";
 
-    // --- FASE 1: PROSES PENGESAHAN DULUAN (PRIORITAS) ---
+    // FASE 1: PENGESAHAN
     bookTypes.forEach((b) => {
       const ck = document.querySelector(`input[name="check_PSH_${b}_${i}"]`);
       if (ck && ck.checked) {
         const nomer = getNextAndIncrement();
-        // Render HTML (TANPA READONLY -> BISA DIEDIT)
         htmlPsh += `
             <div style="margin-bottom:8px;">
                 <label style="font-size:11px; font-weight:bold; color:#ff9f43; display:block; margin-bottom:2px;">${b}</label>
@@ -1094,12 +1119,11 @@ window.updateExibhitumForms = function () {
       }
     });
 
-    // --- FASE 2: PROSES EXIBHITUM SETELAHNYA ---
+    // FASE 2: EXIBHITUM
     bookTypes.forEach((b) => {
       const ck = document.querySelector(`input[name="check_EX_${b}_${i}"]`);
       if (ck && ck.checked) {
         const nomer = getNextAndIncrement();
-        // Render HTML (TANPA READONLY -> BISA DIEDIT)
         htmlEx += `
             <div style="margin-bottom:8px;">
                 <label style="font-size:11px; font-weight:bold; color:var(--neon-blue); display:block; margin-bottom:2px;">${b}</label>
@@ -1108,7 +1132,7 @@ window.updateExibhitumForms = function () {
       }
     });
 
-    // 3. Update Tampilan ke Layar
+    // Update Tampilan
     if (htmlEx === "" && htmlPsh === "") {
       container.innerHTML =
         "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
@@ -1358,7 +1382,15 @@ function renderBulkForm(type) {
                       <div class="group-psh">
                         <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
                         <div class="book-grid-container">
-                        ${["DECK", "MESIN", "ORB", "ORB TK. II", "RADIO", "SAMPAH", "BALLAST"]
+                        ${[
+                          "DECK",
+                          "MESIN",
+                          "ORB",
+                          "ORB TK. II",
+                          "RADIO",
+                          "SAMPAH",
+                          "BALLAST",
+                        ]
                           .map(
                             (b) => `
                           <label class="book-checkbox">
@@ -1374,7 +1406,15 @@ function renderBulkForm(type) {
                     <div class="group-ex">
                       <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
                       <div class="book-grid-container">
-                      ${["DECK", "MESIN", "ORB", "ORB TK. II", "RADIO", "SAMPAH", "BALLAST"]
+                      ${[
+                        "DECK",
+                        "MESIN",
+                        "ORB",
+                        "ORB TK. II",
+                        "RADIO",
+                        "SAMPAH",
+                        "BALLAST",
+                      ]
                         .map(
                           (b) => `
                         <label class="book-checkbox">
@@ -1711,7 +1751,8 @@ async function handleBulkSubmit(type) {
         itemData.nomorSuratArray = nomorSuratArray;
 
         // Gabungan string untuk kompatibilitas tampilan tabel lama
-        itemData.jenisBuku = jenisBukuArray.join(", ");
+        itemData.jenisBuku = jenisBukuArray.join("\n");
+        itemData.nomorSurat = nomorSuratArray.join("\n");
 
         // Upload File
         itemData.files = [];
@@ -2832,7 +2873,7 @@ function toggleAccordion(element) {
   // Element adalah header yang diklik
   // Parent-nya adalah div class="accordion-item"
   const item = element.parentElement;
-  
+
   // Toggle class 'open' (CSS akan menangani display: block/none)
   item.classList.toggle("open");
 }
