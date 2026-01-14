@@ -435,9 +435,9 @@ async function loadMonitoringData() {
         });
 
         if (res.status === "SUCCESS") {
-            // Simpan hasil ke cache global agar bisa dipakai pagination tanpa narik data lagi
+            // 🔥 Simpan ke memori (Cache)
             monitoringDataCache = res.data; 
-            // Gambar halaman 1
+            // 🔥 Langsung tampilkan halaman 1
             renderMonitoringTable(1);
         } else {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
@@ -453,12 +453,11 @@ function renderMonitoringTable(page) {
     if (!tbody) return;
     
     tbody.innerHTML = "";
-
     const limit = 10;
     const start = (page - 1) * limit;
     const end = start + limit;
     
-    // Ambil potongan data dari cache sesuai halaman
+    // 🔥 Ambil potongan data dari memori sesuai halaman yang diklik
     const pageData = monitoringDataCache.slice(start, end);
 
     if (pageData.length === 0) {
@@ -472,7 +471,6 @@ function renderMonitoringTable(page) {
     const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
     pageData.forEach((row, i) => {
-        // Logika Batas Tahun & Bulan
         if (lastYear !== null && row.tahun !== lastYear) {
             tbody.innerHTML += `<tr class="row-separator-year"><td colspan="9">BATAS TAHUN ${lastYear} KE ${row.tahun}</td></tr>`;
         }
@@ -498,7 +496,7 @@ function renderMonitoringTable(page) {
         lastMonth = row.bulan;
     });
 
-    // Panggil fungsi pagination dengan target 'MONITORING_NAV'
+    // 🔥 Panggil pagination agar tombol halaman muncul
     renderPagination("MONITORING", monitoringDataCache.length, page, limit);
 }
 
@@ -794,21 +792,15 @@ function showSection(id, el) {
   // ============================================================
   // 🔥 LOGIKA PEMANGGIL DATA OTOMATIS 🔥
   // ============================================================
-  
-  // A. Jika Klik Menu MONITORING
-  if (id === "monitoring") {
-      // Pastikan filter visual diset ke "Semua" agar sinkron dengan data yang muncul
-      const fBul = document.getElementById("monFilterBulan");
-      const fTah = document.getElementById("monFilterTahun");
-      const fSea = document.getElementById("monSearch");
-      
-      if(fBul) fBul.value = "";
-      if(fTah) fTah.value = "";
-      if(fSea) fSea.value = "";
-      
-      // Langsung panggil data (Load data mentah/tanpa filter)
-      loadMonitoringData(1); 
-  } 
+  // Di dalam fungsi showSection bagian monitoring:
+if (id === "monitoring") {
+    if(document.getElementById("monFilterBulan")) document.getElementById("monFilterBulan").value = "";
+    if(document.getElementById("monFilterTahun")) document.getElementById("monFilterTahun").value = "";
+    if(document.getElementById("monSearch")) document.getElementById("monSearch").value = "";
+    
+    loadMonitoringData(); // Ini memicu penarikan data awal
+}
+
   // B. Jika Klik Menu DATA ARSIP LAINNYA
   else if (id.includes("data")) {
       const type = id.includes("shsk") ? "SHSK" : 
@@ -2653,8 +2645,8 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
 // FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
     if (type === 'MONITORING') {
-        // Jangan panggil loadMonitoringData (karena itu narik API), 
-        // tapi panggil renderMonitoringTable (Hanya ganti tampilan)
+        // 🔥 JANGAN panggil loadMonitoringData karena itu narik API lagi.
+        // Cukup panggil fungsi penggambar tabel dari cache yang sudah ada.
         renderMonitoringTable(pageNum);
         return;
     }
