@@ -752,49 +752,45 @@ function toggleSidebar() {
   document.getElementById("sidebar-overlay").classList.toggle("active");
 }
 
+// ====================================================================
+// NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
+// ====================================================================
+
 function showSection(id, el) {
   // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
   document
     .querySelectorAll(".main-content > div")
     .forEach((d) => d.classList.add("hidden"));
-  document.getElementById(`sec-${id}`).classList.remove("hidden");
+
+  // 2. MUNCULKAN HALAMAN YANG DITUJU
+  const targetSection = document.getElementById(`sec-${id}`);
+  if (targetSection) {
+    targetSection.classList.remove("hidden");
+  }
 
   // ============================================================
-  // 🧹 NUCLEAR RESET (BERSIH-BERSIH TOTAL)
+  // 🧹 FASE BERSIH-BERSIH (RESET MENU)
   // ============================================================
-
-  // Matikan semua lampu 'active' (warna background terang)
   document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
     m.classList.remove("active");
   });
-
-  // Matikan lampu 'parent-active' (emas) & 'open' (panah) pada Bapak Menu
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
     m.classList.remove("open");
   });
-
-  // Tutup SEMUA laci submenu dulu (biar rapi)
   document.querySelectorAll(".submenu-container").forEach((c) => {
     c.classList.remove("show");
   });
 
   // ============================================================
-  // ✨ NYALAKAN MENU BARU
+  // ✨ FASE MENYALAKAN MENU BARU
   // ============================================================
-
   if (el) {
-    // Nyalakan menu yang diklik
     el.classList.add("active");
-
-    // Jika yang diklik adalah ANAK (Submenu)
     if (el.classList.contains("submenu-item")) {
       const container = el.closest(".submenu-container");
       if (container) {
-        // Buka laci bapaknya ini saja
         container.classList.add("show");
-
-        // Nyalakan Bapaknya (Warna Emas + Panah Turun)
         const parentMenu = container.previousElementSibling;
         if (parentMenu) {
           parentMenu.classList.add("parent-active");
@@ -805,8 +801,10 @@ function showSection(id, el) {
   }
 
   // ============================================================
-  // 📥 LOAD DATA (JIKA PERLU)
+  // 📥 LOGIKA LOAD DATA OTOMATIS (INI YANG KURANG TADI!)
   // ============================================================
+  
+  // 1. Load Data Arsip (SHSK, Sertifikasi, dll)
   if (id.includes("data")) {
     const type = id.includes("shsk")
       ? "SHSK"
@@ -815,10 +813,20 @@ function showSection(id, el) {
       : id.includes("service")
       ? "SERVICE"
       : "EXIBHITUM";
-    loadData(type);
+    if (typeof loadData === "function") {
+      loadData(type);
+    }
+  }
+  
+  // 2. 🔥 Load Data Monitoring (TAMBAHAN PENTING) 🔥
+  else if (id === "monitoring") {
+      // Pastikan fungsi ini ada sebelum dipanggil
+      if (typeof loadMonitoringData === "function") {
+          loadMonitoringData(1); 
+      }
   }
 
-  // TUTUP SIDEBAR OTOMATIS (DI HP)
+  // Auto Close Sidebar di HP
   if (window.innerWidth <= 768) {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
