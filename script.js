@@ -435,10 +435,8 @@ async function loadMonitoringData() {
         });
 
         if (res.status === "SUCCESS") {
-            // 🔥 Simpan ke memori (Cache)
-            monitoringDataCache = res.data; 
-            // 🔥 Langsung tampilkan halaman 1
-            renderMonitoringTable(1);
+            monitoringDataCache = res.data; // Simpan ke memori
+            renderMonitoringTable(1); // Tampilkan halaman pertama
         } else {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
         }
@@ -446,7 +444,6 @@ async function loadMonitoringData() {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi ke database.</td></tr>';
     }
 }
-
 
 function renderMonitoringTable(page) {
     const tbody = document.getElementById("tbody-monitoring");
@@ -456,47 +453,31 @@ function renderMonitoringTable(page) {
     const limit = 10;
     const start = (page - 1) * limit;
     const end = start + limit;
-    
-    // 🔥 Ambil potongan data dari memori sesuai halaman yang diklik
-    const pageData = monitoringDataCache.slice(start, end);
+    const pageData = monitoringDataCache.slice(start, end); // Ambil potongan data
 
     if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Tidak ada data layanan ditemukan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Tidak ada data ditemukan.</td></tr>';
         document.getElementById("pagination-MONITORING").innerHTML = "";
         return;
     }
 
-    let lastYear = null;
-    let lastMonth = null;
-    const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-
+    // Gambar baris tabel
     pageData.forEach((row, i) => {
-        if (lastYear !== null && row.tahun !== lastYear) {
-            tbody.innerHTML += `<tr class="row-separator-year"><td colspan="9">BATAS TAHUN ${lastYear} KE ${row.tahun}</td></tr>`;
-        }
-        if (row.tahun !== lastYear) lastMonth = null; 
-        if (lastMonth !== null && row.bulan !== lastMonth) {
-            tbody.innerHTML += `<tr class="row-separator-month"><td colspan="9">DATA BULAN ${monthNames[row.bulan]}</td></tr>`;
-        }
-
         tbody.innerHTML += `
             <tr>
                 <td>${start + i + 1}</td>
                 <td>${row.tahun}</td>
-                <td>${monthNames[row.bulan]}</td>
-                <td style="font-weight:600; text-align:left;">${row.perusahaan}</td>
+                <td>${row.bulan}</td>
+                <td style="text-align:left;">${row.perusahaan}</td>
                 <td>${row.shsk}</td>
                 <td>${row.sert}</td>
                 <td>${row.psh}</td>
                 <td>${row.exib}</td>
                 <td>${row.total}</td>
-            </tr>
-        `;
-        lastYear = row.tahun;
-        lastMonth = row.bulan;
+            </tr>`;
     });
 
-    // 🔥 Panggil pagination agar tombol halaman muncul
+    // Jalankan navigasi angka halaman
     renderPagination("MONITORING", monitoringDataCache.length, page, limit);
 }
 
@@ -2586,10 +2567,7 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
 
-  // Deteksi limit: Exibhitum 25, Monitoring 10, Lainnya 10
   const limit = limitCustom || (type === "EXIBHITUM" ? 25 : 10);
-  
-  // Deteksi Data Source
   const totalRows = totalCustom !== null ? totalCustom : filteredData[type].length;
   const current = pageCustom !== null ? pageCustom : currentPage[type];
   const totalPages = Math.ceil(totalRows / limit);
@@ -2599,45 +2577,21 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
     return;
   }
 
-  // Tentukan Fungsi Navigasi: Monitoring pakai 'loadMonitoringData', sisanya 'goToPage'
-  const funcName = type === "MONITORING" ? "loadMonitoringData" : "goToPage";
+  // SEMUA tipe data (termasuk MONITORING) sekarang memanggil goToPage
+  const funcName = "goToPage"; 
 
   let html = "";
   const prevDisabled = current === 1 ? "disabled" : "";
   html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="${funcName}('${type}', ${current - 1})"><i class="fa fa-chevron-left"></i></button>`;
 
-  const delta = 2;
-  const range = [];
-  const rangeWithDots = [];
-  let l;
-
   for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || (i >= current - delta && i <= current + delta)) {
-      range.push(i);
-    }
+    const activeClass = i === current ? "active" : "";
+    html += `<button class="page-btn ${activeClass}" onclick="${funcName}('${type}', ${i})">${i}</button>`;
   }
-  for (let i of range) {
-    if (l) {
-      if (i - l === 2) rangeWithDots.push(l + 1);
-      else if (i - l !== 1) rangeWithDots.push("...");
-    }
-    rangeWithDots.push(i);
-    l = i;
-  }
-
-  rangeWithDots.forEach((i) => {
-    if (i === "...") {
-      html += `<span style="padding: 0 5px; color:#aaa;">...</span>`;
-    } else {
-      const activeClass = i === current ? "active" : "";
-      html += `<button class="page-btn ${activeClass}" onclick="${funcName}('${type}', ${i})">${i}</button>`;
-    }
-  });
 
   const nextDisabled = current === totalPages ? "disabled" : "";
   html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="${funcName}('${type}', ${current + 1})"><i class="fa fa-chevron-right"></i></button>`;
-  html += `<span style="margin-left:10px; font-size:12px; color:#666;"><b>${totalRows}</b> Data</span>`;
-
+  
   container.innerHTML = html;
 }
 
@@ -2645,9 +2599,7 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
 // FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
     if (type === 'MONITORING') {
-        // 🔥 JANGAN panggil loadMonitoringData karena itu narik API lagi.
-        // Cukup panggil fungsi penggambar tabel dari cache yang sudah ada.
-        renderMonitoringTable(pageNum);
+        renderMonitoringTable(pageNum); // Hanya ganti tampilan tanpa loading API
         return;
     }
 
