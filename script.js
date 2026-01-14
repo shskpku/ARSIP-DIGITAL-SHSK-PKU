@@ -67,7 +67,6 @@ const CERT_CODES = {
 };
 // GLOBAL VARIABLE UNTUK NOMOR SURAT
 let cachedLastNumber = null;
-let globalClickQueue = [];
 
 // FUNGSI GENERATOR NOMOR VERSI JS (MIRROR BACKEND)
 function generateNextNumberJS(lastNumberStr, offset = 1) {
@@ -769,13 +768,13 @@ async function updateExibChart(period, btn, type) {
       .forEach((b) => b.classList.remove("active"));
   else
     document
-      .querySelectorAll(".filter-btn-psh")
+              .querySelectorAll(".filter-btn-psh")
       .forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
   const res = await postData({ action: "getDashboardStats", period: period });
   if (res.status === "SUCCESS") {
     const d = res.data;
-    const labels = ["DECK", "MESIN", "RADIO", "ORB", "SAMPAH", "BALLAST"];
+    const labels = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
     const dataSet =
       type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
     const color =
@@ -1030,47 +1029,36 @@ window.renderCertForms = function (index) {
 };
 
 // ====================================================================
-// CORE: GENERATOR NOMOR URUT EXIBHITUM (GLOBAL SEQUENCE)
+// CORE: GENERATOR NOMOR URUT EXIBHITUM 
 // ====================================================================
-window.updateExibhitumForms = function (idx, el) {
-  if (el) {
-    const uniqueKey = `${el.value}_${idx}`; 
-    
-    if (el.checked) {
-      if (!globalClickQueue.includes(uniqueKey)) {
-        globalClickQueue.push(uniqueKey);
-      }
-    } else {
-      globalClickQueue = globalClickQueue.filter(k => k !== uniqueKey);
-    }
-  }
-
-  // 2. GENERATOR NOMOR
+window.updateExibhitumForms = function () {
+  // 1. Ambil Data Awal
   if (!cachedLastNumber) return;
+
   const parts = cachedLastNumber.split('/');
   let currentX = parseInt(parts[1]); 
   let currentY = parseInt(parts[2]); 
   const suffix = parts[3];
 
+  const countInput = document.getElementById("bulkCountExibhitum");
+  const count = countInput ? parseInt(countInput.value) : 1;
+  
+  // URUTAN PATEN (Sesuai SOP)
+  const bookTypes = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
+
+  // Fungsi Helper Penomoran
   const getNextAndIncrement = () => {
        const pad = (num) => num.toString().padStart(2, '0');
        const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
        currentY++;
-       if (currentY > 25) { currentX++; currentY = 1; }
+       if (currentY > 25) {
+         currentX++;
+         currentY = 1;
+       }
        return numStr;
   };
 
-  // 3. GENERATE NOMOR UNTUK SEMUA ITEM DI ANTRIAN
-  let numberMap = {};
-  globalClickQueue.forEach(key => {
-    numberMap[key] = getNextAndIncrement();
-  });
-
-  // 4. RENDER TAMPILAN (LOOPING SEMUA FORM)
-  const countInput = document.getElementById("bulkCountExibhitum");
-  const count = countInput ? parseInt(countInput.value) : 1;
-  const bookTypes = ["DECK", "MESIN", "RADIO", "ORB", "SAMPAH", "BALLAST"];
-
+  // 2. LOOP SETIAP FORM (Form 1, Form 2, dst)
   for (let i = 1; i <= count; i++) {
     const container = document.getElementById(`dynamic-nomor-${i}`);
     if (!container) continue;
@@ -1078,35 +1066,35 @@ window.updateExibhitumForms = function (idx, el) {
     let htmlPsh = "";
     let htmlEx = "";
 
-    // Render PENGESAHAN (Kiri)
+    // --- FASE 1: PROSES PENGESAHAN DULUAN (PRIORITAS) ---
     bookTypes.forEach(b => {
-      const val = `PSH. ${b}`;
-      const keyQueue = `${val}_${i}`;
-      
-      // Cek apakah item ini ada di Map Nomor
-      if (numberMap[keyQueue]) {
+      const ck = document.querySelector(`input[name="check_PSH_${b}_${i}"]`);
+      if (ck && ck.checked) {
+        const nomer = getNextAndIncrement();
+        // Render HTML (TANPA READONLY -> BISA DIEDIT)
         htmlPsh += `
             <div style="margin-bottom:8px;">
                 <label style="font-size:11px; font-weight:bold; color:#ff9f43; display:block; margin-bottom:2px;">${b}</label>
-                <input type="text" name="nomorSurat_PSH.${b}_${i}" class="form-control" value="${numberMap[keyQueue]}" style="font-size:12px; padding:6px; font-weight:bold;">
+                <input type="text" name="nomorSurat_PSH.${b}_${i}" class="form-control" value="${nomer}" style="font-size:12px; padding:6px; font-weight:bold;">
             </div>`;
       }
     });
 
-    // Render EXIBHITUM (Kanan)
+    // --- FASE 2: PROSES EXIBHITUM SETELAHNYA ---
     bookTypes.forEach(b => {
-      const val = `EX. ${b}`;
-      const keyQueue = `${val}_${i}`;
-      if (numberMap[keyQueue]) {
+      const ck = document.querySelector(`input[name="check_EX_${b}_${i}"]`);
+      if (ck && ck.checked) {
+        const nomer = getNextAndIncrement();
+        // Render HTML (TANPA READONLY -> BISA DIEDIT)
         htmlEx += `
             <div style="margin-bottom:8px;">
                 <label style="font-size:11px; font-weight:bold; color:var(--neon-blue); display:block; margin-bottom:2px;">${b}</label>
-                <input type="text" name="nomorSurat_EX.${b}_${i}" class="form-control" value="${numberMap[keyQueue]}" style="font-size:12px; padding:6px; font-weight:bold;">
+                <input type="text" name="nomorSurat_EX.${b}_${i}" class="form-control" value="${nomer}" style="font-size:12px; padding:6px; font-weight:bold;">
             </div>`;
       }
     });
 
-    // Update HTML
+    // 3. Update Tampilan ke Layar
     if (htmlEx === "" && htmlPsh === "") {
         container.innerHTML = "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
     } else {
@@ -1158,9 +1146,6 @@ window.handleFileSelect = function (input) {
 // FUNGSI RENDER FORM (PERBAIKAN V13.2)
 // ====================================================================
 function renderBulkForm(type) {
-  if (type === "EXIBHITUM") {
-     globalClickQueue = []; 
-  }
   let countSelectId, containerId;
   if (type === "SHSK") {
     countSelectId = "bulkCountSHSK";
@@ -1349,39 +1334,29 @@ function renderBulkForm(type) {
             <div class="accordion-body">
                 <div class="service-selection-box">
                     <div class="exib-grid-wrapper" style="display:grid; grid-template-columns: 1fr 1fr; gap: 25px;">
-                        
-                        <div class="group-psh">
-    <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
-    <div class="book-grid-container">
-        ${["DECK", "MESIN", "RADIO", "ORB", "SAMPAH", "BALLAST"]
-          .map(
-            (b) => `
-            <label class="book-checkbox">
-                <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms(${i}, this)">
-                <div class="book-ui">${b}</div>
-            </label>
-        `
-          )
-          .join("")}
-    </div>
-</div>
+                      <div class="group-psh">
+                        <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
+                        <div class="book-grid-container">
+                        ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"].map(b => `
+                          <label class="book-checkbox">
+                          <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms()">
+                          <div class="book-ui">${b}</div>
+                          </label>
+                        `).join("")}
+                      </div>
+                    </div>
 
-<div class="group-ex">
-    <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
-    <div class="book-grid-container">
-        ${["DECK", "MESIN", "RADIO", "ORB", "SAMPAH", "BALLAST"]
-          .map(
-            (b) => `
-            <label class="book-checkbox">
-                <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms(${i}, this)">
-                <div class="book-ui">${b}</div>
-            </label>
-        `
-          )
-          .join("")}
-    </div>
-</div>
-
+                    <div class="group-ex">
+                      <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
+                      <div class="book-grid-container">
+                      ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"].map(b => `
+                        <label class="book-checkbox">
+                        <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms()">
+                        <div class="book-ui">${b}</div>
+                        </label>
+                      `).join("")}
+                      </div>
+                    </div>
                     </div>
                 </div>
                 <div id="dynamic-nomor-${i}" style="margin-top:15px;"></div>
@@ -1809,7 +1784,7 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
 }
 
 // ====================================================================
-// 1. FUNGSI EDIT DATA (V13.7 - DEFAULT LOCKED / BUKA PAKAI TOMBOL)
+// 1. FUNGSI EDIT DATA
 // ====================================================================
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
@@ -2183,23 +2158,19 @@ async function loadData(type) {
         if (dateA < dateB) return 1;
       }
 
-      // 2. Secondary (Untuk Exibhitum: Sort by Number DESCENDING)
+      // 2. Secondary 
       if (type === "EXIBHITUM") {
         const getVal = (str) => {
           try {
             let parts = String(str).split("/");
-            // Format: AL.531/X/Y/... -> X*1000 + Y
-            // Contoh: 02/20 -> 2020, 01/01 -> 1001
             return parseInt(parts[1]) * 1000 + parseInt(parts[2]);
           } catch (e) {
             return 0;
           }
         };
 
-        //  INI (DIBALIK: b - a) 
         return getVal(b["PENOMORAN"]) - getVal(a["PENOMORAN"]);
       } else {
-        // Untuk tipe lain (SHSK, dll) tetap urut nomor input (Ascending)
         const noA = parseInt(a["NO_URUT"]) || 0;
         const noB = parseInt(b["NO_URUT"]) || 0;
         return noA - noB;
@@ -2305,9 +2276,7 @@ function renderTable(type) {
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
 
-  // 🔥 LOGIKA BARIS: Kalau Exibhitum 25, Lainnya 10 🔥
   const limit = type === "EXIBHITUM" ? 25 : 10;
-
   const start = (currentPage[type] - 1) * limit;
   const pageData = filteredData[type].slice(start, start + limit);
 
@@ -2319,9 +2288,8 @@ function renderTable(type) {
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-    let tr = `<tr><td>${start + i + 1}</td>`; // Nomor urut tabel (visual)
+    let tr = `<tr><td>${start + i + 1}</td>`; 
 
-    // ... (Bagian render kolom di bawah ini TETAP SAMA dengan kodemu) ...
     if (type === "SHSK") {
       tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${
         row["TANDA_PENDAFTARAN"]
@@ -2372,17 +2340,15 @@ function renderTable(type) {
   renderPagination(type);
 }
 // ====================================================================
-// FUNGSI PAGINATION (MODEL SMART: 1 ... 5 6 7 ... 10)
+// FUNGSI PAGINATION 
 // ====================================================================
 function renderPagination(type) {
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
 
-  // 🔥 LOGIKA BARIS: 25 vs 10 🔥
   const limit = type === "EXIBHITUM" ? 25 : 10;
-
   const totalRows = filteredData[type].length;
-  const totalPages = Math.ceil(totalRows / limit); // Hitung total halaman
+  const totalPages = Math.ceil(totalRows / limit); 
   const current = currentPage[type];
 
   if (totalPages <= 1) {
@@ -2439,9 +2405,7 @@ function renderPagination(type) {
 
 // FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
-  // 🔥 LOGIKA BARIS: 25 vs 10 🔥
   const limit = type === "EXIBHITUM" ? 25 : 10;
-
   const totalRows = filteredData[type].length;
   const totalPages = Math.ceil(totalRows / limit);
 
@@ -2661,10 +2625,7 @@ function initCinematic() {
   // Hanya jalankan animasi jika elemen intro ada
   const intro = document.getElementById("cinematic-intro");
   if (intro) {
-    // Timer 3.5 detik untuk slide up (sesuai CSS)
     setTimeout(() => {
-      // Intro akan hilang otomatis lewat CSS animation 'slideUp'
-      // Tapi kita bisa tambahkan logika cleanup jika perlu
       console.log("Welcome to SHSK Digital System");
     }, 3500);
   }
@@ -2674,7 +2635,6 @@ function openLoginModal() {
   const modal = document.getElementById("login-modal-overlay");
   if (modal) {
     modal.classList.remove("hidden");
-    // Optional: Reset form state saat dibuka
     document.getElementById("passPetugas").value = "";
     document.getElementById("passPengguna").value = "";
   }
@@ -2697,14 +2657,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Jalankan fungsi sync secara paralel (Biar cepat)
     Promise.all([
-      postData({ action: "getDataSertifikasi" }), // Ambil Perusahaan & Bahan
-      postData({ action: "getDataSHSK" }), // Ambil Pemilik
-      postData({ action: "getDataService" }), // Ambil Service Station
-      postData({ action: "getDataExibhitum" }), // Ambil Perusahaan Exibhitum
+      postData({ action: "getDataSertifikasi" }), 
+      postData({ action: "getDataSHSK" }), 
+      postData({ action: "getDataService" }), 
+      postData({ action: "getDataExibhitum" }), 
     ])
       .then((results) => {
-        // results[0] = Sertifikasi, results[1] = SHSK, dst...
-
         const [resSert, resSHSK, resServ, resExib] = results;
 
         // 1. Masukkan Data Sertifikasi (Perusahaan & Bahan Kapal)
@@ -2723,8 +2681,7 @@ document.addEventListener("DOMContentLoaded", () => {
           updateSmartData(resExib.data, "EXIBHITUM");
 
         console.log("✅ Auto-Sync Selesai! Database Dropdown Siap Digunakan.");
-        // Opsional: Tampilkan notifikasi kecil kalau mau
-        // showPopup("Database Perusahaan Terupdate!", "success");
+
       })
       .catch((err) => {
         console.error("Gagal Auto-Sync:", err);
@@ -2732,4 +2689,4 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// --- END SCRIPT.JS V13.1 ---
+// --- END SCRIPT.JS V15.3 ---
