@@ -219,7 +219,23 @@ function formatDate(dateStr) {
 }
 
 function formatDateForInput(dateStr) {
-  if (!dateStr || dateStr === "-") return "";
+  // Kalau kosong, kembalikan kosong
+  if (!dateStr || dateStr === "-" || dateStr === "") return "";
+
+  const s = String(dateStr).trim();
+
+  // KASUS 1: Format dari Sheet (dd/mm/yyyy) -> misal: 12/01/2026
+  // Kita harus ubah jadi yyyy-mm-dd biar Form Edit mau membacanya
+  if (s.includes("/")) {
+    const parts = s.split("/");
+    // parts[0]=12, parts[1]=01, parts[2]=2026
+    if (parts.length === 3) {
+      // Balik jadi Tahun-Bulan-Tanggal
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+  }
+
+  // KASUS 2: Format Text Indo (12 Januari 2026) - Jaga-jaga data lama
   const monthsIndo = {
     Januari: "01",
     Februari: "02",
@@ -234,16 +250,27 @@ function formatDateForInput(dateStr) {
     November: "11",
     Desember: "12",
   };
-  if (dateStr.includes(" ")) {
-    const parts = dateStr.split(" ");
-    if (parts.length === 3) {
-      const m = monthsIndo[parts[1]] || "01";
-      return `${parts[2]}-${m}-${parts[0]}`;
+
+  if (s.includes(" ")) {
+    const parts = s.split(" ");
+    if (parts.length >= 3) {
+      const monthStr = parts[1].replace(/[^a-zA-Z]/g, "");
+      const month = monthsIndo[monthStr] || "01";
+      // Balik jadi Tahun-Bulan-Tanggal
+      return `${parts[2]}-${month}-${parts[0].padStart(2, "0")}`;
     }
   }
+
+  // KASUS 3: Format ISO Default
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "";
-  return d.toISOString().split("T")[0];
+  if (!isNaN(d.getTime())) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  return "";
 }
 
 async function postData(data) {
