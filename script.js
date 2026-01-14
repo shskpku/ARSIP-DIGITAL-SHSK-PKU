@@ -761,100 +761,51 @@ async function initCharts(p = "year") {
   });
 }
 
-// ====================================================================
-// UPDATE GRAFIK & KOTAK NAVY DI DASHBOARD
-// ====================================================================
-async function updateExibChart(filter, btn, chartType) {
-  // 1. Atur Tampilan Tombol Aktif
-  if (btn) {
-    const group = btn.parentElement;
-    group
-      .querySelectorAll("button")
+async function updateExibChart(period, btn, type) {
+  if (type === "ex")
+    document
+      .querySelectorAll(".filter-btn-ex")
       .forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
-
-  // 2. Tentukan Label Filter untuk Judul Navy Box
-  let labelFilter = "";
-  const currentYear = new Date().getFullYear();
-
-  if (filter === "today") labelFilter = "HARI INI";
-  else if (filter === "week") labelFilter = "MINGGU INI";
-  else if (filter === "month") labelFilter = "BULAN INI";
-  else labelFilter = `TAHUN ${currentYear}`;
-
-  // 3. Ambil Data dari Server
-  // Kita request data statistik
-  const res = await postData({ action: "getDashboardStats", filter: filter });
-
+  else
+    document
+      .querySelectorAll(".filter-btn-psh")
+      .forEach((b) => b.classList.remove("active"));
+  btn.classList.add("active");
+  const res = await postData({ action: "getDashboardStats", period: period });
   if (res.status === "SUCCESS") {
-    const dataEx = res.ex; // Array angka Exibhitum [Deck, Mesin, ...]
-    const dataPsh = res.psh; // Array angka Pengesahan [Deck, Mesin, ...]
-
-    // =======================================================
-    // 🔥 UPDATE KOTAK NAVY (REKAP DATA) DI SINI 🔥
-    // =======================================================
-
-    // Hitung Total dari Array (Sum)
-    const totalEx = dataEx.reduce((a, b) => a + b, 0);
-    const totalPsh = dataPsh.reduce((a, b) => a + b, 0);
-    const grandTotal = totalEx + totalPsh;
-
-    // Update Angka di HTML
-    const navyContainer = document.getElementById("dashboard-summary-navy");
-    if (navyContainer) {
-      navyContainer.classList.remove("hidden");
-      document.getElementById(
-        "navy-title-text"
-      ).innerText = `REKAP DATA ${labelFilter}`;
-
-      // Animasi angka (Optional) atau langsung text
-      document.getElementById("navy-count-psh").innerText = totalPsh;
-      document.getElementById("navy-count-ex").innerText = totalEx;
-      document.getElementById("navy-count-total").innerText = grandTotal;
-    }
-
-    // =======================================================
-    // LANJUT UPDATE GRAFIK SEPERTI BIASA
-    // =======================================================
-
-    // Update Grafik Exibhitum
-    if (window.chartExInstance) window.chartExInstance.destroy();
-    const ctxEx = document.getElementById("chartExibhitum").getContext("2d");
-    window.chartExInstance = new Chart(ctxEx, {
+    const d = res.data;
+    const labels = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
+    const dataSet =
+      type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
+    const color =
+      type === "ex" ? "rgba(0, 243, 255, 0.7)" : "rgba(255, 159, 67, 0.7)";
+    const canvasId = type === "ex" ? "chartExibhitum" : "chartPengesahan";
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    if (type === "ex" && exChartInstance) exChartInstance.destroy();
+    if (type === "psh" && pshChartInstance) pshChartInstance.destroy();
+    const chartConfig = {
       type: "bar",
       data: {
-        labels: ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"],
+        labels: labels,
         datasets: [
           {
-            label: "Exibhitum",
-            data: dataEx,
-            backgroundColor: "#00d2d3", // Cyan Neon
-            borderRadius: 5,
+            label: "Jumlah Buku",
+            data: dataSet,
+            backgroundColor: color,
+            borderWidth: 1,
+            borderRadius: 4,
           },
         ],
       },
-      options: { responsive: true, maintainAspectRatio: false },
-    });
-
-    // Update Grafik Pengesahan
-    if (window.chartPshInstance) window.chartPshInstance.destroy();
-    const ctxPsh = document.getElementById("chartPengesahan").getContext("2d");
-    window.chartPshInstance = new Chart(ctxPsh, {
-      type: "bar",
-      data: {
-        labels: ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"],
-        datasets: [
-          {
-            label: "Pengesahan",
-            data: dataPsh,
-            backgroundColor: "#ff9f43", // Orange Gold
-            borderRadius: 5,
-          },
-        ],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
       },
-      options: { responsive: true, maintainAspectRatio: false },
-    });
+    };
+    if (type === "ex") exChartInstance = new Chart(ctx, chartConfig);
+    else pshChartInstance = new Chart(ctx, chartConfig);
   }
 }
 
