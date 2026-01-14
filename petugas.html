@@ -96,6 +96,10 @@
           <i class="fa fa-chart-pie"></i> Dashboard
         </div>
 
+        <div class="menu-item" onclick="showSection('monitoring', this)">
+          <i class="fa fa-desktop"></i> Monitoring
+        </div>
+
         <div class="menu-item has-submenu" onclick="toggleSubmenu('sub-shsk')">
           <i class="fa fa-ship"></i> Status Hukum Kapal
           <i class="fa fa-chevron-down arrow-icon"></i>
@@ -423,6 +427,58 @@
           </div>
         </div>
       </div>
+      <div id="sec-monitoring" class="hidden">
+    <div class="section-header">
+        <h2><i class="fa fa-chart-line"></i> MONITORING LAYANAN</h2>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <select id="monFilterBulan" class="form-control" onchange="loadMonitoringData(1)">
+                <option value="">Semua Bulan</option>
+                <option value="1">Januari</option>
+                <option value="12">Desember</option>
+            </select>
+            <select id="monFilterTahun" class="form-control" onchange="loadMonitoringData(1)">
+                <option value="">Semua Tahun</option>
+                <script>
+                    for(let y=2024; y<=2030; y++) document.write(`<option value="${y}">${y}</option>`);
+                </script>
+            </select>
+        </div>
+    </div>
+
+    <div class="filter-card" style="border-left: 5px solid #673ab7; margin-bottom:15px;">
+        <div style="display:flex; width:100%;">
+            <i class="fa fa-search" style="padding:10px; color:#666;"></i>
+            <input type="text" id="monSearch" class="form-control" 
+                   placeholder="Ketik Nama Perusahaan / Pemilik untuk filter otomatis..." 
+                   style="border:none; outline:none; font-size:16px;"
+                   onkeyup="debouncedMonitoringLoad()"> 
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="data-table" id="table-monitoring">
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>TAHUN</th>
+                        <th>BULAN</th>
+                        <th>NAMA PERUSAHAAN</th>
+                        <th>STATUS HUKUM</th>
+                        <th>SERTIFIKASI</th>
+                        <th>PENGESAHAN</th>
+                        <th>EXIBHITUM</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-monitoring">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="pagination-MONITORING" class="pagination-wrapper"></div>
+</div>
 
       <div id="sec-shsk-input" class="hidden">
         <div class="section-header">
@@ -1131,3 +1187,4 @@
     <script src="script.js"></script>
   </body>
 </html>
+
