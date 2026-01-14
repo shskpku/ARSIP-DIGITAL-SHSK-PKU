@@ -1858,6 +1858,13 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
 // ====================================================================
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
+  const noUrut = rowData["NO_URUT"] || rowData["NO"];
+
+  // 🔥 KHUSUS EXIBHITUM PAKAI SMART EDIT 🔥
+  if (type === "EXIBHITUM") {
+    openSmartEditModal(noUrut);
+    return;
+  }
   let formId, countId;
 
   // 1. Buka Section Input
@@ -2358,7 +2365,17 @@ function renderTable(type) {
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-    let tr = `<tr><td>${start + i + 1}</td>`;
+    // Ambil ID Unik (NO_URUT)
+    const uniqueId = row["NO_URUT"] || row["NO URUT"] || row["NO"];
+
+    let tr = `<tr>`;
+
+    // 🔥 TAMBAHAN: KOLOM CHECKBOX (Default Hidden) 🔥
+    tr += `<td class="col-check hidden">
+             <input type="checkbox" class="bulk-check" value="${uniqueId}" onchange="updateDeleteCount('${type}')">
+           </td>`;
+
+    tr += `<td>${start + i + 1}</td>`;
 
     if (type === "SHSK") {
       tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${
@@ -2878,4 +2895,202 @@ function toggleAccordion(element) {
   item.classList.toggle("open");
 }
 
+// ====================================================================
+// FITUR 1: BULK DELETE (HAPUS MASSAL)
+// ====================================================================
+let isDeleteMode = false;
+
+function toggleDeleteMode(type) {
+  isDeleteMode = !isDeleteMode;
+  const btn = document.getElementById(`btn-mode-hapus-${type}`);
+  const confirmBtn = document.getElementById(`btn-confirm-hapus-${type}`);
+
+  // Toggle Kolom Checkbox di Tabel
+  const checkCols = document.querySelectorAll(
+    "#table-" + type.toLowerCase() + " .col-check"
+  );
+
+  if (isDeleteMode) {
+    btn.innerHTML = '<i class="fa fa-times"></i> Batal';
+    btn.style.background = "#666";
+    confirmBtn.classList.remove("hidden");
+    checkCols.forEach((el) => el.classList.remove("hidden"));
+  } else {
+    btn.innerHTML = '<i class="fa fa-check-square"></i> Mode Hapus';
+    btn.style.background = "#555";
+    confirmBtn.classList.add("hidden");
+    checkCols.forEach((el) => el.classList.add("hidden"));
+    // Uncheck semua
+    document
+      .querySelectorAll(".bulk-check")
+      .forEach((cb) => (cb.checked = false));
+    updateDeleteCount(type);
+  }
+}
+
+function updateDeleteCount(type) {
+  const count = document.querySelectorAll(
+    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+  ).length;
+  document.getElementById(`count-hapus-${type}`).innerText = count;
+}
+
+async function executeBulkDelete(type) {
+  const checked = document.querySelectorAll(
+    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+  );
+  if (checked.length === 0) return showPopup("Pilih data dulu!", "error");
+
+  if (!confirm(`Yakin hapus ${checked.length} data ini? Permanen lho!`)) return;
+
+  const ids = Array.from(checked).map((cb) => cb.value);
+  const btn = document.getElementById(`btn-confirm-hapus-${type}`);
+  const oriText = btn.innerHTML;
+
+  btn.innerHTML = "Menghapus...";
+  btn.disabled = true;
+
+  try {
+    const res = await postData({
+      action: "deleteBulkData",
+      type: type,
+      ids: ids,
+    });
+    if (res.status === "SUCCESS") {
+      showPopup("Data berhasil dihapus!", "success");
+      toggleDeleteMode(type); // Keluar mode hapus
+      loadData(type); // Refresh tabel
+      updateSidebarCounts();
+    } else {
+      showPopup("Gagal: " + res.message, "error");
+    }
+  } catch (e) {
+    showPopup("Error koneksi", "error");
+  }
+
+  btn.innerHTML = oriText;
+  btn.disabled = false;
+}
+
+// ====================================================================
+// FITUR 2: SMART BATCH EDIT (DOMINO EFFECT)
+// ====================================================================
+
+async function openSmartEditModal(noUrut) {
+  showPopup("Mengambil data satu kapal...", "info");
+
+  // Panggil Backend: Ambil semua data dengan ID Batch yang sama
+  const res = await postData({ action: "getBatchExibhitum", noUrut: noUrut });
+
+  if (res.status === "SUCCESS") {
+    const rows = res.data;
+    if (rows.length === 0) return showPopup("Data tidak ditemukan", "error");
+
+    const first = rows[0];
+
+    // 1. Isi Data Umum
+    document.getElementById("smart-id-batch").value = noUrut;
+    document.getElementById("smart-date").value = formatDateForInput(
+      first.TANGGAL
+    );
+    document.getElementById("smart-company").value = first.PERUSAHAAN;
+    document.getElementById("smart-ship").value = first.NAMA_KAPAL;
+    document.getElementById("smart-pup").value = first.PUP;
+
+    // 2. Render List Buku
+    const container = document.getElementById("smart-list-container");
+    container.innerHTML = "";
+
+    // Urutkan biar PSH diatas, EX dibawah
+    rows.sort((a, b) => {
+      const isAEx = a.JENIS_BUKU.includes("EX");
+      const isBEx = b.JENIS_BUKU.includes("EX");
+      return isAEx - isBEx;
+    });
+
+    rows.forEach((r) => {
+      const jenis = r.JENIS_BUKU;
+      const nomor = r.PENOMORAN;
+      const isPsh = jenis.includes("PSH") || jenis.includes("PENGESAHAN");
+
+      // Style beda buat PSH dan EX biar gampang liatnya
+      const bg = isPsh ? "#fff3e0" : "#e3f2fd";
+      const icon = isPsh ? "fa-stamp" : "fa-book";
+      const color = isPsh ? "#ef6c00" : "#1565c0";
+
+      container.innerHTML += `
+                <div style="display:flex; align-items:center; gap:10px; padding:10px; background:${bg}; border-radius:6px; margin-bottom:8px; border:1px solid #ddd;">
+                    <div style="width:30px; text-align:center; color:${color};"><i class="fa ${icon}"></i></div>
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; font-size:12px; color:#555;">${jenis}</div>
+                        <input type="text" class="form-control smart-item-input" 
+                               data-jenis="${jenis}" 
+                               value="${nomor}" 
+                               style="width:100%; font-family:monospace; font-weight:bold; margin-top:2px;">
+                    </div>
+                </div>
+            `;
+    });
+
+    document.getElementById("modal-smart-edit").classList.remove("hidden");
+  } else {
+    showPopup("Gagal ambil data.", "error");
+  }
+}
+
+function closeSmartEdit() {
+  document.getElementById("modal-smart-edit").classList.add("hidden");
+}
+
+async function saveSmartBatch() {
+  const id = document.getElementById("smart-id-batch").value;
+  const btn = event.currentTarget;
+  const oriText = btn.innerHTML;
+
+  // Ambil Data Umum
+  const common = {
+    tanggal: document.getElementById("smart-date").value,
+    perusahaan: document.getElementById("smart-company").value,
+    namaKapal: document.getElementById("smart-ship").value,
+    pup: document.getElementById("smart-pup").value,
+  };
+
+  // Ambil Data Nomor (Array)
+  const items = [];
+  document.querySelectorAll(".smart-item-input").forEach((inp) => {
+    items.push({
+      jenis: inp.dataset.jenis,
+      nomor: inp.value,
+    });
+  });
+
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES DOMINO...';
+  btn.disabled = true;
+
+  try {
+    // KIRIM KE BACKEND (LOGIKA DOMINO ADA DI SANA)
+    const res = await postData({
+      action: "updateSmartBatchExibhitum",
+      noUrut: id,
+      common: common,
+      items: items,
+    });
+
+    if (res.status === "SUCCESS") {
+      showPopup(
+        "SUKSES! Data terupdate & nomor lain telah digeser.",
+        "success"
+      );
+      closeSmartEdit();
+      loadData("EXIBHITUM");
+    } else {
+      showPopup("Gagal: " + res.message, "error");
+    }
+  } catch (e) {
+    showPopup("Error Server", "error");
+  }
+
+  btn.innerHTML = oriText;
+  btn.disabled = false;
+}
 // --- END SCRIPT.JS V15.3 ---
