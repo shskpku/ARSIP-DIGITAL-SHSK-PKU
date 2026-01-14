@@ -418,6 +418,8 @@ function debouncedMonitoringLoad() {
 
 async function loadMonitoringData(page = 1) {
     const tbody = document.getElementById("tbody-monitoring");
+    
+    // Ambil nilai filter (jika kosong "" maka backend akan mengirimkan semua data)
     const bulan = document.getElementById("monFilterBulan").value;
     const tahun = document.getElementById("monFilterTahun").value;
     const search = document.getElementById("monSearch").value;
@@ -425,16 +427,15 @@ async function loadMonitoringData(page = 1) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Mengolah Data Lintas Dimensi...</td></tr>';
 
     try {
-        // Panggil Backend
         const res = await postData({
             action: "getMonitoringData",
-            bulan: bulan,
-            tahun: tahun,
+            bulan: bulan, // Jika ini "", backend (Code.gs) sudah kita setting untuk abaikan filter
+            tahun: tahun, // Jika ini "", backend (Code.gs) sudah kita setting untuk abaikan filter
             search: search
         });
 
         if (res.status === "SUCCESS") {
-            monitoringDataCache = res.data; // Simpan di cache global
+            monitoringDataCache = res.data; 
             renderMonitoringTable(page);
         } else {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
@@ -443,6 +444,7 @@ async function loadMonitoringData(page = 1) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi.</td></tr>';
     }
 }
+
 
 function renderMonitoringTable(page) {
     const tbody = document.getElementById("tbody-monitoring");
