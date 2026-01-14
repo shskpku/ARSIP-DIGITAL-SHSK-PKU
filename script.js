@@ -419,7 +419,7 @@ function debouncedMonitoringLoad() {
 async function loadMonitoringData(page = 1) {
     const tbody = document.getElementById("tbody-monitoring");
     
-    // Ambil nilai filter (jika kosong "" maka backend akan mengirimkan semua data)
+    // Ambil nilai filter (Kalau baru buka, nilainya pasti "")
     const bulan = document.getElementById("monFilterBulan").value;
     const tahun = document.getElementById("monFilterTahun").value;
     const search = document.getElementById("monSearch").value;
@@ -429,8 +429,8 @@ async function loadMonitoringData(page = 1) {
     try {
         const res = await postData({
             action: "getMonitoringData",
-            bulan: bulan, // Jika ini "", backend (Code.gs) sudah kita setting untuk abaikan filter
-            tahun: tahun, // Jika ini "", backend (Code.gs) sudah kita setting untuk abaikan filter
+            bulan: bulan, // Kalau "" (kosong), Backend akan kirim SEMUA
+            tahun: tahun, // Kalau "" (kosong), Backend akan kirim SEMUA
             search: search
         });
 
@@ -444,7 +444,6 @@ async function loadMonitoringData(page = 1) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi.</td></tr>';
     }
 }
-
 
 function renderMonitoringTable(page) {
     const tbody = document.getElementById("tbody-monitoring");
@@ -757,14 +756,16 @@ function toggleSidebar() {
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
 // ====================================================================
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN
+  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
   document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
   
   // 2. MUNCULKAN HALAMAN TARGET
-  const target = document.getElementById(`sec-${id}`);
-  if (target) target.classList.remove("hidden");
+  const targetSection = document.getElementById(`sec-${id}`);
+  if (targetSection) {
+    targetSection.classList.remove("hidden");
+  }
 
-  // 3. RESET MENU (Matikan lampu menu lain)
+  // 3. RESET MENU (Matikan semua lampu active)
   document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => m.classList.remove("active"));
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
@@ -779,14 +780,51 @@ function showSection(id, el) {
       const container = el.closest(".submenu-container");
       if (container) {
         container.classList.add("show");
-        const parent = container.previousElementSibling;
-        if (parent) {
-          parent.classList.add("parent-active");
-          parent.classList.add("open");
+        const parentMenu = container.previousElementSibling;
+        if (parentMenu) {
+          parentMenu.classList.add("parent-active");
+          parentMenu.classList.add("open");
         }
       }
     }
   }
+
+  // ============================================================
+  // 🔥 LOGIKA PEMANGGIL DATA OTOMATIS 🔥
+  // ============================================================
+  
+  // A. Jika Klik Menu MONITORING
+  if (id === "monitoring") {
+      // Pastikan filter visual diset ke "Semua" agar sinkron dengan data yang muncul
+      const fBul = document.getElementById("monFilterBulan");
+      const fTah = document.getElementById("monFilterTahun");
+      const fSea = document.getElementById("monSearch");
+      
+      if(fBul) fBul.value = "";
+      if(fTah) fTah.value = "";
+      if(fSea) fSea.value = "";
+      
+      // Langsung panggil data (Load data mentah/tanpa filter)
+      loadMonitoringData(1); 
+  } 
+  // B. Jika Klik Menu DATA ARSIP LAINNYA
+  else if (id.includes("data")) {
+      const type = id.includes("shsk") ? "SHSK" : 
+                   id.includes("sertifikasi") ? "SERTIFIKASI" : 
+                   id.includes("service") ? "SERVICE" : "EXIBHITUM";
+      loadData(type);
+  }
+
+  // AUTO CLOSE SIDEBAR (Khusus tampilan Mobile)
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar && sidebar.classList.contains("show")) {
+      sidebar.classList.remove("show");
+      if (overlay) overlay.classList.remove("active");
+    }
+  }
+}
 
   // ============================================================
   // 🔥🔥🔥 INI YANG KURANG DI KODINGAN KAMU TADI 🔥🔥🔥
