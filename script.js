@@ -788,7 +788,7 @@ async function updateExibChart(period, btn, type) {
   const res = await postData({ action: "getDashboardStats", period: period });
   if (res.status === "SUCCESS") {
     const d = res.data;
-    const labels = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
+    const labels = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST", "ORB TK. II"];
     const dataSet =
       type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
     const color =
@@ -1058,7 +1058,7 @@ window.updateExibhitumForms = function () {
   const count = countInput ? parseInt(countInput.value) : 1;
 
   // URUTAN PATEN (Sesuai SOP)
-  const bookTypes = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
+  const bookTypes = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST", "ORB TK. II"];
 
   // Fungsi Helper Penomoran
   const getNextAndIncrement = () => {
@@ -1358,7 +1358,7 @@ function renderBulkForm(type) {
                       <div class="group-psh">
                         <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
                         <div class="book-grid-container">
-                        ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"]
+                        ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST", "BALLAST", "ORB TK. II"]
                           .map(
                             (b) => `
                           <label class="book-checkbox">
@@ -1374,7 +1374,7 @@ function renderBulkForm(type) {
                     <div class="group-ex">
                       <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
                       <div class="book-grid-container">
-                      ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"]
+                      ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST", "ORB TK. II"]
                         .map(
                           (b) => `
                         <label class="book-checkbox">
