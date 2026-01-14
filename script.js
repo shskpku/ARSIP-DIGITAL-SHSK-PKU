@@ -818,11 +818,13 @@ function showSection(id, el) {
     }
   }
   
-  // 2. 🔥 Load Data Monitoring (TAMBAHAN PENTING) 🔥
+  // 2. 🔥 TAMBAHAN PENTING: LOAD DATA MONITORING 🔥
   else if (id === "monitoring") {
-      // Pastikan fungsi ini ada sebelum dipanggil
+      // Panggil fungsi pengambil data monitoring
       if (typeof loadMonitoringData === "function") {
           loadMonitoringData(1); 
+      } else {
+          console.error("Fungsi loadMonitoringData belum ada!");
       }
   }
 
