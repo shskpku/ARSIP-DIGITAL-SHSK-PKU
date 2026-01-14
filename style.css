@@ -2566,3 +2566,81 @@ body.gateway-mode {
     transform: scale(1);
   }
 }
+
+/* ==================================================================
+   STYLE KHUSUS TABEL MONITORING & TOTAL
+   ================================================================== */
+
+/* 1. PEMISAH BARIS (SEPARATOR) */
+.row-separator-year {
+    background-color: #1a252f !important; /* Warna Biru Gelap (Mirip Header) */
+    color: #ffd700 !important; /* Teks Emas */
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-top: 2px solid #ffd700;
+    border-bottom: 2px solid #ffd700;
+}
+
+.row-separator-month {
+    background-color: #e3f2fd !important; /* Biru Langit Sangat Muda */
+    color: #0d47a1 !important; /* Biru Tua */
+    font-weight: bold;
+    font-style: italic;
+    text-align: left;
+    padding-left: 20px !important;
+    border-bottom: 2px solid #90caf9;
+}
+
+/* 2. PERATAAN KOLOM (ALIGNMENT) */
+/* Kolom Angka Layanan (Tengah) */
+#table-monitoring td:nth-child(2), /* Tahun */
+#table-monitoring td:nth-child(3), /* Bulan */
+#table-monitoring td:nth-child(5), /* Status Hukum */
+#table-monitoring td:nth-child(6), /* Sertifikasi */
+#table-monitoring td:nth-child(7), /* Pengesahan */
+#table-monitoring td:nth-child(8)  /* Exibhitum */
+{
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Kolom Nama Perusahaan (Kiri & Tebal Dikit) */
+#table-monitoring td:nth-child(4) {
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 3. STYLE SPESIAL KOLOM "TOTAL" (PALING KANAN) */
+
+/* Header Total */
+#table-monitoring th:last-child {
+    background-color: #ffecb3 !important; /* Background Emas Pucat */
+    color: #d84315 !important; /* Teks Merah Bata */
+    border-left: 4px solid #ffa000; /* Garis Batas Kiri Tebal */
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Isi Data Total */
+#table-monitoring td:last-child {
+    background-color: #fff8e1 !important; /* Background Krem Terang */
+    color: #bf360c !important; /* Angka Merah Gelap */
+    font-weight: 900 !important; /* Font Sangat Tebal */
+    font-size: 1.2em; /* Ukuran Font Lebih Besar */
+    text-align: center;
+    vertical-align: middle;
+    border-left: 4px solid #ffa000; /* Garis Batas Kiri Tebal */
+    letter-spacing: 1px;
+}
+
+/* Efek Hover Keren di Kolom Total */
+#table-monitoring tr:hover td:last-child {
+    background-color: #ffcc80 !important; /* Jadi lebih gelap saat disorot */
+    color: #000 !important;
+    transform: scale(1.1); /* Angkanya membesar sedikit (Pop-up) */
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
