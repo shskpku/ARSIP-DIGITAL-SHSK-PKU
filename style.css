@@ -2541,3 +2541,28 @@ body.gateway-mode {
   border-left: 3px solid var(--gold); /* Garis kiri Emas */
   font-weight: 600;
 }
+/* KOLOM CHECKBOX (Default Sembunyi) */
+.col-check {
+  width: 40px;
+  text-align: center;
+  background-color: #ffebee; /* Merah muda biar tau mode hapus */
+  border-right: 1px solid #ffcdd2;
+}
+
+.col-check.hidden,
+.check-header.hidden {
+  display: none;
+}
+
+/* Biar tombol hapus kedip-kedip kalau ada yang dicentang */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
