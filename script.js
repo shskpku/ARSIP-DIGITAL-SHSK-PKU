@@ -761,51 +761,100 @@ async function initCharts(p = "year") {
   });
 }
 
-async function updateExibChart(period, btn, type) {
-  if (type === "ex")
-    document
-      .querySelectorAll(".filter-btn-ex")
+// ====================================================================
+// UPDATE GRAFIK & KOTAK NAVY DI DASHBOARD
+// ====================================================================
+async function updateExibChart(filter, btn, chartType) {
+  // 1. Atur Tampilan Tombol Aktif
+  if (btn) {
+    const group = btn.parentElement;
+    group
+      .querySelectorAll("button")
       .forEach((b) => b.classList.remove("active"));
-  else
-    document
-              .querySelectorAll(".filter-btn-psh")
-      .forEach((b) => b.classList.remove("active"));
-  btn.classList.add("active");
-  const res = await postData({ action: "getDashboardStats", period: period });
+    btn.classList.add("active");
+  }
+
+  // 2. Tentukan Label Filter untuk Judul Navy Box
+  let labelFilter = "";
+  const currentYear = new Date().getFullYear();
+
+  if (filter === "today") labelFilter = "HARI INI";
+  else if (filter === "week") labelFilter = "MINGGU INI";
+  else if (filter === "month") labelFilter = "BULAN INI";
+  else labelFilter = `TAHUN ${currentYear}`;
+
+  // 3. Ambil Data dari Server
+  // Kita request data statistik
+  const res = await postData({ action: "getDashboardStats", filter: filter });
+
   if (res.status === "SUCCESS") {
-    const d = res.data;
-    const labels = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
-    const dataSet =
-      type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
-    const color =
-      type === "ex" ? "rgba(0, 243, 255, 0.7)" : "rgba(255, 159, 67, 0.7)";
-    const canvasId = type === "ex" ? "chartExibhitum" : "chartPengesahan";
-    const ctx = document.getElementById(canvasId).getContext("2d");
-    if (type === "ex" && exChartInstance) exChartInstance.destroy();
-    if (type === "psh" && pshChartInstance) pshChartInstance.destroy();
-    const chartConfig = {
+    const dataEx = res.ex; // Array angka Exibhitum [Deck, Mesin, ...]
+    const dataPsh = res.psh; // Array angka Pengesahan [Deck, Mesin, ...]
+
+    // =======================================================
+    // 🔥 UPDATE KOTAK NAVY (REKAP DATA) DI SINI 🔥
+    // =======================================================
+
+    // Hitung Total dari Array (Sum)
+    const totalEx = dataEx.reduce((a, b) => a + b, 0);
+    const totalPsh = dataPsh.reduce((a, b) => a + b, 0);
+    const grandTotal = totalEx + totalPsh;
+
+    // Update Angka di HTML
+    const navyContainer = document.getElementById("dashboard-summary-navy");
+    if (navyContainer) {
+      navyContainer.classList.remove("hidden");
+      document.getElementById(
+        "navy-title-text"
+      ).innerText = `REKAP DATA ${labelFilter}`;
+
+      // Animasi angka (Optional) atau langsung text
+      document.getElementById("navy-count-psh").innerText = totalPsh;
+      document.getElementById("navy-count-ex").innerText = totalEx;
+      document.getElementById("navy-count-total").innerText = grandTotal;
+    }
+
+    // =======================================================
+    // LANJUT UPDATE GRAFIK SEPERTI BIASA
+    // =======================================================
+
+    // Update Grafik Exibhitum
+    if (window.chartExInstance) window.chartExInstance.destroy();
+    const ctxEx = document.getElementById("chartExibhitum").getContext("2d");
+    window.chartExInstance = new Chart(ctxEx, {
       type: "bar",
       data: {
-        labels: labels,
+        labels: ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"],
         datasets: [
           {
-            label: "Jumlah Buku",
-            data: dataSet,
-            backgroundColor: color,
-            borderWidth: 1,
-            borderRadius: 4,
+            label: "Exibhitum",
+            data: dataEx,
+            backgroundColor: "#00d2d3", // Cyan Neon
+            borderRadius: 5,
           },
         ],
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } },
+      options: { responsive: true, maintainAspectRatio: false },
+    });
+
+    // Update Grafik Pengesahan
+    if (window.chartPshInstance) window.chartPshInstance.destroy();
+    const ctxPsh = document.getElementById("chartPengesahan").getContext("2d");
+    window.chartPshInstance = new Chart(ctxPsh, {
+      type: "bar",
+      data: {
+        labels: ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"],
+        datasets: [
+          {
+            label: "Pengesahan",
+            data: dataPsh,
+            backgroundColor: "#ff9f43", // Orange Gold
+            borderRadius: 5,
+          },
+        ],
       },
-    };
-    if (type === "ex") exChartInstance = new Chart(ctx, chartConfig);
-    else pshChartInstance = new Chart(ctx, chartConfig);
+      options: { responsive: true, maintainAspectRatio: false },
+    });
   }
 }
 
@@ -879,13 +928,13 @@ window.togglePacketMode = function (index, mode, btn) {
   );
 
   if (isAlreadyActive) {
-    packetModeState[index] = null; 
+    packetModeState[index] = null;
     checkboxes.forEach((cb) => {
       cb.checked = false;
       cb.disabled = false;
     });
   } else {
-    packetModeState[index] = mode; 
+    packetModeState[index] = mode;
     btn.classList.add("active");
 
     // Tentukan target sertifikat berdasarkan mode
@@ -1000,7 +1049,7 @@ window.renderCertForms = function (index) {
       else if (currentMode === "ENDORS_OB")
         packetCerts = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
 
-      if (packetCerts.includes(cert)) return; 
+      if (packetCerts.includes(cert)) return;
     }
 
     let defaultNo =
@@ -1029,33 +1078,33 @@ window.renderCertForms = function (index) {
 };
 
 // ====================================================================
-// CORE: GENERATOR NOMOR URUT EXIBHITUM 
+// CORE: GENERATOR NOMOR URUT EXIBHITUM
 // ====================================================================
 window.updateExibhitumForms = function () {
   // 1. Ambil Data Awal
   if (!cachedLastNumber) return;
 
-  const parts = cachedLastNumber.split('/');
-  let currentX = parseInt(parts[1]); 
-  let currentY = parseInt(parts[2]); 
+  const parts = cachedLastNumber.split("/");
+  let currentX = parseInt(parts[1]);
+  let currentY = parseInt(parts[2]);
   const suffix = parts[3];
 
   const countInput = document.getElementById("bulkCountExibhitum");
   const count = countInput ? parseInt(countInput.value) : 1;
-  
+
   // URUTAN PATEN (Sesuai SOP)
   const bookTypes = ["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"];
 
   // Fungsi Helper Penomoran
   const getNextAndIncrement = () => {
-       const pad = (num) => num.toString().padStart(2, '0');
-       const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
-       currentY++;
-       if (currentY > 25) {
-         currentX++;
-         currentY = 1;
-       }
-       return numStr;
+    const pad = (num) => num.toString().padStart(2, "0");
+    const numStr = `AL.531/${pad(currentX)}/${pad(currentY)}/${suffix}`;
+    currentY++;
+    if (currentY > 25) {
+      currentX++;
+      currentY = 1;
+    }
+    return numStr;
   };
 
   // 2. LOOP SETIAP FORM (Form 1, Form 2, dst)
@@ -1067,7 +1116,7 @@ window.updateExibhitumForms = function () {
     let htmlEx = "";
 
     // --- FASE 1: PROSES PENGESAHAN DULUAN (PRIORITAS) ---
-    bookTypes.forEach(b => {
+    bookTypes.forEach((b) => {
       const ck = document.querySelector(`input[name="check_PSH_${b}_${i}"]`);
       if (ck && ck.checked) {
         const nomer = getNextAndIncrement();
@@ -1081,7 +1130,7 @@ window.updateExibhitumForms = function () {
     });
 
     // --- FASE 2: PROSES EXIBHITUM SETELAHNYA ---
-    bookTypes.forEach(b => {
+    bookTypes.forEach((b) => {
       const ck = document.querySelector(`input[name="check_EX_${b}_${i}"]`);
       if (ck && ck.checked) {
         const nomer = getNextAndIncrement();
@@ -1096,17 +1145,24 @@ window.updateExibhitumForms = function () {
 
     // 3. Update Tampilan ke Layar
     if (htmlEx === "" && htmlPsh === "") {
-        container.innerHTML = "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
+      container.innerHTML =
+        "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
     } else {
-        container.innerHTML = `
+      container.innerHTML = `
         <div class="service-options-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
             <div style="background:#fff8f0; padding:12px; border-radius:8px; border:1px dashed #ff9f43;">
                 <div style="font-size:12px; font-weight:bold; color:#ff9f43; margin-bottom:10px; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:5px;">PENGESAHAN</div>
-                ${htmlPsh || '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'}
+                ${
+                  htmlPsh ||
+                  '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
+                }
             </div>
             <div style="background:#f0f8ff; padding:12px; border-radius:8px; border:1px dashed var(--neon-blue);">
                 <div style="font-size:12px; font-weight:bold; color:var(--neon-blue); margin-bottom:10px; text-align:center; border-bottom:1px solid #cceeff; padding-bottom:5px;">EXIBHITUM</div>
-                ${htmlEx || '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'}
+                ${
+                  htmlEx ||
+                  '<div style="text-align:center; font-size:11px; color:#aaa; margin-top:10px;">- Kosong -</div>'
+                }
             </div>
         </div>`;
     }
@@ -1337,24 +1393,32 @@ function renderBulkForm(type) {
                       <div class="group-psh">
                         <span class="group-label"><i class="fa fa-stamp"></i> PENGESAHAN</span>
                         <div class="book-grid-container">
-                        ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"].map(b => `
+                        ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"]
+                          .map(
+                            (b) => `
                           <label class="book-checkbox">
                           <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms()">
                           <div class="book-ui">${b}</div>
                           </label>
-                        `).join("")}
+                        `
+                          )
+                          .join("")}
                       </div>
                     </div>
 
                     <div class="group-ex">
                       <span class="group-label"><i class="fa fa-book"></i> EXIBHITUM</span>
                       <div class="book-grid-container">
-                      ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"].map(b => `
+                      ${["DECK", "MESIN", "ORB", "RADIO", "SAMPAH", "BALLAST"]
+                        .map(
+                          (b) => `
                         <label class="book-checkbox">
                         <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms()">
                         <div class="book-ui">${b}</div>
                         </label>
-                      `).join("")}
+                      `
+                        )
+                        .join("")}
                       </div>
                     </div>
                     </div>
@@ -1373,10 +1437,10 @@ function renderBulkForm(type) {
             </div>
         </div>`;
     }
-    html += `</div>`; 
+    html += `</div>`;
     container.innerHTML += html;
     if (type === "EXIBHITUM") {
-      initExibhitumNumber(); 
+      initExibhitumNumber();
     }
   }
 }
@@ -1660,7 +1724,7 @@ async function handleBulkSubmit(type) {
           `input[type="checkbox"][name*="_${i}"]:checked`
         );
         checkedBoxes.forEach((cb) => {
-          jenisBukuArray.push(cb.value); 
+          jenisBukuArray.push(cb.value);
         });
 
         // --- AMBIL NOMOR SURAT ---
@@ -1673,7 +1737,7 @@ async function handleBulkSubmit(type) {
           if (inputNomor) {
             nomorSuratArray.push(inputNomor.value);
           } else {
-            nomorSuratArray.push(""); 
+            nomorSuratArray.push("");
           }
         });
 
@@ -1681,7 +1745,7 @@ async function handleBulkSubmit(type) {
         itemData.jenisBukuArray = jenisBukuArray;
         itemData.nomorSuratArray = nomorSuratArray;
 
-        // Gabungan string untuk kompatibilitas tampilan tabel lama 
+        // Gabungan string untuk kompatibilitas tampilan tabel lama
         itemData.jenisBuku = jenisBukuArray.join(", ");
 
         // Upload File
@@ -1872,7 +1936,7 @@ function editData(type, rowDataStr) {
       setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING"]));
     }
 
-    //  PAKSA LOCK SEMUA CHECKBOX DI AWAL 
+    //  PAKSA LOCK SEMUA CHECKBOX DI AWAL
     form
       .querySelectorAll(`input[name="cert_select_1"]`)
       .forEach((c) => (c.disabled = true));
@@ -1909,7 +1973,7 @@ function editData(type, rowDataStr) {
         }
       }
     }
-    //  LOCK CHECKBOX SERVICE 
+    //  LOCK CHECKBOX SERVICE
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
@@ -1942,7 +2006,7 @@ function editData(type, rowDataStr) {
       );
       if (noSuratInput) noSuratInput.value = nomor;
     }
-    //  LOCK CHECKBOX EXIBHITUM 
+    //  LOCK CHECKBOX EXIBHITUM
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
@@ -1951,7 +2015,7 @@ function editData(type, rowDataStr) {
   // 4. FINAL LOCK: KUNCI SEMUA INPUT (TERMASUK TEXT & SELECT)
   const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => {
-    i.disabled = true; 
+    i.disabled = true;
   });
 
   // 5. SIAPKAN TOMBOL "UBAH DATA"
@@ -1966,7 +2030,7 @@ function editData(type, rowDataStr) {
     btnUnlock.id = `btn-unlock-${type}`;
     btnUnlock.className = "btn-edit-mode";
     btnUnlock.innerHTML = '<i class="fa fa-pencil-alt"></i> UBAH DATA';
-    btnUnlock.onclick = () => enableEditMode(type); 
+    btnUnlock.onclick = () => enableEditMode(type);
     btnContainer.insertBefore(btnUnlock, btnSaveOriginal);
   }
   btnUnlock.classList.remove("hidden");
@@ -2101,8 +2165,8 @@ async function exportTriple(type) {
 // --- FUNGSI RAHASIA: DOWNLOAD LEWAT IFRAME ---
 function downloadDirectly(url) {
   const iframe = document.createElement("iframe");
-  iframe.style.display = "none"; 
-  iframe.src = url; 
+  iframe.style.display = "none";
+  iframe.src = url;
   document.body.appendChild(iframe);
 
   // Hapus iframe setelah 1 menit (bersih-bersih memori)
@@ -2158,7 +2222,7 @@ async function loadData(type) {
         if (dateA < dateB) return 1;
       }
 
-      // 2. Secondary 
+      // 2. Secondary
       if (type === "EXIBHITUM") {
         const getVal = (str) => {
           try {
@@ -2181,7 +2245,7 @@ async function loadData(type) {
     filteredData[type] = rawData[type];
     currentPage[type] = 1;
     updateSmartData(rawData[type], type);
-    renderTable(type); 
+    renderTable(type);
 
     if (type === "SERTIFIKASI") populateFilterOptions(rawData[type]);
   } else {
@@ -2288,7 +2352,7 @@ function renderTable(type) {
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-    let tr = `<tr><td>${start + i + 1}</td>`; 
+    let tr = `<tr><td>${start + i + 1}</td>`;
 
     if (type === "SHSK") {
       tr += `<td>${row["NAMA_KAPAL"]}</td><td>${row["TONASE_GT"]}</td><td>${
@@ -2340,7 +2404,7 @@ function renderTable(type) {
   renderPagination(type);
 }
 // ====================================================================
-// FUNGSI PAGINATION 
+// FUNGSI PAGINATION
 // ====================================================================
 function renderPagination(type) {
   const container = document.getElementById(`pagination-${type}`);
@@ -2348,7 +2412,7 @@ function renderPagination(type) {
 
   const limit = type === "EXIBHITUM" ? 25 : 10;
   const totalRows = filteredData[type].length;
-  const totalPages = Math.ceil(totalRows / limit); 
+  const totalPages = Math.ceil(totalRows / limit);
   const current = currentPage[type];
 
   if (totalPages <= 1) {
@@ -2657,10 +2721,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Jalankan fungsi sync secara paralel (Biar cepat)
     Promise.all([
-      postData({ action: "getDataSertifikasi" }), 
-      postData({ action: "getDataSHSK" }), 
-      postData({ action: "getDataService" }), 
-      postData({ action: "getDataExibhitum" }), 
+      postData({ action: "getDataSertifikasi" }),
+      postData({ action: "getDataSHSK" }),
+      postData({ action: "getDataService" }),
+      postData({ action: "getDataExibhitum" }),
     ])
       .then((results) => {
         const [resSert, resSHSK, resServ, resExib] = results;
@@ -2681,7 +2745,6 @@ document.addEventListener("DOMContentLoaded", () => {
           updateSmartData(resExib.data, "EXIBHITUM");
 
         console.log("✅ Auto-Sync Selesai! Database Dropdown Siap Digunakan.");
-
       })
       .catch((err) => {
         console.error("Gagal Auto-Sync:", err);
