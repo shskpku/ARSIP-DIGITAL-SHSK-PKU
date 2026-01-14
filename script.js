@@ -2825,4 +2825,16 @@ function toggleSubmenu(id) {
   }
 }
 
+// ====================================================================
+// FUNGSI ACCORDION (BUKA/TUTUP FORM INPUT)
+// ====================================================================
+function toggleAccordion(element) {
+  // Element adalah header yang diklik
+  // Parent-nya adalah div class="accordion-item"
+  const item = element.parentElement;
+  
+  // Toggle class 'open' (CSS akan menangani display: block/none)
+  item.classList.toggle("open");
+}
+
 // --- END SCRIPT.JS V15.3 ---
