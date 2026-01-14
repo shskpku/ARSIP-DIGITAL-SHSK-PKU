@@ -711,39 +711,38 @@ async function resetPasswordFinal() {
 }
 
 // ====================================================================
-// 4. PAGE INITIALIZATION & NAVIGATION
+// INITIALIZATION
 // ====================================================================
 document.addEventListener("DOMContentLoaded", () => {
-   initAutoLogout(); 
-   resetActivityTimer();   
-   initSmartSearch();
+  // 1. Init Auto Logout (PENTING)
+  initAutoLogout(); 
+  resetActivityTimer();   
+  initSmartSearch();
 
+  // 2. Cek Halaman Dashboard User
   if (document.querySelector(".dashboard-page")) {
     initPenggunaDashboard();
-    initAutoLogout();
-  } else if (document.querySelector(".petugas-page")) {
+  } 
+  // 3. Cek Halaman Petugas
+  else if (document.querySelector(".petugas-page")) {
     loadProfilePetugas();
     updateSidebarCounts();
+    
+    // Init Grafik Filter
     if (document.querySelector(".filter-btn.active"))
       updateChartFilter("year", document.querySelector(".filter-btn.active"));
+    
     if (document.getElementById("chartExibhitum"))
-      updateExibChart(
-        "year",
-        document.querySelector(".filter-btn-ex.active"),
-        "ex"
-      );
+      updateExibChart("year", document.querySelector(".filter-btn-ex.active"), "ex");
+    
     if (document.getElementById("chartPengesahan"))
-      updateExibChart(
-        "year",
-        document.querySelector(".filter-btn-psh.active"),
-        "psh"
-      );
+      updateExibChart("year", document.querySelector(".filter-btn-psh.active"), "psh");
+    
     initAnnualReportUI();
     renderBulkForm("SHSK");
     renderBulkForm("SERTIFIKASI");
     renderBulkForm("SERVICE");
     renderBulkForm("EXIBHITUM");
-    initAutoLogout();
   }
 });
 
@@ -755,90 +754,65 @@ function toggleSidebar() {
 // ====================================================================
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
 // ====================================================================
-
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
-  document
-    .querySelectorAll(".main-content > div")
-    .forEach((d) => d.classList.add("hidden"));
+  // 1. SEMBUNYIKAN SEMUA HALAMAN
+  document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
+  
+  // 2. MUNCULKAN HALAMAN TARGET
+  const target = document.getElementById(`sec-${id}`);
+  if (target) target.classList.remove("hidden");
 
-  // 2. MUNCULKAN HALAMAN YANG DITUJU
-  const targetSection = document.getElementById(`sec-${id}`);
-  if (targetSection) {
-    targetSection.classList.remove("hidden");
-  }
-
-  // ============================================================
-  // 🧹 FASE BERSIH-BERSIH (RESET MENU)
-  // ============================================================
-  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => {
-    m.classList.remove("active");
-  });
+  // 3. RESET MENU (Matikan lampu menu lain)
+  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => m.classList.remove("active"));
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
     m.classList.remove("open");
   });
-  document.querySelectorAll(".submenu-container").forEach((c) => {
-    c.classList.remove("show");
-  });
+  document.querySelectorAll(".submenu-container").forEach((c) => c.classList.remove("show"));
 
-  // ============================================================
-  // ✨ FASE MENYALAKAN MENU BARU
-  // ============================================================
+  // 4. NYALAKAN MENU YANG DIKLIK
   if (el) {
     el.classList.add("active");
     if (el.classList.contains("submenu-item")) {
       const container = el.closest(".submenu-container");
       if (container) {
         container.classList.add("show");
-        const parentMenu = container.previousElementSibling;
-        if (parentMenu) {
-          parentMenu.classList.add("parent-active");
-          parentMenu.classList.add("open");
+        const parent = container.previousElementSibling;
+        if (parent) {
+          parent.classList.add("parent-active");
+          parent.classList.add("open");
         }
       }
     }
   }
 
   // ============================================================
-  // 📥 LOGIKA LOAD DATA OTOMATIS (INI YANG KURANG TADI!)
+  // 🔥🔥🔥 INI YANG KURANG DI KODINGAN KAMU TADI 🔥🔥🔥
   // ============================================================
   
-  // 1. Load Data Arsip (SHSK, Sertifikasi, dll)
+  // A. LOAD DATA STANDARD (SHSK/SERTIFIKASI/DLL)
   if (id.includes("data")) {
-    const type = id.includes("shsk")
-      ? "SHSK"
-      : id.includes("sertifikasi")
-      ? "SERTIFIKASI"
-      : id.includes("service")
-      ? "SERVICE"
-      : "EXIBHITUM";
-    if (typeof loadData === "function") {
-      loadData(type);
-    }
+    const type = id.includes("shsk") ? "SHSK" : 
+                 id.includes("sertifikasi") ? "SERTIFIKASI" : 
+                 id.includes("service") ? "SERVICE" : "EXIBHITUM";
+    if (typeof loadData === "function") loadData(type);
   }
   
-  // 2. 🔥 TAMBAHAN PENTING: LOAD DATA MONITORING 🔥
+  // B. LOAD DATA MONITORING (WAJIB ADA!)
   else if (id === "monitoring") {
-      // Panggil fungsi pengambil data monitoring
-      if (typeof loadMonitoringData === "function") {
-          loadMonitoringData(1); 
-      } else {
-          console.error("Fungsi loadMonitoringData belum ada!");
-      }
+      if (typeof loadMonitoringData === "function") loadMonitoringData(1);
   }
 
   // Auto Close Sidebar di HP
   if (window.innerWidth <= 768) {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebar-overlay");
-    if (sidebar.classList.contains("show")) {
-      sidebar.classList.remove("show");
-      overlay.classList.remove("active");
+    const sb = document.getElementById("sidebar");
+    const ov = document.getElementById("sidebar-overlay");
+    if (sb.classList.contains("show")) {
+      sb.classList.remove("show");
+      ov.classList.remove("active");
     }
   }
 }
-
 // ====================================================================
 // 5. CHART UI
 // ====================================================================
@@ -2598,27 +2572,31 @@ function renderTable(type) {
   renderPagination(type);
 }
 // ====================================================================
-// FUNGSI PAGINATION
+// FUNGSI PAGINATION (SUPPORT MONITORING)
 // ====================================================================
-function renderPagination(type) {
+function renderPagination(type, totalCustom = null, pageCustom = null, limitCustom = null) {
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
 
-  const limit = type === "EXIBHITUM" ? 25 : 10;
-  const totalRows = filteredData[type].length;
+  // Deteksi limit: Exibhitum 25, Monitoring 10, Lainnya 10
+  const limit = limitCustom || (type === "EXIBHITUM" ? 25 : 10);
+  
+  // Deteksi Data Source
+  const totalRows = totalCustom !== null ? totalCustom : filteredData[type].length;
+  const current = pageCustom !== null ? pageCustom : currentPage[type];
   const totalPages = Math.ceil(totalRows / limit);
-  const current = currentPage[type];
 
   if (totalPages <= 1) {
     container.innerHTML = "";
     return;
   }
 
+  // Tentukan Fungsi Navigasi: Monitoring pakai 'loadMonitoringData', sisanya 'goToPage'
+  const funcName = type === "MONITORING" ? "loadMonitoringData" : "goToPage";
+
   let html = "";
   const prevDisabled = current === 1 ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="goToPage('${type}', ${
-    current - 1
-  })"><i class="fa fa-chevron-left"></i></button>`;
+  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="${funcName}('${type}', ${current - 1})"><i class="fa fa-chevron-left"></i></button>`;
 
   const delta = 2;
   const range = [];
@@ -2626,11 +2604,7 @@ function renderPagination(type) {
   let l;
 
   for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 ||
-      i === totalPages ||
-      (i >= current - delta && i <= current + delta)
-    ) {
+    if (i === 1 || i === totalPages || (i >= current - delta && i <= current + delta)) {
       range.push(i);
     }
   }
@@ -2648,21 +2622,26 @@ function renderPagination(type) {
       html += `<span style="padding: 0 5px; color:#aaa;">...</span>`;
     } else {
       const activeClass = i === current ? "active" : "";
-      html += `<button class="page-btn ${activeClass}" onclick="goToPage('${type}', ${i})">${i}</button>`;
+      html += `<button class="page-btn ${activeClass}" onclick="${funcName}('${type}', ${i})">${i}</button>`;
     }
   });
 
   const nextDisabled = current === totalPages ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="goToPage('${type}', ${
-    current + 1
-  })"><i class="fa fa-chevron-right"></i></button>`;
+  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="${funcName}('${type}', ${current + 1})"><i class="fa fa-chevron-right"></i></button>`;
   html += `<span style="margin-left:10px; font-size:12px; color:#666;"><b>${totalRows}</b> Data</span>`;
 
   container.innerHTML = html;
 }
 
+
 // FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
+  // Kalau yang dipanggil Monitoring, oper ke fungsinya sendiri
+  if(type === 'MONITORING') {
+      loadMonitoringData(pageNum);
+      return;
+  }
+
   const limit = type === "EXIBHITUM" ? 25 : 10;
   const totalRows = filteredData[type].length;
   const totalPages = Math.ceil(totalRows / limit);
@@ -2672,6 +2651,7 @@ function goToPage(type, pageNum) {
   currentPage[type] = pageNum;
   renderTable(type);
 }
+
 
 let pendingDelete = null;
 function prepareDelete(type, rowDataStr) {
