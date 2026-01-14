@@ -420,23 +420,29 @@ async function loadMonitoringData(page = 1) {
     const tbody = document.getElementById("tbody-monitoring");
     if (!tbody) return;
 
-    // Ambil nilai filter
     const bulan = document.getElementById("monFilterBulan").value;
     const tahun = document.getElementById("monFilterTahun").value;
     const search = document.getElementById("monSearch").value;
+
+    // KUNCINYA DI SINI:
+    // Jika kita klik pagination (page > 1) dan cache data sudah ada, jangan tarik API lagi.
+    if (page > 1 && monitoringDataCache.length > 0) {
+        renderMonitoringTable(page);
+        return;
+    }
 
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Memproses Data Pelayanan...</td></tr>';
 
     try {
         const res = await postData({
             action: "getMonitoringData",
-            bulan: bulan, // Jika kosong "", backend akan kirim semua
-            tahun: tahun, // Jika kosong "", backend akan kirim semua
+            bulan: bulan,
+            tahun: tahun,
             search: search
         });
 
         if (res.status === "SUCCESS") {
-            monitoringDataCache = res.data; 
+            monitoringDataCache = res.data; // Simpan ke cache
             renderMonitoringTable(page);
         } else {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
@@ -445,6 +451,7 @@ async function loadMonitoringData(page = 1) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi ke database.</td></tr>';
     }
 }
+
 
 function renderMonitoringTable(page) {
     const tbody = document.getElementById("tbody-monitoring");
@@ -498,7 +505,7 @@ function renderMonitoringTable(page) {
         lastMonth = row.bulan;
     });
 
-    renderPagination("MONITORING", monitoringDataCache.length, page, limit);
+renderPagination("MONITORING", monitoringDataCache.length, page, 10);
 }
 
 // ====================================================================
