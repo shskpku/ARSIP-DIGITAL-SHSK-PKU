@@ -508,31 +508,40 @@ function renderMonitoringTable(page) {
 const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 1 Jam (Ubah ke 10000 kalau mau tes 10 detik)
 const STORAGE_KEY_ACTIVITY = "shsk_last_activity";
 
+// ====================================================================
+// PERBAIKAN AUTO LOGOUT (AGAR BISA LOGIN)
+// ====================================================================
 function initAutoLogout() {
-    // 1. Cek saat halaman dimuat: Apakah sudah expired?
+    // 1. Cek apakah user sedang berada di halaman login (index.html)
+    // Jika di halaman login, JANGAN jalankan auto-logout
+    if (window.location.pathname.includes("index.html") || window.location.pathname === "/") {
+        return; 
+    }
+
+    // 2. Cek status aktif (Hanya jika sudah masuk ke dashboard)
     checkActivityStatus();
 
-    // 2. Pasang pendengar gerakan
-    // Setiap user gerak/klik, kita reset timer di LocalStorage
+    // 3. Pasang pendengar gerakan
     ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
         document.addEventListener(evt, () => {
             resetActivityTimer();
         }, true);
     });
 
-    // 3. Cek berkala tiap 1 menit (Jaga-jaga kalau browser didiamkan terbuka)
+    // 4. Cek berkala tiap 1 menit
     setInterval(checkActivityStatus, 60000); 
 }
 
 function resetActivityTimer() {
-    // Simpan waktu sekarang sebagai waktu terakhir aktif
     localStorage.setItem(STORAGE_KEY_ACTIVITY, Date.now());
 }
 
 function checkActivityStatus() {
+    // Jika tidak ada data user di storage, jangan tendang (biarkan proses login)
+    const user = localStorage.getItem("user");
+    if (!user) return;
+
     const lastActive = localStorage.getItem(STORAGE_KEY_ACTIVITY);
-    
-    // Kalau belum pernah login/aktif, set sekarang
     if (!lastActive) {
         resetActivityTimer();
         return;
@@ -540,11 +549,12 @@ function checkActivityStatus() {
 
     const diff = Date.now() - parseInt(lastActive);
 
-    // 🔥 LOGIKA TENDANGAN MAUT 🔥
+    // 🔥 TENDANG JIKA LEBIH DARI 1 JAM 🔥
     if (diff > INACTIVITY_LIMIT_MS) {
         forceLogout();
     }
 }
+
 
 function forceLogout() {
     // Hapus data sesi
