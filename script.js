@@ -2429,11 +2429,31 @@ function renderTable(type) {
     return;
   }
 
+  let lastX = null;
+
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-
     const uniqueId = row["NO_URUT"] || row["NO URUT"] || row["NO"];
 
+    if (type === "EXIBHITUM") {
+      let currentX = null;
+      try {
+        const parts = String(row["PENOMORAN"]).split("/");
+        if (parts.length >= 2) currentX = parts[1];
+      } catch (e) {
+        currentX = null;
+      }
+
+      if (lastX !== null && currentX !== lastX) {
+        tbody.innerHTML += `
+          <tr class="row-separator-exib">
+            <td colspan="9">
+              <i class="fa fa-layer-group"></i> BATAS URUTAN NOMOR: AL.531 / ${lastX} KE ${currentX}
+            </td>
+          </tr>`;
+      }
+      lastX = currentX;
+    }
     let tr = `<tr>`;
 
     tr += `<td class="col-check hidden">
