@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reset Password - SHSK Pekanbaru</title>
-    <link href="logo-shsk.png" rel="icon">
+    <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
@@ -148,10 +148,8 @@
     <script src="script.js"></script>
 
     <script>
-      // Variable Global untuk menyimpan email sementara
       let currentEmail = "";
 
-      // 1. TOGGLE PASSWORD UTILS
       function togglePass(icon) {
         const input = icon.parentElement.querySelector("input");
         if (input.type === "password") {
@@ -165,30 +163,25 @@
         }
       }
 
-      // 2. STEP 1: KIRIM OTP
       async function handleSendOTP(e) {
         e.preventDefault();
         const email = document.getElementById("resetEmail").value;
         const btn = document.getElementById("btnStep1");
 
-        // Loading Animasi
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENGIRIM...';
         btn.disabled = true;
 
         try {
-          // Panggil Backend: sendOTP
           const res = await postData({ action: "sendOTP", email: email });
 
           if (res.status === "SUCCESS") {
             showPopup("Kode terkirim! Cek Email Anda.", "success");
-            currentEmail = email; // Simpan email buat step selanjutnya
+            currentEmail = email;
 
-            // Transisi ke Step 2
             document.getElementById("step1Form").classList.add("hidden");
             document.getElementById("step2Form").classList.remove("hidden");
 
-            // Ubah Judul Header
             document.getElementById("headerTitle").innerText =
               "VERIFIKASI KODE";
             document.getElementById(
@@ -206,7 +199,6 @@
         }
       }
 
-      // 3. STEP 2: VERIFIKASI OTP
       async function handleVerifyOTP(e) {
         e.preventDefault();
         const otp = document.getElementById("inputOTP").value;
@@ -217,7 +209,6 @@
         btn.disabled = true;
 
         try {
-          // Panggil Backend: verifyOTP
           const res = await postData({
             action: "verifyOTP",
             email: currentEmail,
@@ -227,7 +218,6 @@
           if (res.status === "SUCCESS") {
             showPopup("Kode Valid! Silakan buat password baru.", "success");
 
-            // Transisi ke Step 3
             document.getElementById("step2Form").classList.add("hidden");
             document.getElementById("step3Form").classList.remove("hidden");
 
@@ -246,7 +236,6 @@
         }
       }
 
-      // 4. STEP 3: SIMPAN PASSWORD BARU
       async function handleResetFinal(e) {
         e.preventDefault();
         const p1 = document.getElementById("newPass").value;
@@ -263,7 +252,6 @@
         btn.disabled = true;
 
         try {
-          // Panggil Backend: resetPasswordFinal
           const res = await postData({
             action: "resetPasswordFinal",
             email: currentEmail,
@@ -273,7 +261,6 @@
           if (res.status === "SUCCESS") {
             showPopup(res.message, "success");
 
-            // Redirect ke Login setelah 2 detik
             setTimeout(() => {
               window.location.href = "index.html";
             }, 2000);
@@ -291,5 +278,3 @@
     </script>
   </body>
 </html>
-
-
