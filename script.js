@@ -3004,19 +3004,37 @@ function updateDeleteCount(type) {
   document.getElementById(`count-hapus-${type}`).innerText = count;
 }
 
-async function executeBulkDelete(type) {
-  const checked = document.querySelectorAll(
-    "#table-" + type.toLowerCase() + " .bulk-check:checked"
-  );
+// 1. Fungsi pemicu modal
+function executeBulkDelete(type) {
+  const checked = document.querySelectorAll("#table-" + type.toLowerCase() + " .bulk-check:checked");
   if (checked.length === 0) return showPopup("Pilih data dulu!", "error");
 
-  if (!confirm(`Yakin hapus ${checked.length} data ini? Permanen lho!`)) return;
+  // Update teks di modal custom
+  document.getElementById("bulk-confirm-message").innerText = `Yakin hapus ${checked.length} data ini secara permanen?`;
+  
+  // Pasang fungsi klik ke tombol "Ya" di modal
+  document.getElementById("btn-do-bulk-delete").onclick = function() {
+      processBulkDelete(type);
+  };
 
+  document.getElementById("modal-bulk-confirm").classList.remove("hidden");
+}
+
+// 2. Fungsi penutup modal
+function closeBulkConfirm() {
+  document.getElementById("modal-bulk-confirm").classList.add("hidden");
+}
+
+// 3. Fungsi inti eksekusi ke Server
+async function processBulkDelete(type) {
+  closeBulkConfirm(); 
+  
+  const checked = document.querySelectorAll("#table-" + type.toLowerCase() + " .bulk-check:checked");
   const ids = Array.from(checked).map((cb) => cb.value);
   const btn = document.getElementById(`btn-confirm-hapus-${type}`);
   const oriText = btn.innerHTML;
 
-  btn.innerHTML = "Menghapus...";
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menghapus...';
   btn.disabled = true;
 
   try {
@@ -3025,20 +3043,20 @@ async function executeBulkDelete(type) {
       type: type,
       ids: ids,
     });
+
     if (res.status === "SUCCESS") {
       showPopup("Data berhasil dihapus!", "success");
-      toggleDeleteMode(type); // Keluar mode hapus
-      loadData(type); // Refresh tabel
-      updateSidebarCounts();
-    } else {
-      showPopup("Gagal: " + res.message, "error");
     }
   } catch (e) {
-    showPopup("Error koneksi", "error");
+    console.error("Timeout server:", e);
+  } finally {
+    // 🔥 Kuncinya di sini: Apapun hasilnya, tabel web ditarik ulang supaya sinkron
+    btn.innerHTML = oriText;
+    btn.disabled = false;
+    toggleDeleteMode(type); 
+    loadData(type);         
+    updateSidebarCounts();
   }
-
-  btn.innerHTML = oriText;
-  btn.disabled = false;
 }
 
 // ====================================================================
