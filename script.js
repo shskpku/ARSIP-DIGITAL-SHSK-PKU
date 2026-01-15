@@ -1,12 +1,12 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (V13.1)
+   SCRIPT.JS - ULTIMATE MASTER (V17)
    ==================================================================== */
 
-// ---- API URL GOOGLE APPSCRIPT ---
+// ---- API URL GOOGLE APPSCRIPT --- //
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwo5j74mC6sMx4NPlfrFRIVkLT5tTgfFU5rPymDjRzjPjcDKwgjaVXVhkGa6tkVwK_mFA/exec";
 
-// --- DATABASE LIST SERTIFIKAT (LENGKAP) ---
+// --- DATABASE LIST SERTIFIKAT --- //
 const CERT_LIST = [
   "KONSTRUKSI",
   "PERLENGKAPAN",
@@ -35,7 +35,7 @@ const CERT_LIST = [
   "PENGESAHAN GAMBAR",
 ];
 
-// Database Kode Surat Default
+// KODE SURAT SERTIFIKASI //
 const CERT_CODES = {
   KONSTRUKSI: "AL.501",
   PERLENGKAPAN: "AL.501",
@@ -65,10 +65,11 @@ const CERT_CODES = {
   NTR: "SPECIAL",
   "OIL BARGE": "SPECIAL",
 };
-// GLOBAL VARIABLE UNTUK NOMOR SURAT
+
+// GLOBAL VARIABLE //
 let cachedLastNumber = null;
 
-// FUNGSI GENERATOR NOMOR VERSI JS (MIRROR BACKEND)
+// GENERATOR NOMOR //
 function generateNextNumberJS(lastNumberStr, offset = 1) {
   const currentYear = new Date().getFullYear();
   const suffix = `KSOP.PKU.${currentYear}`;
@@ -88,14 +89,13 @@ function generateNextNumberJS(lastNumberStr, offset = 1) {
   let finalX = x + addX;
   let finalY = totalY - addX * 25;
 
-  // FORMATTER: Tambah 0 di depan
+  // FORMATTER //
   const pad = (num) => num.toString().padStart(2, "0");
 
   return `AL.531/${pad(finalX)}/${pad(finalY)}/${suffix}`;
 }
 
-// FETCH NOMOR DARI SERVER SAAT BUKA MENU EXIBHITUM
-
+// FETCH NOMOR DARI SERVER SAAT BUKA MENU EXIBHITUM //
 async function initExibhitumNumber() {
   try {
     const res = await postData({ action: "getNextExibNumber" });
@@ -103,11 +103,12 @@ async function initExibhitumNumber() {
       let x = parseInt(res.startX);
       let y = parseInt(res.startY);
       let year = res.year;
-      // SIMPAN DATA KE GLOBAL VARIABLE
+
+      // SIMPAN DATA KE GLOBAL VARIABLE //
       cachedLastNumber = `AL.531/${x}/${y}/KSOP.PKU/${year}`;
       console.log("Nomor Start dari Server:", cachedLastNumber);
 
-      // TRIGGER UPDATE PERTAMA KALI (Biar kalau ada checkbox yg default checked langsung keisi)
+      // TRIGGER UPDATE PERTAMA KALI //
       updateExibhitumForms();
     }
   } catch (error) {
@@ -122,7 +123,6 @@ let packetModeState = {};
 // ====================================================================
 // 1. UTILITIES & HELPER
 // ====================================================================
-
 function speakWelcome(namaLengkap) {
   if (!("speechSynthesis" in window)) return;
   if (sessionStorage.getItem("welcome_played")) return;
@@ -219,23 +219,18 @@ function formatDate(dateStr) {
 }
 
 function formatDateForInput(dateStr) {
-  // Kalau kosong, kembalikan kosong
   if (!dateStr || dateStr === "-" || dateStr === "") return "";
 
   const s = String(dateStr).trim();
 
-  // KASUS 1: Format dari Sheet (dd/mm/yyyy) -> misal: 12/01/2026
-  // Kita harus ubah jadi yyyy-mm-dd biar Form Edit mau membacanya
   if (s.includes("/")) {
     const parts = s.split("/");
-    // parts[0]=12, parts[1]=01, parts[2]=2026
+
     if (parts.length === 3) {
-      // Balik jadi Tahun-Bulan-Tanggal
       return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
   }
 
-  // KASUS 2: Format Text Indo (12 Januari 2026) - Jaga-jaga data lama
   const monthsIndo = {
     Januari: "01",
     Februari: "02",
@@ -256,12 +251,11 @@ function formatDateForInput(dateStr) {
     if (parts.length >= 3) {
       const monthStr = parts[1].replace(/[^a-zA-Z]/g, "");
       const month = monthsIndo[monthStr] || "01";
-      // Balik jadi Tahun-Bulan-Tanggal
+
       return `${parts[2]}-${month}-${parts[0].padStart(2, "0")}`;
     }
   }
 
-  // KASUS 3: Format ISO Default
   const d = new Date(dateStr);
   if (!isNaN(d.getTime())) {
     const year = d.getFullYear();
@@ -324,7 +318,6 @@ function updateSmartData(dataArray, type) {
     });
   }
 
-  // Update DOM Material List
   const dlMat = document.getElementById("materialList");
   if (dlMat) {
     dlMat.innerHTML = "";
@@ -339,7 +332,6 @@ function updateSmartData(dataArray, type) {
 // ====================================================================
 // 2. DASHBOARD & ANNUAL REPORT LOGIC
 // ====================================================================
-
 function initAnnualReportUI() {
   const container = document.querySelector(".chart-grid");
   if (!container) return;
@@ -406,64 +398,67 @@ async function handleAnnualReport(btn) {
 // ====================================================================
 // FITUR 1: MONITORING CONTROLLER
 // ====================================================================
-let monitoringDataCache = []; // Simpan data biar pagination ngebut
+let monitoringDataCache = [];
 let debounceTimer;
 
 function debouncedMonitoringLoad() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        loadMonitoringData(1);
-    }, 500); // Tunggu 0.5 detik setelah ngetik baru load
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    loadMonitoringData(1);
+  }, 500);
 }
 
 async function loadMonitoringData() {
-    const tbody = document.getElementById("tbody-monitoring");
-    if (!tbody) return;
+  const tbody = document.getElementById("tbody-monitoring");
+  if (!tbody) return;
 
-    const bulan = document.getElementById("monFilterBulan").value;
-    const tahun = document.getElementById("monFilterTahun").value;
-    const search = document.getElementById("monSearch").value;
+  const bulan = document.getElementById("monFilterBulan").value;
+  const tahun = document.getElementById("monFilterTahun").value;
+  const search = document.getElementById("monSearch").value;
 
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Memproses Data Pelayanan...</td></tr>';
+  tbody.innerHTML =
+    '<tr><td colspan="9" style="text-align:center;"><i class="fa fa-spinner fa-spin"></i> Memproses Data Pelayanan...</td></tr>';
 
-    try {
-        const res = await postData({
-            action: "getMonitoringData",
-            bulan: bulan,
-            tahun: tahun,
-            search: search
-        });
+  try {
+    const res = await postData({
+      action: "getMonitoringData",
+      bulan: bulan,
+      tahun: tahun,
+      search: search,
+    });
 
-        if (res.status === "SUCCESS") {
-            monitoringDataCache = res.data; // Simpan ke memori
-            renderMonitoringTable(1); // Tampilkan halaman pertama
-        } else {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
-        }
-    } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error koneksi ke database.</td></tr>';
+    if (res.status === "SUCCESS") {
+      monitoringDataCache = res.data;
+      renderMonitoringTable(1);
+    } else {
+      tbody.innerHTML =
+        '<tr><td colspan="9" style="text-align:center;">Gagal memuat data.</td></tr>';
     }
+  } catch (e) {
+    tbody.innerHTML =
+      '<tr><td colspan="9" style="text-align:center;">Error koneksi ke database.</td></tr>';
+  }
 }
 
 function renderMonitoringTable(page) {
-    const tbody = document.getElementById("tbody-monitoring");
-    if (!tbody) return;
-    
-    tbody.innerHTML = "";
-    const limit = 10;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const pageData = monitoringDataCache.slice(start, end); // Ambil potongan data
+  const tbody = document.getElementById("tbody-monitoring");
+  if (!tbody) return;
 
-    if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Tidak ada data ditemukan.</td></tr>';
-        document.getElementById("pagination-MONITORING").innerHTML = "";
-        return;
-    }
+  tbody.innerHTML = "";
+  const limit = 10;
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  const pageData = monitoringDataCache.slice(start, end);
 
-    // Gambar baris tabel
-    pageData.forEach((row, i) => {
-        tbody.innerHTML += `
+  if (pageData.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="9" style="text-align:center;">Tidak ada data ditemukan.</td></tr>';
+    document.getElementById("pagination-MONITORING").innerHTML = "";
+    return;
+  }
+
+  pageData.forEach((row, i) => {
+    tbody.innerHTML += `
             <tr>
                 <td>${start + i + 1}</td>
                 <td>${row.tahun}</td>
@@ -475,63 +470,57 @@ function renderMonitoringTable(page) {
                 <td>${row.exib}</td>
                 <td>${row.total}</td>
             </tr>`;
-    });
+  });
 
-    // Jalankan navigasi angka halaman
-    renderPagination("MONITORING", monitoringDataCache.length, page, limit);
+  renderPagination("MONITORING", monitoringDataCache.length, page, limit);
 }
 
 // ====================================================================
 // FITUR 2: AUTO LOGOUT FORCE (1 JAM) - SILENT KILLER
 // ====================================================================
-const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 1 Jam (Ubah ke 10000 kalau mau tes 10 detik)
+const INACTIVITY_LIMIT_MS = 60 * 60 * 1000;
 const STORAGE_KEY_ACTIVITY = "shsk_last_activity";
 
 function initAutoLogout() {
-    // 1. Cek saat halaman dimuat: Apakah sudah expired?
-    checkActivityStatus();
+  checkActivityStatus();
 
-    // 2. Pasang pendengar gerakan
-    // Setiap user gerak/klik, kita reset timer di LocalStorage
-    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
-        document.addEventListener(evt, () => {
-            resetActivityTimer();
-        }, true);
-    });
+  ["click", "mousemove", "keypress", "scroll", "touchstart"].forEach((evt) => {
+    document.addEventListener(
+      evt,
+      () => {
+        resetActivityTimer();
+      },
+      true
+    );
+  });
 
-    // 3. Cek berkala tiap 1 menit (Jaga-jaga kalau browser didiamkan terbuka)
-    setInterval(checkActivityStatus, 60000); 
+  setInterval(checkActivityStatus, 60000);
 }
 
 function resetActivityTimer() {
-    // Simpan waktu sekarang sebagai waktu terakhir aktif
-    localStorage.setItem(STORAGE_KEY_ACTIVITY, Date.now());
+  localStorage.setItem(STORAGE_KEY_ACTIVITY, Date.now());
 }
 
 function checkActivityStatus() {
-    const lastActive = localStorage.getItem(STORAGE_KEY_ACTIVITY);
-    
-    // Kalau belum pernah login/aktif, set sekarang
-    if (!lastActive) {
-        resetActivityTimer();
-        return;
-    }
+  const lastActive = localStorage.getItem(STORAGE_KEY_ACTIVITY);
 
-    const diff = Date.now() - parseInt(lastActive);
+  if (!lastActive) {
+    resetActivityTimer();
+    return;
+  }
 
-    // 🔥 LOGIKA TENDANGAN MAUT 🔥
-    if (diff > INACTIVITY_LIMIT_MS) {
-        forceLogout();
-    }
+  const diff = Date.now() - parseInt(lastActive);
+
+  if (diff > INACTIVITY_LIMIT_MS) {
+    forceLogout();
+  }
 }
 
 function forceLogout() {
-    // Hapus data sesi
-    localStorage.removeItem("shsk_user");
-    localStorage.removeItem(STORAGE_KEY_ACTIVITY);
-    
-    // Redirect langsung (Tanpa Ba-Bi-Bu)
-    window.location.href = "index.html"; 
+  localStorage.removeItem("shsk_user");
+  localStorage.removeItem(STORAGE_KEY_ACTIVITY);
+
+  window.location.href = "index.html";
 }
 
 // ====================================================================
@@ -696,30 +685,33 @@ async function resetPasswordFinal() {
 // INITIALIZATION
 // ====================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Init Auto Logout (PENTING)
-  initAutoLogout(); 
-  resetActivityTimer();   
+  initAutoLogout();
+  resetActivityTimer();
   initSmartSearch();
 
-  // 2. Cek Halaman Dashboard User
   if (document.querySelector(".dashboard-page")) {
     initPenggunaDashboard();
-  } 
-  // 3. Cek Halaman Petugas
-  else if (document.querySelector(".petugas-page")) {
+  } else if (document.querySelector(".petugas-page")) {
     loadProfilePetugas();
     updateSidebarCounts();
-    
-    // Init Grafik Filter
+
     if (document.querySelector(".filter-btn.active"))
       updateChartFilter("year", document.querySelector(".filter-btn.active"));
-    
+
     if (document.getElementById("chartExibhitum"))
-      updateExibChart("year", document.querySelector(".filter-btn-ex.active"), "ex");
-    
+      updateExibChart(
+        "year",
+        document.querySelector(".filter-btn-ex.active"),
+        "ex"
+      );
+
     if (document.getElementById("chartPengesahan"))
-      updateExibChart("year", document.querySelector(".filter-btn-psh.active"), "psh");
-    
+      updateExibChart(
+        "year",
+        document.querySelector(".filter-btn-psh.active"),
+        "psh"
+      );
+
     initAnnualReportUI();
     renderBulkForm("SHSK");
     renderBulkForm("SERTIFIKASI");
@@ -737,24 +729,26 @@ function toggleSidebar() {
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
 // ====================================================================
 function showSection(id, el) {
-  // 1. SEMBUNYIKAN SEMUA HALAMAN KONTEN
-  document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
-  
-  // 2. MUNCULKAN HALAMAN TARGET
+  document
+    .querySelectorAll(".main-content > div")
+    .forEach((d) => d.classList.add("hidden"));
+
   const targetSection = document.getElementById(`sec-${id}`);
   if (targetSection) {
     targetSection.classList.remove("hidden");
   }
 
-  // 3. RESET MENU (Matikan semua lampu active)
-  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => m.classList.remove("active"));
+  document
+    .querySelectorAll(".menu-item, .submenu-item")
+    .forEach((m) => m.classList.remove("active"));
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
     m.classList.remove("open");
   });
-  document.querySelectorAll(".submenu-container").forEach((c) => c.classList.remove("show"));
+  document
+    .querySelectorAll(".submenu-container")
+    .forEach((c) => c.classList.remove("show"));
 
-  // 4. NYALAKAN MENU YANG DIKLIK
   if (el) {
     el.classList.add("active");
     if (el.classList.contains("submenu-item")) {
@@ -771,26 +765,28 @@ function showSection(id, el) {
   }
 
   // ============================================================
-  // 🔥 LOGIKA PEMANGGIL DATA OTOMATIS 🔥
+  // LOGIKA PEMANGGIL DATA OTOMATIS
   // ============================================================
-  // Di dalam fungsi showSection bagian monitoring:
-if (id === "monitoring") {
-    if(document.getElementById("monFilterBulan")) document.getElementById("monFilterBulan").value = "";
-    if(document.getElementById("monFilterTahun")) document.getElementById("monFilterTahun").value = "";
-    if(document.getElementById("monSearch")) document.getElementById("monSearch").value = "";
-    
-    loadMonitoringData(); // Ini memicu penarikan data awal
-}
+  if (id === "monitoring") {
+    if (document.getElementById("monFilterBulan"))
+      document.getElementById("monFilterBulan").value = "";
+    if (document.getElementById("monFilterTahun"))
+      document.getElementById("monFilterTahun").value = "";
+    if (document.getElementById("monSearch"))
+      document.getElementById("monSearch").value = "";
 
-  // B. Jika Klik Menu DATA ARSIP LAINNYA
-  else if (id.includes("data")) {
-      const type = id.includes("shsk") ? "SHSK" : 
-                   id.includes("sertifikasi") ? "SERTIFIKASI" : 
-                   id.includes("service") ? "SERVICE" : "EXIBHITUM";
-      loadData(type);
+    loadMonitoringData();
+  } else if (id.includes("data")) {
+    const type = id.includes("shsk")
+      ? "SHSK"
+      : id.includes("sertifikasi")
+      ? "SERTIFIKASI"
+      : id.includes("service")
+      ? "SERVICE"
+      : "EXIBHITUM";
+    loadData(type);
   }
 
-  // AUTO CLOSE SIDEBAR (Khusus tampilan Mobile)
   if (window.innerWidth <= 768) {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
@@ -800,7 +796,6 @@ if (id === "monitoring") {
     }
   }
 }
-
 
 // ====================================================================
 // 5. CHART UI
@@ -989,7 +984,7 @@ function loadProfilePetugas() {
   speakWelcome(user.nama);
 }
 // ====================================================================
-// FITUR: UPDATE SIDEBAR BADGE COUNT
+// UPDATE SIDEBAR BADGE COUNT
 // ====================================================================
 async function updateSidebarCounts() {
   try {
@@ -997,12 +992,11 @@ async function updateSidebarCounts() {
     if (res.status === "SUCCESS") {
       const d = res.data;
 
-      // Helper animasii
       const setBadge = (id, count) => {
         const el = document.getElementById(id);
         if (el) {
           el.innerText = count;
-          el.classList.add("badge-bump"); // Efek membal
+          el.classList.add("badge-bump");
           setTimeout(() => el.classList.remove("badge-bump"), 300);
         }
       };
@@ -1018,14 +1012,12 @@ async function updateSidebarCounts() {
 }
 
 // ====================================================================
-// 7. BULK INPUT ENGINE (UPDATED: HYBRID PACKET & UI FIX)
+// 7. BULK INPUT ENGINE
 // ====================================================================
-
 window.togglePacketMode = function (index, mode, btn) {
-  const parent = btn.parentNode.parentNode; // Naik ke parent container tombol
+  const parent = btn.parentNode.parentNode;
   const isAlreadyActive = btn.classList.contains("active");
 
-  // Reset semua tombol paket di baris ini
   parent
     .querySelectorAll(".btn-packet")
     .forEach((b) => b.classList.remove("active"));
@@ -1044,7 +1036,6 @@ window.togglePacketMode = function (index, mode, btn) {
     packetModeState[index] = mode;
     btn.classList.add("active");
 
-    // Tentukan target sertifikat berdasarkan mode
     let targets = [];
     if (mode === "NTR") targets = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
     else if (mode === "OB") targets = ["KONSTRUKSI", "PERLENGKAPAN"];
@@ -1053,7 +1044,6 @@ window.togglePacketMode = function (index, mode, btn) {
     else if (mode === "ENDORS_OB")
       targets = ["ENDORS KONSTRUKSI", "ENDORS PERLENGKAPAN"];
 
-    // Centang otomatis & kunci checkbox target
     checkboxes.forEach((cb) => {
       if (targets.includes(cb.value)) {
         cb.checked = true;
@@ -1081,12 +1071,10 @@ window.renderCertForms = function (index) {
   const currentYear = new Date().getFullYear();
   const currentMode = packetModeState[index];
 
-  // --- 1. RENDER FORM PAKET (SHARED SECTION) ---
   if (currentMode) {
     let title = "";
     let packetCerts = [];
 
-    // Tentukan Judul & Isi Paket
     if (currentMode === "NTR") {
       title = "PAKET NTR";
       packetCerts = ["KONSTRUKSI", "PERLENGKAPAN", "RADIO"];
@@ -1122,7 +1110,6 @@ window.renderCertForms = function (index) {
         </div>
     `;
 
-    // Loop Item Paket (Hanya Upload Sertifikat & No Sert)
     selectedCerts.forEach((cert) => {
       if (packetCerts.includes(cert)) {
         let defaultNo = cert.includes("RADIO") ? "AL.502" : "AL.501";
@@ -1139,7 +1126,6 @@ window.renderCertForms = function (index) {
     });
   }
 
-  // --- 2. RENDER FORM ECERAN (SISANYA) ---
   selectedCerts.forEach((cert) => {
     if (currentMode) {
       let packetCerts = [];
@@ -1185,26 +1171,21 @@ window.renderCertForms = function (index) {
 };
 
 // ====================================================================
-// CORE: GENERATOR NOMOR URUT EXIBHITUM
+// GENERATOR NOMOR URUT EXIBHITUM
 // ====================================================================
 window.updateExibhitumForms = function () {
-  // 1. Ambil Data Awal
   if (!cachedLastNumber) return;
 
   const parts = cachedLastNumber.split("/");
-  // Format Baru: AL.531 / XX / YY / KSOP.PKU / 2026
-  // index array:   0      1    2       3        4
 
   let currentX = parseInt(parts[1]);
   let currentY = parseInt(parts[2]);
 
-  // Ambil tahun secara dinamis dari data terakhir, atau pakai tahun sekarang
   let currentYear = parts[4] || new Date().getFullYear();
 
   const countInput = document.getElementById("bulkCountExibhitum");
   const count = countInput ? parseInt(countInput.value) : 1;
 
-  // URUTAN PATEN
   const bookTypes = [
     "DECK",
     "MESIN",
@@ -1215,11 +1196,9 @@ window.updateExibhitumForms = function () {
     "BALLAST",
   ];
 
-  // Fungsi Helper Penomoran (FORMAT BARU DENGAN GARIS MIRING)
   const getNextAndIncrement = () => {
     const pad = (num) => num.toString().padStart(2, "0");
 
-    // 🔥 PERUBAHAN ADA DI SINI (Ganti titik jadi garis miring) 🔥
     const numStr = `AL.531/${pad(currentX)}/${pad(
       currentY
     )}/KSOP.PKU/${currentYear}`;
@@ -1232,7 +1211,6 @@ window.updateExibhitumForms = function () {
     return numStr;
   };
 
-  // 2. LOOP SETIAP FORM (Form 1, Form 2, dst)
   for (let i = 1; i <= count; i++) {
     const container = document.getElementById(`dynamic-nomor-${i}`);
     if (!container) continue;
@@ -1240,7 +1218,6 @@ window.updateExibhitumForms = function () {
     let htmlPsh = "";
     let htmlEx = "";
 
-    // FASE 1: PENGESAHAN
     bookTypes.forEach((b) => {
       const ck = document.querySelector(`input[name="check_PSH_${b}_${i}"]`);
       if (ck && ck.checked) {
@@ -1253,7 +1230,6 @@ window.updateExibhitumForms = function () {
       }
     });
 
-    // FASE 2: EXIBHITUM
     bookTypes.forEach((b) => {
       const ck = document.querySelector(`input[name="check_EX_${b}_${i}"]`);
       if (ck && ck.checked) {
@@ -1266,7 +1242,6 @@ window.updateExibhitumForms = function () {
       }
     });
 
-    // Update Tampilan
     if (htmlEx === "" && htmlPsh === "") {
       container.innerHTML =
         "<div style='text-align:center; padding:10px; color:#aaa; font-style:italic;'>Belum ada buku yang dipilih.</div>";
@@ -1322,7 +1297,7 @@ window.handleFileSelect = function (input) {
 };
 
 // ====================================================================
-// FUNGSI RENDER FORM (PERBAIKAN V13.2)
+// FUNGSI RENDER FORM
 // ====================================================================
 function renderBulkForm(type) {
   let countSelectId, containerId;
@@ -1604,7 +1579,6 @@ async function handleBulkSubmit(type) {
     btnId = "btn-save-EXIBHITUM";
   }
 
-  // Cek tombol mana yang aktif (Tombol Update atau Save)
   let btnSave = document.getElementById(`btn-update-${type}`);
   if (!btnSave || btnSave.classList.contains("hidden")) {
     btnSave = document.getElementById(btnId);
@@ -1620,12 +1594,10 @@ async function handleBulkSubmit(type) {
 
   const items = [];
 
-  // --- LOOPING PENGAMBILAN DATA ---
   for (let i = 1; i <= count; i++) {
     const itemData = {};
     let hasData = false;
 
-    // Helper File
     const getFile = (name) => {
       const el = form.querySelector(`[name="${name}"]`);
       return el && el.files.length > 0 ? el.files[0] : null;
@@ -1638,7 +1610,6 @@ async function handleBulkSubmit(type) {
         r.readAsDataURL(file);
       });
 
-    // 1. SERTIFIKASI
     if (type === "SERTIFIKASI") {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       const globalData = {};
@@ -1685,7 +1656,6 @@ async function handleBulkSubmit(type) {
           files: [...sharedFiles],
         };
 
-        // PENTING: Ambil No Urut buat cek Edit/Baru
         rowItem.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
         rowItem.oldFolderUrl = form.querySelector(
           `[name="oldFolderUrl_${i}"]`
@@ -1761,10 +1731,7 @@ async function handleBulkSubmit(type) {
           rowItem.files.push({ jenis: "sertifikat", ...(await read(fSert)) });
         items.push(rowItem);
       }
-    }
-
-    // 2. SHSK
-    else if (type === "SHSK") {
+    } else if (type === "SHSK") {
       const inputs = form.querySelectorAll(`[name$="_${i}"]`);
       inputs.forEach((input) => {
         const key = input.name.replace(`_${i}`, "");
@@ -1789,10 +1756,7 @@ async function handleBulkSubmit(type) {
       const fPnbp = getFile(`pnbp_${i}`);
       if (fPnbp) itemData.files.push({ jenis: "pnbp", ...(await read(fPnbp)) });
       items.push(itemData);
-    }
-
-    // 3. SERVICE
-    else if (type === "SERVICE") {
+    } else if (type === "SERVICE") {
       const penyedia = form.querySelector(
         `[name="namaPenyediaJasa_${i}"]`
       ).value;
@@ -1837,34 +1801,37 @@ async function handleBulkSubmit(type) {
           });
         items.push(itemData);
       }
-    }
-
-    // 4. EXIBHITUM (VERSI ANTI-DOUBLING & ANTI-ZONK)
-    else if (type === "EXIBHITUM") {
+    } else if (type === "EXIBHITUM") {
       const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
 
       if (nama.trim()) {
-        // 🔥 Object baru di dalam loop agar data antar form tidak menimpa/doubling
-        let currentItem = {}; 
+        let currentItem = {};
 
         currentItem.namaKapal = nama.toUpperCase();
         currentItem.tanggal = form.querySelector(`[name="tanggal_${i}"]`).value;
-        currentItem.perusahaan = form.querySelector(`[name="perusahaan_${i}"]`).value.toUpperCase();
-        currentItem.pup = form.querySelector(`[name="pup_${i}"]`).value; // Boleh kosong
+        currentItem.perusahaan = form
+          .querySelector(`[name="perusahaan_${i}"]`)
+          .value.toUpperCase();
+        currentItem.pup = form.querySelector(`[name="pup_${i}"]`).value;
 
         currentItem.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
-        currentItem.oldFolderUrl = form.querySelector(`[name="oldFolderUrl_${i}"]`).value;
+        currentItem.oldFolderUrl = form.querySelector(
+          `[name="oldFolderUrl_${i}"]`
+        ).value;
 
         const jenisBukuArray = [];
         const nomorSuratArray = [];
-        const checkedBoxes = form.querySelectorAll(`input[type="checkbox"][name*="_${i}"]:checked`);
-        
+        const checkedBoxes = form.querySelectorAll(
+          `input[type="checkbox"][name*="_${i}"]:checked`
+        );
+
         checkedBoxes.forEach((cb) => {
           let safeName = cb.value.replace(". ", ".");
-          const inputNomor = form.querySelector(`input[name="nomorSurat_${safeName}_${i}"]`);
+          const inputNomor = form.querySelector(
+            `input[name="nomorSurat_${safeName}_${i}"]`
+          );
           const nomorVal = inputNomor ? inputNomor.value.trim() : "";
 
-          // 🔥 Anti baris kosong: Hanya ambil buku yang ADA nomornya
           if (nomorVal !== "") {
             jenisBukuArray.push(cb.value);
             nomorSuratArray.push(nomorVal);
@@ -1879,9 +1846,17 @@ async function handleBulkSubmit(type) {
 
           currentItem.files = [];
           const fPerm = getFile(`permohonan_${i}`);
-          if (fPerm) currentItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+          if (fPerm)
+            currentItem.files.push({
+              jenis: "permohonan",
+              ...(await read(fPerm)),
+            });
           const fBilling = getFile(`billing_${i}`);
-          if (fBilling) currentItem.files.push({ jenis: "billing", ...(await read(fBilling)) });
+          if (fBilling)
+            currentItem.files.push({
+              jenis: "billing",
+              ...(await read(fBilling)),
+            });
 
           items.push(currentItem);
         }
@@ -1892,7 +1867,6 @@ async function handleBulkSubmit(type) {
   // ==========================================================
   // INI LOGIKA CERDASNYA: BARU vs EDIT
   // ==========================================================
-
   if (items.length === 0) {
     showPopup("Tidak ada data untuk disimpan.", "error");
     btnSave.innerHTML = originalText;
@@ -1900,37 +1874,31 @@ async function handleBulkSubmit(type) {
     return;
   }
 
-  // Cek ID Data (noUrut) pada item pertama
   const firstItem = items[0];
   const isEditMode = firstItem.noUrut && String(firstItem.noUrut).trim() !== "";
 
   let payload = {};
 
   if (isEditMode) {
-    // --- UPDATE (TIMPA DATA LAMA) ---
     let action = "";
     if (type === "SHSK") action = "updateSHSK";
     else if (type === "SERTIFIKASI") action = "updateSertifikasi";
     else if (type === "SERVICE") action = "updateService";
     else if (type === "EXIBHITUM") action = "updateExibhitum";
 
-    // Kirim sebagai single object
     payload = { action: action, ...firstItem };
     console.log("Mengirim Update:", payload);
   } else {
-    // --- UPLOAD (BARIS BARU) ---
     let action = "";
     if (type === "SHSK") action = "uploadBulkSHSK";
     else if (type === "SERTIFIKASI") action = "uploadBulkSertifikasi";
     else if (type === "SERVICE") action = "uploadBulkService";
     else if (type === "EXIBHITUM") action = "uploadBulkExibhitum";
 
-    // Kirim array items
     payload = { action: action, items: items };
     console.log("Mengirim Baru:", payload);
   }
 
-  // --- KIRIM ---
   try {
     const res = await postData(payload);
     handleResponse(res, type, form, originalText, btnSave, isEditMode);
@@ -1959,11 +1927,9 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
       updateChartFilter(currentFilter);
       updateSidebarCounts();
 
-      // 2. Refresh Grafik Statistik Exibhitum (Jika ada)
       const btnEx = document.querySelector(".filter-btn-ex.active");
       if (btnEx) updateExibChart(currentFilter, btnEx, "ex");
 
-      // 3. Refresh Grafik Statistik Pengesahan (Jika ada)
       const btnPsh = document.querySelector(".filter-btn-psh.active");
       if (btnPsh) updateExibChart(currentFilter, btnPsh, "psh");
 
@@ -1975,20 +1941,18 @@ function handleResponse(res, type, form, btnText, btnEl, isEdit) {
 }
 
 // ====================================================================
-// 1. FUNGSI EDIT DATA
+// FUNGSI EDIT DATA
 // ====================================================================
 function editData(type, rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
   const noUrut = rowData["NO_URUT"] || rowData["NO"];
 
-  // 🔥 KHUSUS EXIBHITUM PAKAI SMART EDIT 🔥
   if (type === "EXIBHITUM") {
     openSmartEditModal(noUrut);
     return;
   }
   let formId, countId;
 
-  // 1. Buka Section Input
   if (type === "SHSK") {
     formId = "formSHSK";
     countId = "bulkCountSHSK";
@@ -2005,14 +1969,12 @@ function editData(type, rowDataStr) {
 
   showSection(`${type.toLowerCase()}-input`);
 
-  // 2. Reset Form ke Mode Single
   const countSelect = document.getElementById(countId);
   if (countSelect) countSelect.value = "1";
   renderBulkForm(type);
 
   const form = document.getElementById(formId);
 
-  // Helper Isi Nilai
   const setVal = (name, val) => {
     const el = form.querySelector(`[name="${name}_1"]`);
     if (el) {
@@ -2023,13 +1985,11 @@ function editData(type, rowDataStr) {
     }
   };
 
-  // Helper Cari Data
   const getRowVal = (keys) => {
     for (let k of keys) if (rowData[k] !== undefined) return rowData[k];
     return "";
   };
 
-  // 3. ISI DATA
   setVal("noUrut", getRowVal(["NO_URUT", "NO URUT", "NO"]));
   setVal("oldFolderUrl", rowData.LINK_FOLDER);
 
@@ -2056,7 +2016,6 @@ function editData(type, rowDataStr) {
     setVal("pemeriksa", getRowVal(["NAMA_PEMERIKSA"]));
     setVal("keterangan", getRowVal(["KETERANGAN"]));
 
-    // Checkbox Sertifikat
     const jenisSert = getRowVal(["JENIS_SERTIFIKAT", "JENIS"]);
     const certCheck = form.querySelector(
       `input[name="cert_select_1"][value="${jenisSert}"]`
@@ -2070,7 +2029,6 @@ function editData(type, rowDataStr) {
       setVal(`billing_${jenisSert}`, getRowVal(["KODE_BILLING"]));
     }
 
-    //  PAKSA LOCK SEMUA CHECKBOX DI AWAL
     form
       .querySelectorAll(`input[name="cert_select_1"]`)
       .forEach((c) => (c.disabled = true));
@@ -2107,7 +2065,7 @@ function editData(type, rowDataStr) {
         }
       }
     }
-    //  LOCK CHECKBOX SERVICE
+
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
@@ -2140,19 +2098,17 @@ function editData(type, rowDataStr) {
       );
       if (noSuratInput) noSuratInput.value = nomor;
     }
-    //  LOCK CHECKBOX EXIBHITUM
+
     form
       .querySelectorAll('[type="checkbox"]')
       .forEach((c) => (c.disabled = true));
   }
 
-  // 4. FINAL LOCK: KUNCI SEMUA INPUT (TERMASUK TEXT & SELECT)
   const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => {
     i.disabled = true;
   });
 
-  // 5. SIAPKAN TOMBOL "UBAH DATA"
   const btnSaveOriginal = document.getElementById(`btn-save-${type}`);
   if (btnSaveOriginal) btnSaveOriginal.classList.add("hidden");
 
@@ -2186,11 +2142,9 @@ function enableEditMode(type) {
 
   const form = document.getElementById(formId);
 
-  //  INI MANTRA PEMBUKA GEMBOKNYA:
   const allInputs = form.querySelectorAll("input, select, textarea");
   allInputs.forEach((i) => (i.disabled = false));
 
-  // Ganti Tombol
   document.getElementById(`btn-unlock-${type}`).classList.add("hidden");
 
   let btnUpdate = document.getElementById(`btn-update-${type}`);
@@ -2232,7 +2186,7 @@ function cancelEdit(type) {
 }
 
 // ====================================================================
-// FITUR: EXPORT (TEKNIK HIDDEN IFRAME - DIRECT DOWNLOAD)
+// EXPORT
 // ====================================================================
 async function exportTriple(type) {
   const btn = event.currentTarget;
@@ -2273,13 +2227,10 @@ async function exportTriple(type) {
       showPopup("Laporan Siap! Download dimulai...", "success");
 
       res.files.forEach((f, index) => {
-        // Cek Error Backend
         if (f.error) {
           console.error(f.name + " Error: " + f.error);
           showPopup("Gagal: " + f.name, "error");
-        }
-        // Lakukan Download jika ada URL
-        else if (f.url) {
+        } else if (f.url) {
           setTimeout(() => {
             downloadDirectly(f.url);
             showPopup("Mendownload: " + f.name, "info");
@@ -2296,14 +2247,12 @@ async function exportTriple(type) {
   btn.disabled = false;
 }
 
-// --- FUNGSI RAHASIA: DOWNLOAD LEWAT IFRAME ---
 function downloadDirectly(url) {
   const iframe = document.createElement("iframe");
   iframe.style.display = "none";
   iframe.src = url;
   document.body.appendChild(iframe);
 
-  // Hapus iframe setelah 1 menit (bersih-bersih memori)
   setTimeout(() => {
     document.body.removeChild(iframe);
   }, 60000);
@@ -2314,7 +2263,7 @@ let filteredData = { SHSK: [], SERTIFIKASI: [], SERVICE: [], EXIBHITUM: [] };
 let currentPage = { SHSK: 1, SERTIFIKASI: 1, SERVICE: 1, EXIBHITUM: 1 };
 
 // ====================================================================
-// FUNGSI LOAD DATA (UPDATE: SORTING EXIBHITUM DESCENDING)
+// LOAD DATA
 // ====================================================================
 async function loadData(type) {
   let tbodyId;
@@ -2344,19 +2293,15 @@ async function loadData(type) {
     else if (type === "SERVICE") dateKey = "TANGGAL_VALIDASI_SERVICE_REPORT";
     else if (type === "EXIBHITUM") dateKey = "TANGGAL";
 
-    // --- SORTING LOGIC UPDATE ---
     data.sort((a, b) => {
-      // 1. Primary: Tanggal (Newest First)
       const dateA = new Date(a[dateKey]);
       const dateB = new Date(b[dateKey]);
 
-      // Kalau tanggal beda, urutkan berdasarkan tanggal
       if (type !== "EXIBHITUM") {
         if (dateA > dateB) return -1;
         if (dateA < dateB) return 1;
       }
 
-      // 2. Secondary
       if (type === "EXIBHITUM") {
         const getVal = (str) => {
           try {
@@ -2486,12 +2431,11 @@ function renderTable(type) {
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-    // Ambil ID Unik (NO_URUT)
+
     const uniqueId = row["NO_URUT"] || row["NO URUT"] || row["NO"];
 
     let tr = `<tr>`;
 
-    // 🔥 TAMBAHAN: KOLOM CHECKBOX (Default Hidden) 🔥
     tr += `<td class="col-check hidden">
              <input type="checkbox" class="bulk-check" value="${uniqueId}" onchange="updateDeleteCount('${type}')">
            </td>`;
@@ -2547,15 +2491,22 @@ function renderTable(type) {
   });
   renderPagination(type);
 }
+
 // ====================================================================
-// FUNGSI PAGINATION (SUPPORT MONITORING)
+// PAGINATION
 // ====================================================================
-function renderPagination(type, totalCustom = null, pageCustom = null, limitCustom = null) {
+function renderPagination(
+  type,
+  totalCustom = null,
+  pageCustom = null,
+  limitCustom = null
+) {
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
 
   const limit = limitCustom || (type === "EXIBHITUM" ? 25 : 10);
-  const totalRows = totalCustom !== null ? totalCustom : filteredData[type].length;
+  const totalRows =
+    totalCustom !== null ? totalCustom : filteredData[type].length;
   const current = pageCustom !== null ? pageCustom : currentPage[type];
   const totalPages = Math.ceil(totalRows / limit);
 
@@ -2564,12 +2515,13 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
     return;
   }
 
-  // SEMUA tipe data (termasuk MONITORING) sekarang memanggil goToPage
-  const funcName = "goToPage"; 
+  const funcName = "goToPage";
 
   let html = "";
   const prevDisabled = current === 1 ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="${funcName}('${type}', ${current - 1})"><i class="fa fa-chevron-left"></i></button>`;
+  html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="${funcName}('${type}', ${
+    current - 1
+  })"><i class="fa fa-chevron-left"></i></button>`;
 
   for (let i = 1; i <= totalPages; i++) {
     const activeClass = i === current ? "active" : "";
@@ -2577,30 +2529,28 @@ function renderPagination(type, totalCustom = null, pageCustom = null, limitCust
   }
 
   const nextDisabled = current === totalPages ? "disabled" : "";
-  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="${funcName}('${type}', ${current + 1})"><i class="fa fa-chevron-right"></i></button>`;
-  
+  html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="${funcName}('${type}', ${
+    current + 1
+  })"><i class="fa fa-chevron-right"></i></button>`;
+
   container.innerHTML = html;
 }
 
-
-// FUNGSI PINDAH HALAMAN
 function goToPage(type, pageNum) {
-    if (type === 'MONITORING') {
-        renderMonitoringTable(pageNum); // Hanya ganti tampilan tanpa loading API
-        return;
-    }
+  if (type === "MONITORING") {
+    renderMonitoringTable(pageNum);
+    return;
+  }
 
-    const limit = type === "EXIBHITUM" ? 25 : 10;
-    const totalRows = filteredData[type].length;
-    const totalPages = Math.ceil(totalRows / limit);
+  const limit = type === "EXIBHITUM" ? 25 : 10;
+  const totalRows = filteredData[type].length;
+  const totalPages = Math.ceil(totalRows / limit);
 
-    if (pageNum < 1 || pageNum > totalPages) return;
+  if (pageNum < 1 || pageNum > totalPages) return;
 
-    currentPage[type] = pageNum;
-    renderTable(type);
+  currentPage[type] = pageNum;
+  renderTable(type);
 }
-
-
 
 let pendingDelete = null;
 function prepareDelete(type, rowDataStr) {
@@ -2806,10 +2756,9 @@ function getMonthName(i) {
 }
 
 // ====================================================================
-// NEW FEATURES: CINEMATIC INTRO & MODAL LOGIC
+// CINEMATIC INTRO & MODAL LOGIC
 // ====================================================================
 function initCinematic() {
-  // Hanya jalankan animasi jika elemen intro ada
   const intro = document.getElementById("cinematic-intro");
   if (intro) {
     setTimeout(() => {
@@ -2835,14 +2784,12 @@ function closeLoginModal() {
 }
 
 // ====================================================================
-// FITUR AUTO-SYNC: SINKRONISASI DROPDOWN OTOMATIS (SERVER KE DEVICE)
+// AUTO-SYNC
 // ====================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Hanya jalan di halaman Petugas (Dashboard Admin)
   if (document.querySelector(".petugas-page")) {
     console.log("🔄 Memulai Auto-Sync Database Dropdown...");
 
-    // Jalankan fungsi sync secara paralel (Biar cepat)
     Promise.all([
       postData({ action: "getDataSertifikasi" }),
       postData({ action: "getDataSHSK" }),
@@ -2852,18 +2799,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((results) => {
         const [resSert, resSHSK, resServ, resExib] = results;
 
-        // 1. Masukkan Data Sertifikasi (Perusahaan & Bahan Kapal)
         if (resSert.status === "SUCCESS")
           updateSmartData(resSert.data, "SERTIFIKASI");
 
-        // 2. Masukkan Data SHSK (Pemilik)
         if (resSHSK.status === "SUCCESS") updateSmartData(resSHSK.data, "SHSK");
 
-        // 3. Masukkan Data Service (Service Station)
         if (resServ.status === "SUCCESS")
           updateSmartData(resServ.data, "SERVICE");
 
-        // 4. Masukkan Data Exibhitum (Perusahaan)
         if (resExib.status === "SUCCESS")
           updateSmartData(resExib.data, "EXIBHITUM");
 
@@ -2876,21 +2819,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ====================================================================
-// NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
+// NAVIGASI SIDEBAR
 // ====================================================================
 
 function showSection(id, el) {
-  document.querySelectorAll(".main-content > div").forEach((d) => d.classList.add("hidden"));
+  document
+    .querySelectorAll(".main-content > div")
+    .forEach((d) => d.classList.add("hidden"));
   const targetSection = document.getElementById(`sec-${id}`);
   if (targetSection) targetSection.classList.remove("hidden");
 
-  // Bersih-bersih menu aktif
-  document.querySelectorAll(".menu-item, .submenu-item").forEach((m) => m.classList.remove("active"));
+  document
+    .querySelectorAll(".menu-item, .submenu-item")
+    .forEach((m) => m.classList.remove("active"));
   document.querySelectorAll(".menu-item").forEach((m) => {
     m.classList.remove("parent-active");
     m.classList.remove("open");
   });
-  document.querySelectorAll(".submenu-container").forEach((c) => c.classList.remove("show"));
+  document
+    .querySelectorAll(".submenu-container")
+    .forEach((c) => c.classList.remove("show"));
 
   if (el) {
     el.classList.add("active");
@@ -2907,24 +2855,26 @@ function showSection(id, el) {
     }
   }
 
-  // --- 🔥 LOGIKA AUTO LOAD DATA 🔥 ---
   if (id === "monitoring") {
-      // Reset filter ke default saat menu diklik
-      if(document.getElementById("monFilterBulan")) document.getElementById("monFilterBulan").value = "";
-      if(document.getElementById("monFilterTahun")) document.getElementById("monFilterTahun").value = "";
-      if(document.getElementById("monSearch")) document.getElementById("monSearch").value = "";
-      
-      // Load data otomatis (Muncul semua)
-      loadMonitoringData(1); 
-  } 
-  else if (id.includes("data")) {
-      const type = id.includes("shsk") ? "SHSK" : 
-                   id.includes("sertifikasi") ? "SERTIFIKASI" : 
-                   id.includes("service") ? "SERVICE" : "EXIBHITUM";
-      loadData(type);
+    if (document.getElementById("monFilterBulan"))
+      document.getElementById("monFilterBulan").value = "";
+    if (document.getElementById("monFilterTahun"))
+      document.getElementById("monFilterTahun").value = "";
+    if (document.getElementById("monSearch"))
+      document.getElementById("monSearch").value = "";
+
+    loadMonitoringData(1);
+  } else if (id.includes("data")) {
+    const type = id.includes("shsk")
+      ? "SHSK"
+      : id.includes("sertifikasi")
+      ? "SERTIFIKASI"
+      : id.includes("service")
+      ? "SERVICE"
+      : "EXIBHITUM";
+    loadData(type);
   }
 
-  // Mobile sidebar auto-close
   if (window.innerWidth <= 768) {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
@@ -2935,34 +2885,29 @@ function showSection(id, el) {
   }
 }
 
-// 2. FUNGSI BUKA/TUTUP LACI SUBMENU (TANPA PINDAH HALAMAN)
 function toggleSubmenu(id) {
   const submenu = document.getElementById(id);
   if (!submenu) return;
 
-  const parentMenu = submenu.previousElementSibling; // Tombol Bapaknya
+  const parentMenu = submenu.previousElementSibling;
 
-  // Aksi Buka/Tutup (Toggle)
-  submenu.classList.toggle("show"); // Buka/Tutup Laci
+  submenu.classList.toggle("show");
   if (parentMenu) {
-    parentMenu.classList.toggle("open"); // Putar Panah
+    parentMenu.classList.toggle("open");
   }
 }
 
 // ====================================================================
-// FUNGSI ACCORDION (BUKA/TUTUP FORM INPUT)
+// ACCORDION
 // ====================================================================
 function toggleAccordion(element) {
-  // Element adalah header yang diklik
-  // Parent-nya adalah div class="accordion-item"
   const item = element.parentElement;
 
-  // Toggle class 'open' (CSS akan menangani display: block/none)
   item.classList.toggle("open");
 }
 
 // ====================================================================
-// FITUR 1: BULK DELETE (HAPUS MASSAL)
+// BULK DELETE
 // ====================================================================
 let isDeleteMode = false;
 
@@ -2971,7 +2916,6 @@ function toggleDeleteMode(type) {
   const btn = document.getElementById(`btn-mode-hapus-${type}`);
   const confirmBtn = document.getElementById(`btn-confirm-hapus-${type}`);
 
-  // Toggle Kolom Checkbox di Tabel
   const checkCols = document.querySelectorAll(
     "#table-" + type.toLowerCase() + " .col-check"
   );
@@ -2986,7 +2930,7 @@ function toggleDeleteMode(type) {
     btn.style.background = "#555";
     confirmBtn.classList.add("hidden");
     checkCols.forEach((el) => el.classList.add("hidden"));
-    // Uncheck semua
+
     document
       .querySelectorAll(".bulk-check")
       .forEach((cb) => (cb.checked = false));
@@ -3001,32 +2945,33 @@ function updateDeleteCount(type) {
   document.getElementById(`count-hapus-${type}`).innerText = count;
 }
 
-// 1. Fungsi pemicu modal
 function executeBulkDelete(type) {
-  const checked = document.querySelectorAll("#table-" + type.toLowerCase() + " .bulk-check:checked");
+  const checked = document.querySelectorAll(
+    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+  );
   if (checked.length === 0) return showPopup("Pilih data dulu!", "error");
 
-  // Update teks di modal custom
-  document.getElementById("bulk-confirm-message").innerText = `Yakin hapus ${checked.length} data ini secara permanen?`;
-  
-  // Pasang fungsi klik ke tombol "Ya" di modal
-  document.getElementById("btn-do-bulk-delete").onclick = function() {
-      processBulkDelete(type);
+  document.getElementById(
+    "bulk-confirm-message"
+  ).innerText = `Yakin hapus ${checked.length} data ini secara permanen?`;
+
+  document.getElementById("btn-do-bulk-delete").onclick = function () {
+    processBulkDelete(type);
   };
 
   document.getElementById("modal-bulk-confirm").classList.remove("hidden");
 }
 
-// 2. Fungsi penutup modal
 function closeBulkConfirm() {
   document.getElementById("modal-bulk-confirm").classList.add("hidden");
 }
 
-// 3. Fungsi inti eksekusi ke Server
 async function processBulkDelete(type) {
-  closeBulkConfirm(); 
-  
-  const checked = document.querySelectorAll("#table-" + type.toLowerCase() + " .bulk-check:checked");
+  closeBulkConfirm();
+
+  const checked = document.querySelectorAll(
+    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+  );
   const ids = Array.from(checked).map((cb) => cb.value);
   const btn = document.getElementById(`btn-confirm-hapus-${type}`);
   const oriText = btn.innerHTML;
@@ -3047,23 +2992,21 @@ async function processBulkDelete(type) {
   } catch (e) {
     console.error("Timeout server:", e);
   } finally {
-    // 🔥 Kuncinya di sini: Apapun hasilnya, tabel web ditarik ulang supaya sinkron
     btn.innerHTML = oriText;
     btn.disabled = false;
-    toggleDeleteMode(type); 
-    loadData(type);         
+    toggleDeleteMode(type);
+    loadData(type);
     updateSidebarCounts();
   }
 }
 
 // ====================================================================
-// FITUR 2: SMART BATCH EDIT (DOMINO EFFECT)
+// SMART BATCH EDIT
 // ====================================================================
 
 async function openSmartEditModal(noUrut) {
   showPopup("Mengambil data satu kapal...", "info");
 
-  // Panggil Backend: Ambil semua data dengan ID Batch yang sama
   const res = await postData({ action: "getBatchExibhitum", noUrut: noUrut });
 
   if (res.status === "SUCCESS") {
@@ -3072,7 +3015,6 @@ async function openSmartEditModal(noUrut) {
 
     const first = rows[0];
 
-    // 1. Isi Data Umum
     document.getElementById("smart-id-batch").value = noUrut;
     document.getElementById("smart-date").value = formatDateForInput(
       first.TANGGAL
@@ -3081,11 +3023,9 @@ async function openSmartEditModal(noUrut) {
     document.getElementById("smart-ship").value = first.NAMA_KAPAL;
     document.getElementById("smart-pup").value = first.PUP;
 
-    // 2. Render List Buku
     const container = document.getElementById("smart-list-container");
     container.innerHTML = "";
 
-    // Urutkan biar PSH diatas, EX dibawah
     rows.sort((a, b) => {
       const isAEx = a.JENIS_BUKU.includes("EX");
       const isBEx = b.JENIS_BUKU.includes("EX");
@@ -3097,7 +3037,6 @@ async function openSmartEditModal(noUrut) {
       const nomor = r.PENOMORAN;
       const isPsh = jenis.includes("PSH") || jenis.includes("PENGESAHAN");
 
-      // Style beda buat PSH dan EX biar gampang liatnya
       const bg = isPsh ? "#fff3e0" : "#e3f2fd";
       const icon = isPsh ? "fa-stamp" : "fa-book";
       const color = isPsh ? "#ef6c00" : "#1565c0";
@@ -3131,7 +3070,6 @@ async function saveSmartBatch() {
   const btn = event.currentTarget;
   const oriText = btn.innerHTML;
 
-  // Ambil Data Umum
   const common = {
     tanggal: document.getElementById("smart-date").value,
     perusahaan: document.getElementById("smart-company").value,
@@ -3139,7 +3077,6 @@ async function saveSmartBatch() {
     pup: document.getElementById("smart-pup").value,
   };
 
-  // Ambil Data Nomor (Array)
   const items = [];
   document.querySelectorAll(".smart-item-input").forEach((inp) => {
     items.push({
@@ -3152,7 +3089,6 @@ async function saveSmartBatch() {
   btn.disabled = true;
 
   try {
-    // KIRIM KE BACKEND (LOGIKA DOMINO ADA DI SANA)
     const res = await postData({
       action: "updateSmartBatchExibhitum",
       noUrut: id,
@@ -3177,4 +3113,5 @@ async function saveSmartBatch() {
   btn.innerHTML = oriText;
   btn.disabled = false;
 }
-// --- END SCRIPT.JS V15.3 ---
+
+// --- END SCRIPT.JS V.17 ---
