@@ -1890,6 +1890,7 @@ async function handleBulkSubmit(type) {
         }
       }
     }
+  }
 
   // ==========================================================
   // INI LOGIKA CERDASNYA: BARU vs EDIT
