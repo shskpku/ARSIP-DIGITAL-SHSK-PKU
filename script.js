@@ -2536,17 +2536,35 @@ function renderPagination(
   }
 
   const funcName = "goToPage";
-
   let html = "";
+
   const prevDisabled = current === 1 ? "disabled" : "";
   html += `<button class="page-btn nav-btn" ${prevDisabled} onclick="${funcName}('${type}', ${
     current - 1
   })"><i class="fa fa-chevron-left"></i></button>`;
 
-  for (let i = 1; i <= totalPages; i++) {
-    const activeClass = i === current ? "active" : "";
-    html += `<button class="page-btn ${activeClass}" onclick="${funcName}('${type}', ${i})">${i}</button>`;
+  let pages = [];
+
+  if (totalPages <= 5) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    if (current <= 3) {
+      pages = [1, 2, 3, "...", totalPages];
+    } else if (current >= totalPages - 2) {
+      pages = [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    } else {
+      pages = [1, "...", current, "...", totalPages];
+    }
   }
+
+  pages.forEach((p) => {
+    if (p === "...") {
+      html += `<span class="page-dots">...</span>`;
+    } else {
+      const activeClass = p === current ? "active" : "";
+      html += `<button class="page-btn ${activeClass}" onclick="${funcName}('${type}', ${p})">${p}</button>`;
+    }
+  });
 
   const nextDisabled = current === totalPages ? "disabled" : "";
   html += `<button class="page-btn nav-btn" ${nextDisabled} onclick="${funcName}('${type}', ${
