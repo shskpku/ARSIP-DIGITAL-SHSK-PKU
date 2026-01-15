@@ -1418,14 +1418,31 @@ button:disabled {
   box-shadow: 0 2px 5px rgba(10, 25, 47, 0.3);
 }
 .table-card {
-  background: #fff;
-  padding: 0;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  max-height: 70vh; 
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative; 
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.data-table thead th {
+  position: sticky !important;
+  top: 0;
+  z-index: 50;
+  background-color: var(--navy) !important;
+  color: white !important;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+}
+.header-actions,
+.filter-card {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  background: white;
+  padding-bottom: 10px;
 }
 .table-responsive {
-  overflow-x: auto;
+  overflow: visible !important;
 }
 .data-table {
   width: 100%;
@@ -2594,23 +2611,27 @@ body.gateway-mode {
 }
 
 .row-separator-exib {
+  position: relative;
+  z-index: 5;
   background: linear-gradient(to right, #f8f9fa, #e9ecef) !important;
 }
 
 .row-separator-exib td {
-  background: #f1f5f9 !important;
-  color: #1e293b !important;
+  position: sticky;
+  left: 0;
+  background: #40bdf7 !important;
+  color: var(--navy);
   text-align: center;
-  font-weight: 700;
+  font-weight: bold;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   padding: 12px !important;
-  border-top: 2px solid #ffd700 !important;
-  border-bottom: 2px solid #ffd700 !important;
+  border-top: 2px solid var(--gold) !important;
+  border-bottom: 2px solid var(--gold) !important;
 }
 
 .row-separator-exib i {
-  color: var(--gold);
+  color: var(--neon-gold);
   margin-right: 10px;
 }
 .page-dots {
