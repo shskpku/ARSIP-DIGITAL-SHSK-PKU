@@ -32,7 +32,9 @@
           Yakin ingin menghapus data yang dipilih?
         </p>
         <div class="modal-buttons">
-          <button class="btn-cancel" onclick="closeBulkConfirm()">CANCEL</button>
+          <button class="btn-cancel" onclick="closeBulkConfirm()">
+            CANCEL
+          </button>
           <button
             id="btn-do-bulk-delete"
             class="btn-confirm-logout"
@@ -50,7 +52,9 @@
         <h3>Konfirmasi Keluar</h3>
         <p>Anda yakin ingin mengakhiri sesi?</p>
         <div class="modal-buttons">
-          <button class="btn-cancel" onclick="closeLogoutModal()">CANCEL</button>
+          <button class="btn-cancel" onclick="closeLogoutModal()">
+            CANCEL
+          </button>
           <button class="btn-confirm-logout" onclick="confirmLogout()">
             LOGOUT
           </button>
@@ -64,7 +68,9 @@
         <h3>Hapus Data?</h3>
         <p>Data ini akan dihapus permanen dari sistem.</p>
         <div class="modal-buttons">
-          <button class="btn-cancel" onclick="closeDeleteModal()">CANCEL</button>
+          <button class="btn-cancel" onclick="closeDeleteModal()">
+            CANCEL
+          </button>
           <button class="btn-confirm-logout" onclick="executeDelete()">
             DELETE
           </button>
@@ -574,66 +580,74 @@
       </div>
 
       <div id="sec-shsk-data" class="hidden">
-        <div class="header-actions">
-          <button
-            id="btn-mode-hapus-SHSK"
-            class="btn-del"
-            onclick="toggleDeleteMode('SHSK')"
-            style="background: #555"
-          >
-            <i class="fa fa-check-square"></i> SMART DELETE
-          </button>
-          <button
-            id="btn-confirm-hapus-SHSK"
-            class="btn-del hidden"
-            onclick="executeBulkDelete('SHSK')"
-            style="background: #ff3d00; animation: pulse 1s infinite"
-          >
-            <i class="fa fa-trash"></i> DELETE (<span id="count-hapus-SHSK"
-              >0</span
-            >)
-          </button>
-
-          <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
-            <i class="fa fa-sync"></i> Refresh
-          </button>
-          <button class="btn-action btn-export" onclick="exportTriple('SHSK')">
-            <i class="fa fa-file-excel"></i> Export
-          </button>
-        </div>
-        <div class="filter-card" style="border-left: 5px solid var(--gold)">
-          <div class="grid-filter">
-            <select id="filterSHSKBulan" class="form-control">
-              <option value="">Semua Bulan</option>
-              <option value="1">Januari</option>
-              <option value="2">Februari</option>
-              <option value="3">Maret</option>
-              <option value="4">April</option>
-              <option value="5">Mei</option>
-              <option value="6">Juni</option>
-              <option value="7">Juli</option>
-              <option value="8">Agustus</option>
-              <option value="9">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-            <select id="filterSHSKTahun" class="form-control">
-              <option value="">Semua Tahun</option>
-              <script>
-                for (let y = 2020; y <= 2030; y++)
-                  document.write(`<option value='${y}'>${y}</option>`);
-              </script>
-            </select>
-            <input
-              type="text"
-              id="searchSHSK"
-              placeholder="Cari Nama/Pemilik/No..."
-              class="form-control"
-            />
-            <button onclick="applyFilter('SHSK')" class="btn-action btn-filter">
-              <i class="fa fa-filter"></i> APPLY
+        <div class="sticky-header-container">
+          <div class="header-actions">
+            <button
+              id="btn-mode-hapus-SHSK"
+              class="btn-del"
+              onclick="toggleDeleteMode('SHSK')"
+              style="background: #ff0000"
+            >
+              <i class="fa fa-check-square"></i> SMART DELETE
             </button>
+            <button
+              id="btn-confirm-hapus-SHSK"
+              class="btn-del hidden"
+              onclick="executeBulkDelete('SHSK')"
+              style="background: #ff3d00; animation: pulse 1s infinite"
+            >
+              <i class="fa fa-trash"></i> DELETE (<span id="count-hapus-SHSK"
+                >0</span
+              >)
+            </button>
+
+            <button class="btn-action btn-refresh" onclick="loadData('SHSK')">
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('SHSK')"
+            >
+              <i class="fa fa-file-excel"></i> Export
+            </button>
+          </div>
+          <div class="filter-card" style="border-left: 5px solid var(--gold)">
+            <div class="grid-filter">
+              <select id="filterSHSKBulan" class="form-control">
+                <option value="">Semua Bulan</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select id="filterSHSKTahun" class="form-control">
+                <option value="">Semua Tahun</option>
+                <script>
+                  for (let y = 2020; y <= 2030; y++)
+                    document.write(`<option value='${y}'>${y}</option>`);
+                </script>
+              </select>
+              <input
+                type="text"
+                id="searchSHSK"
+                placeholder="Cari Nama/Pemilik/No..."
+                class="form-control"
+              />
+              <button
+                onclick="applyFilter('SHSK')"
+                class="btn-action btn-filter"
+              >
+                <i class="fa fa-filter"></i> APPLY
+              </button>
+            </div>
           </div>
         </div>
         <div class="table-card">
@@ -715,91 +729,93 @@
       </div>
 
       <div id="sec-sertifikasi-data" class="hidden">
-        <div class="header-actions">
-          <button
-            id="btn-mode-hapus-SERTIFIKASI"
-            class="btn-del"
-            onclick="toggleDeleteMode('SERTIFIKASI')"
-            style="background: #555"
-          >
-            <i class="fa fa-check-square"></i> SMART DELETE
-          </button>
-          <button
-            id="btn-confirm-hapus-SERTIFIKASI"
-            class="btn-del hidden"
-            onclick="executeBulkDelete('SERTIFIKASI')"
-            style="background: #ff3d00; animation: pulse 1s infinite"
-          >
-            <i class="fa fa-trash"></i> DELETE (<span
-              id="count-hapus-SERTIFIKASI"
-              >0</span
-            >)
-          </button>
-
-          <button
-            class="btn-action btn-refresh"
-            onclick="loadData('SERTIFIKASI')"
-          >
-            <i class="fa fa-sync"></i> Refresh
-          </button>
-          <button
-            class="btn-action btn-export"
-            onclick="exportTriple('SERTIFIKASI')"
-          >
-            <i class="fa fa-file-excel"></i> Export
-          </button>
-        </div>
-        <div
-          class="filter-card"
-          style="border-left: 5px solid var(--neon-blue)"
-        >
-          <div
-            class="grid-filter"
-            style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto"
-          >
-            <select id="filterSertBulan" class="form-control">
-              <option value="">Semua Bulan</option>
-              <option value="1">Januari</option>
-              <option value="2">Februari</option>
-              <option value="3">Maret</option>
-              <option value="4">April</option>
-              <option value="5">Mei</option>
-              <option value="6">Juni</option>
-              <option value="7">Juli</option>
-              <option value="8">Agustus</option>
-              <option value="9">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-            <select id="filterSertTahun" class="form-control">
-              <option value="">Semua Tahun</option>
-              <script>
-                for (let y = 2020; y <= 2030; y++)
-                  document.write(`<option value='${y}'>${y}</option>`);
-              </script>
-            </select>
-            <select id="filterSertJenis" class="form-control">
-              <option value="">Semua Jenis</option>
-            </select>
-            <input
-              type="text"
-              id="filterSertDaerah"
-              class="form-control"
-              placeholder="Cari Daerah Pelayaran"
-            />
-            <input
-              type="text"
-              id="searchSertifikasi"
-              placeholder="Cari Nama/Perusahaan..."
-              class="form-control"
-            />
+        <div class="sticky-header-container">
+          <div class="header-actions">
             <button
-              onclick="applyFilter('SERTIFIKASI')"
-              class="btn-action btn-filter"
+              id="btn-mode-hapus-SERTIFIKASI"
+              class="btn-del"
+              onclick="toggleDeleteMode('SERTIFIKASI')"
+              style="background: #ff0000"
             >
-              <i class="fa fa-filter"></i> APPLY
+              <i class="fa fa-check-square"></i> SMART DELETE
             </button>
+            <button
+              id="btn-confirm-hapus-SERTIFIKASI"
+              class="btn-del hidden"
+              onclick="executeBulkDelete('SERTIFIKASI')"
+              style="background: #ff3d00; animation: pulse 1s infinite"
+            >
+              <i class="fa fa-trash"></i> DELETE (<span
+                id="count-hapus-SERTIFIKASI"
+                >0</span
+              >)
+            </button>
+
+            <button
+              class="btn-action btn-refresh"
+              onclick="loadData('SERTIFIKASI')"
+            >
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('SERTIFIKASI')"
+            >
+              <i class="fa fa-file-excel"></i> Export
+            </button>
+          </div>
+          <div
+            class="filter-card"
+            style="border-left: 5px solid var(--neon-blue)"
+          >
+            <div
+              class="grid-filter"
+              style="grid-template-columns: 1fr 1fr 1fr 1fr 2fr auto"
+            >
+              <select id="filterSertBulan" class="form-control">
+                <option value="">Semua Bulan</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select id="filterSertTahun" class="form-control">
+                <option value="">Semua Tahun</option>
+                <script>
+                  for (let y = 2020; y <= 2030; y++)
+                    document.write(`<option value='${y}'>${y}</option>`);
+                </script>
+              </select>
+              <select id="filterSertJenis" class="form-control">
+                <option value="">Semua Jenis</option>
+              </select>
+              <input
+                type="text"
+                id="filterSertDaerah"
+                class="form-control"
+                placeholder="Cari Daerah Pelayaran"
+              />
+              <input
+                type="text"
+                id="searchSertifikasi"
+                placeholder="Cari Nama/Perusahaan..."
+                class="form-control"
+              />
+              <button
+                onclick="applyFilter('SERTIFIKASI')"
+                class="btn-action btn-filter"
+              >
+                <i class="fa fa-filter"></i> APPLY
+              </button>
+            </div>
           </div>
         </div>
         <div class="table-card">
@@ -879,72 +895,77 @@
       </div>
 
       <div id="sec-service-data" class="hidden">
-        <div class="header-actions">
-          <button
-            id="btn-mode-hapus-SERVICE"
-            class="btn-del"
-            onclick="toggleDeleteMode('SERVICE')"
-            style="background: #555"
-          >
-            <i class="fa fa-check-square"></i> SMART DELETE
-          </button>
-          <button
-            id="btn-confirm-hapus-SERVICE"
-            class="btn-del hidden"
-            onclick="executeBulkDelete('SERVICE')"
-            style="background: #ff3d00; animation: pulse 1s infinite"
-          >
-            <i class="fa fa-trash"></i> DELETE (<span id="count-hapus-SERVICE"
-              >0</span
-            >)
-          </button>
-
-          <button class="btn-action btn-refresh" onclick="loadData('SERVICE')">
-            <i class="fa fa-sync"></i> Refresh
-          </button>
-          <button
-            class="btn-action btn-export"
-            onclick="exportTriple('SERVICE')"
-          >
-            <i class="fa fa-file-excel"></i> Export
-          </button>
-        </div>
-        <div class="filter-card" style="border-left: 5px solid #00c853">
-          <div class="grid-filter">
-            <select id="filterServiceBulan" class="form-control">
-              <option value="">Semua Bulan</option>
-              <option value="1">Januari</option>
-              <option value="2">Februari</option>
-              <option value="3">Maret</option>
-              <option value="4">April</option>
-              <option value="5">Mei</option>
-              <option value="6">Juni</option>
-              <option value="7">Juli</option>
-              <option value="8">Agustus</option>
-              <option value="9">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-            <select id="filterServiceTahun" class="form-control">
-              <option value="">Semua Tahun</option>
-              <script>
-                for (let y = 2020; y <= 2030; y++)
-                  document.write(`<option value='${y}'>${y}</option>`);
-              </script>
-            </select>
-            <input
-              type="text"
-              id="searchService"
-              placeholder="Cari Penyedia/Kapal..."
-              class="form-control"
-            />
+        <div class="sticky-header-container">
+          <div class="header-actions">
             <button
-              onclick="applyFilter('SERVICE')"
-              class="btn-action btn-filter"
+              id="btn-mode-hapus-SERVICE"
+              class="btn-del"
+              onclick="toggleDeleteMode('SERVICE')"
+              style="background: #ff0000"
             >
-              <i class="fa fa-filter"></i> APPLY
+              <i class="fa fa-check-square"></i> SMART DELETE
             </button>
+            <button
+              id="btn-confirm-hapus-SERVICE"
+              class="btn-del hidden"
+              onclick="executeBulkDelete('SERVICE')"
+              style="background: #ff3d00; animation: pulse 1s infinite"
+            >
+              <i class="fa fa-trash"></i> DELETE (<span id="count-hapus-SERVICE"
+                >0</span
+              >)
+            </button>
+
+            <button
+              class="btn-action btn-refresh"
+              onclick="loadData('SERVICE')"
+            >
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('SERVICE')"
+            >
+              <i class="fa fa-file-excel"></i> Export
+            </button>
+          </div>
+          <div class="filter-card" style="border-left: 5px solid #00c853">
+            <div class="grid-filter">
+              <select id="filterServiceBulan" class="form-control">
+                <option value="">Semua Bulan</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select id="filterServiceTahun" class="form-control">
+                <option value="">Semua Tahun</option>
+                <script>
+                  for (let y = 2020; y <= 2030; y++)
+                    document.write(`<option value='${y}'>${y}</option>`);
+                </script>
+              </select>
+              <input
+                type="text"
+                id="searchService"
+                placeholder="Cari Penyedia/Kapal..."
+                class="form-control"
+              />
+              <button
+                onclick="applyFilter('SERVICE')"
+                class="btn-action btn-filter"
+              >
+                <i class="fa fa-filter"></i> APPLY
+              </button>
+            </div>
           </div>
         </div>
         <div class="table-card">
@@ -1016,78 +1037,81 @@
       </div>
 
       <div id="sec-exibhitum-data" class="hidden">
-        <div class="header-actions">
-          <button
-            id="btn-mode-hapus-EXIBHITUM"
-            class="btn-del"
-            onclick="toggleDeleteMode('EXIBHITUM')"
-            style="background: #555"
-          >
-            <i class="fa fa-check-square"></i> SMART DELETE
-          </button>
-          <button
-            id="btn-confirm-hapus-EXIBHITUM"
-            class="btn-del hidden"
-            onclick="executeBulkDelete('EXIBHITUM')"
-            style="background: #ff3d00; animation: pulse 1s infinite"
-          >
-            <i class="fa fa-trash"></i> Delete (<span id="count-hapus-EXIBHITUM"
-              >0</span
-            >)
-          </button>
-
-          <button
-            class="btn-action btn-refresh"
-            onclick="loadData('EXIBHITUM')"
-          >
-            <i class="fa fa-sync"></i> Refresh
-          </button>
-          <button
-            class="btn-action btn-export"
-            onclick="exportTriple('EXIBHITUM')"
-          >
-            <i class="fa fa-file-excel"></i> Export
-          </button>
-        </div>
-        <div
-          class="filter-card"
-          style="border-left: 5px solid var(--neon-blue)"
-        >
-          <div class="grid-filter">
-            <select id="filterExibBulan" class="form-control">
-              <option value="">Semua Bulan</option>
-              <option value="1">Januari</option>
-              <option value="2">Februari</option>
-              <option value="3">Maret</option>
-              <option value="4">April</option>
-              <option value="5">Mei</option>
-              <option value="6">Juni</option>
-              <option value="7">Juli</option>
-              <option value="8">Agustus</option>
-              <option value="9">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-            <select id="filterExibTahun" class="form-control">
-              <option value="">Semua Tahun</option>
-              <script>
-                for (let y = 2020; y <= 2030; y++)
-                  document.write(`<option value='${y}'>${y}</option>`);
-              </script>
-            </select>
-            <input
-              type="text"
-              id="searchExibhitum"
-              placeholder="Cari Kapal/Perusahaan..."
-              class="form-control"
-            />
+        <div class="sticky-header-container">
+          <div class="header-actions">
             <button
-              onclick="applyFilter('EXIBHITUM')"
-              class="btn-action btn-filter"
+              id="btn-mode-hapus-EXIBHITUM"
+              class="btn-del"
+              onclick="toggleDeleteMode('EXIBHITUM')"
+              style="background: #ff0000"
             >
-              <i class="fa fa-filter"></i> APPLY
+              <i class="fa fa-check-square"></i> SMART DELETE
             </button>
+            <button
+              id="btn-confirm-hapus-EXIBHITUM"
+              class="btn-del hidden"
+              onclick="executeBulkDelete('EXIBHITUM')"
+              style="background: #ff3d00; animation: pulse 1s infinite"
+            >
+              <i class="fa fa-trash"></i> Delete (<span
+                id="count-hapus-EXIBHITUM"
+                >0</span
+              >)
+            </button>
+
+            <button
+              class="btn-action btn-refresh"
+              onclick="loadData('EXIBHITUM')"
+            >
+              <i class="fa fa-sync"></i> Refresh
+            </button>
+            <button
+              class="btn-action btn-export"
+              onclick="exportTriple('EXIBHITUM')"
+            >
+              <i class="fa fa-file-excel"></i> Export
+            </button>
+          </div>
+          <div
+            class="filter-card"
+            style="border-left: 5px solid var(--neon-blue)"
+          >
+            <div class="grid-filter">
+              <select id="filterExibBulan" class="form-control">
+                <option value="">Semua Bulan</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select id="filterExibTahun" class="form-control">
+                <option value="">Semua Tahun</option>
+                <script>
+                  for (let y = 2020; y <= 2030; y++)
+                    document.write(`<option value='${y}'>${y}</option>`);
+                </script>
+              </select>
+              <input
+                type="text"
+                id="searchExibhitum"
+                placeholder="Cari Kapal/Perusahaan..."
+                class="form-control"
+              />
+              <button
+                onclick="applyFilter('EXIBHITUM')"
+                class="btn-action btn-filter"
+              >
+                <i class="fa fa-filter"></i> APPLY
+              </button>
+            </div>
           </div>
         </div>
         <div class="table-card">
