@@ -1,8 +1,8 @@
 /* ====================================================================
-   STYLE.CSS - SHSK PEKANBARU (FULL MASTER VERSION)
+   STYLE.CSS - SHSK PEKANBARU (V17)
    ==================================================================== */
 
-/* --- 1. GLOBAL VARIABLES & RESET --- */
+/* --- GLOBAL VARIABLES & RESET --- */
 :root {
   --neon-gold: #ffd700;
   --neon-blue: #00f3ff;
@@ -29,7 +29,7 @@
   display: none !important;
 }
 
-/* --- LOGIN PAGE (LEGACY SUPPORT FOR MODAL) --- */
+/* --- LOGIN PAGE --- */
 body.login-page {
   background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop")
     no-repeat center center fixed;
@@ -1694,7 +1694,7 @@ button:disabled {
   background: #e3f2fd;
 }
 
-/* --- RESPONSIVE FIXES --- */
+/* --- RESPONSIVE MEDIA --- */
 @media (max-width: 900px) {
   .navbar.glass-nav {
     padding: 0 20px;
@@ -1743,11 +1743,11 @@ button:disabled {
     justify-content: center;
   }
 
-  /* FIX DASHBOARD MOBILE (v11.7 - CENTERED & COMPACT) */
+  /* --- DASHBOARD MOBILE --- */
   .chart-header {
     display: flex !important;
-    flex-direction: column !important; /* Stack Vertical */
-    align-items: center !important; /* Center Horizontally */
+    flex-direction: column !important;
+    align-items: center !important;
     justify-content: center !important;
     gap: 15px !important;
     text-align: center !important;
@@ -1778,18 +1778,15 @@ button:disabled {
     height: auto !important;
   }
 
-  /* Space for Doughnut Chart */
   .chart-card > div[style*="height: 200px"] {
     margin: 0 auto;
     margin-top: 25px !important;
   }
 
-  /* Compact Padding like Info Cards */
   .chart-card {
     padding: 25px 20px;
   }
 
-  /* Stack Charts Vertically */
   .charts-container {
     display: flex;
     flex-direction: column;
@@ -1852,7 +1849,7 @@ button:disabled {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   }
 
-  /* FIX REGISTER & FORGOT PASSWORD MOBILE */
+  /* --- REGISTER & FORGOT PASSWORD MOBILE --- */
   .auth-card,
   .auth-card.theme-purple,
   .modal-box {
@@ -1885,11 +1882,7 @@ button:disabled {
   }
 }
 
-/* =========================================================
-   7. FITUR BARU: BULK FORM COLOR & FILE UPLOAD
-   ========================================================= */
-
-/* BULK CARD CONTAINER - WARNA SELANG SELING */
+/* --- BULK CARD CONTAINER --- */
 .bulk-card {
   border-radius: 12px;
   padding: 25px;
@@ -1899,21 +1892,18 @@ button:disabled {
   border: 1px solid #e0e0e0;
 }
 
-/* GANJIL (1, 3, 5): Putih Bersih + Border Navy */
 .bulk-card:nth-child(odd) {
   background-color: #ffffff;
   border-left: 6px solid var(--navy);
   box-shadow: 0 4px 15px rgba(10, 25, 47, 0.08);
 }
 
-/* GENAP (2, 4): Abu-abu/Biru Muda Halus + Border Gold */
 .bulk-card:nth-child(even) {
   background-color: var(--bulk-even-bg);
   border-left: 6px solid var(--bulk-even-border);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* BADGE NOMOR KAPAL */
 .bulk-number-badge {
   position: absolute;
   top: -12px;
@@ -1934,7 +1924,6 @@ button:disabled {
   color: var(--navy);
 }
 
-/* MODERN FILE UPLOAD (CUSTOM UI) */
 .file-dropzone {
   position: relative;
   width: 100%;
@@ -2001,10 +1990,9 @@ button:disabled {
 }
 
 /* =========================================================
-   V13.0 - CINEMATIC LANDING & MODAL STYLES (NEW!)
+   CINEMATIC LANDING & MODAL STYLES 
    ========================================================= */
 
-/* 1. GATEWAY MODE (Clean Background) */
 body.gateway-mode {
   background: #000;
   overflow-x: hidden;
@@ -2013,7 +2001,6 @@ body.gateway-mode {
   padding: 0;
 }
 
-/* 2. CINEMATIC INTRO (The Movie Scene) */
 #cinematic-intro {
   position: fixed;
   top: 0;
@@ -2026,23 +2013,22 @@ body.gateway-mode {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  animation: slideUp 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 3.5s; /* Opens after 3.5s */
+  animation: slideUp 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 3.5s;
 }
-/* TAMBAHAN BARU: Memastikan konten intro rata tengah mutlak */
+
 .intro-content {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Kunci vertikal item di tengah */
-  justify-content: center; /* Kunci horizontal item di tengah */
-  text-align: center; /* Memastikan teks dan gambar img rata tengah */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   width: 100%;
 }
 
-/* Update sedikit di logo biar tidak ada margin aneh */
 .intro-logo {
   width: 120px;
-  margin: 0 auto 20px auto; /* Margin auto kiri-kanan memaksa ke tengah */
-  display: block; /* Pastikan dia dianggap blok agar margin auto jalan */
+  margin: 0 auto 20px auto;
+  display: block;
   filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
 }
 
@@ -2055,7 +2041,6 @@ body.gateway-mode {
   animation: fadeIn 1s forwards 0.5s;
 }
 
-/* PULSE ANIMATION (Jantung) */
 .pulse-anim {
   animation: pulse 2s infinite;
 }
@@ -2074,7 +2059,6 @@ body.gateway-mode {
   }
 }
 
-/* SLIDE UP (Tirai Terbuka) */
 @keyframes slideUp {
   0% {
     transform: translateY(0);
@@ -2085,7 +2069,6 @@ body.gateway-mode {
   }
 }
 
-/* TYPEWRITER EFFECT */
 .typing-container {
   font-family: "Courier New", monospace;
   color: #00f3ff;
@@ -2122,7 +2105,6 @@ body.gateway-mode {
   }
 }
 
-/* 3. LANDING HERO (Halaman Utama) */
 #landing-hero {
   position: relative;
   width: 100%;
@@ -2137,7 +2119,6 @@ body.gateway-mode {
   overflow: hidden;
 }
 
-/* Overlay Gelap Biar Teks Kebaca */
 .hero-overlay {
   position: absolute;
   top: 0;
@@ -2157,8 +2138,8 @@ body.gateway-mode {
   z-index: 2;
   max-width: 800px;
   padding: 20px;
-  opacity: 0; /* Hidden initially */
-  animation: fadeInUp 1.5s forwards 4s; /* Muncul setelah Intro selesai (detik ke-4) */
+  opacity: 0;
+  animation: fadeInUp 1.5s forwards 4s;
 }
 
 @keyframes fadeInUp {
@@ -2211,7 +2192,6 @@ body.gateway-mode {
   line-height: 1.6;
 }
 
-/* TOMBOL AKSES KEREN */
 .btn-entrance {
   padding: 15px 40px;
   font-size: 18px;
@@ -2241,7 +2221,6 @@ body.gateway-mode {
   color: #666;
 }
 
-/* 4. MODAL LOGIN (Pop-up Style) */
 #login-modal-overlay {
   position: fixed;
   top: 0;
@@ -2254,7 +2233,6 @@ body.gateway-mode {
   align-items: center;
 }
 
-/* Backdrop Blur saat Modal Muncul */
 .modal-backdrop {
   position: absolute;
   top: 0;
@@ -2312,7 +2290,7 @@ body.gateway-mode {
   }
 }
 
-/* RESPONSIVE HERO */
+/* --- MEDIA QUERY 768PX --- */
 @media (max-width: 768px) {
   .hero-titles h1 {
     font-size: 1.8rem;
@@ -2325,39 +2303,33 @@ body.gateway-mode {
     justify-content: center;
   }
   .btn-close-modal {
-    top: 10px !important; /* Turunkan ke dalam kotak */
-    right: 10px !important; /* Geser masuk ke kiri */
-    width: 35px; /* Kecilkan sedikit biar manis */
+    top: 10px !important;
+    right: 10px !important;
+    width: 35px;
     height: 35px;
-    background: rgba(255, 61, 0, 0.9); /* Bikin agak transparan dikit */
-    box-shadow: none; /* Hilangkan bayangan berat */
+    background: rgba(255, 61, 0, 0.9);
+    box-shadow: none;
   }
 
-  /* Pastikan modal tidak terlalu lebar di HP */
   .modal-box,
   .auth-card {
     width: 90% !important;
     max-width: 90% !important;
-    padding-top: 50px !important; /* Tambah padding atas biar konten gak nabrak tombol X */
+    padding-top: 50px !important;
   }
 }
 
 /* =========================================================
-   MODERN CHECKBOX GRID (EXIBHITUM & PENGESAHAN) - V13.2
+   MODERN CHECKBOX GRID
    ========================================================= */
 
-/* Container Utama Grid Buku */
 .book-grid-container {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(90px, 1fr)
-  ); /* Responsive Grid */
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 10px;
   margin-top: 10px;
 }
 
-/* Pembungkus Checkbox (Hidden Input) */
 .book-checkbox {
   cursor: pointer;
   position: relative;
@@ -2366,18 +2338,17 @@ body.gateway-mode {
 
 .book-checkbox input {
   position: absolute;
-  opacity: 0; /* Sembunyikan checkbox asli */
+  opacity: 0;
   cursor: pointer;
 }
 
-/* Desain Tombol (Mati/Belum Dipilih) */
 .book-ui {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 12px 5px;
   background: #fff;
-  border: 1px solid #d1d5db; /* Abu-abu halus */
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 700;
@@ -2393,9 +2364,6 @@ body.gateway-mode {
   border-color: #aaa;
 }
 
-/* --- WARNA SAAT DIPILIH (CHECKED) --- */
-
-/* KELOMPOK EXIBHITUM (BIRU NEON) */
 .group-ex .book-checkbox input:checked + .book-ui {
   background: linear-gradient(135deg, #00f3ff 0%, #0077ff 100%);
   color: #fff;
@@ -2404,16 +2372,14 @@ body.gateway-mode {
   transform: scale(1.05);
 }
 
-/* KELOMPOK PENGESAHAN (EMAS/ORANGE) */
 .group-psh .book-checkbox input:checked + .book-ui {
   background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-  color: #0a192f; /* Teks Navy biar kontras */
+  color: #0a192f;
   border-color: transparent;
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
   transform: scale(1.05);
 }
 
-/* Label Judul Kelompok */
 .group-label {
   font-size: 13px;
   font-weight: 800;
@@ -2433,15 +2399,14 @@ body.gateway-mode {
   border-color: #ff8c00;
 }
 
-/* FIX MOBILE BIAR GAK SEMPIT */
 @media (max-width: 768px) {
   .exib-grid-wrapper {
-    grid-template-columns: 1fr !important; /* Jadi 1 kolom ke bawah di HP */
+    grid-template-columns: 1fr !important;
     gap: 30px !important;
   }
 }
 /* =========================================================
-   NUMBERED PAGINATION STYLE (V13.3)
+   NUMBERED PAGINATION STYLE 
    ========================================================= */
 
 .pagination-wrapper {
@@ -2451,7 +2416,7 @@ body.gateway-mode {
   gap: 5px;
   margin-top: 20px;
   padding: 10px;
-  flex-wrap: wrap; /* Biar kalau di HP angkanya turun ke bawah kalau kebanyakan */
+  flex-wrap: wrap;
 }
 
 .page-btn {
@@ -2476,16 +2441,14 @@ body.gateway-mode {
   transform: translateY(-1px);
 }
 
-/* TOMBOL HALAMAN AKTIF (YANG LAGI DIBUKA) */
 .page-btn.active {
-  background: var(--navy); /* Biru Gelap */
-  color: var(--gold); /* Teks Emas */
+  background: var(--navy);
+  color: var(--gold);
   border-color: var(--navy);
   box-shadow: 0 4px 10px rgba(10, 25, 47, 0.3);
   z-index: 2;
 }
 
-/* TOMBOL PREV & NEXT */
 .page-btn.nav-btn {
   background: #f8fafc;
   color: var(--navy);
@@ -2498,54 +2461,51 @@ body.gateway-mode {
   background: #eee;
 }
 
-/* BADGE COUNT DI SIDEBAR */
 .submenu-item {
   display: flex;
-  justify-content: space-between; /* Biar teks di kiri, badge di kanan */
+  justify-content: space-between;
   align-items: center;
 }
 
 .badge-count {
-  background: var(--gold); /* Warna Emas biar nyala */
-  color: var(--navy); /* Teks Gelap */
+  background: var(--gold);
+  color: var(--navy);
   font-size: 10px;
   font-weight: bold;
   padding: 2px 8px;
-  border-radius: 12px; /* Bentuk Kapsul/Lingkaran */
+  border-radius: 12px;
   min-width: 20px;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
 
-/* Animasi pas angka berubah */
 .badge-bump {
   transform: scale(1.3);
 }
-/* UPDATE: Indikator Menu Aktif di Submenu */
+
 .submenu-item.active {
-  background: rgba(255, 215, 0, 0.2); /* Warna Emas Transparan */
-  color: var(--gold); /* Teks jadi Emas */
-  border-left: 3px solid var(--gold); /* Garis di kiri */
+  background: rgba(255, 215, 0, 0.2);
+  color: var(--gold);
+  border-left: 3px solid var(--gold);
   font-weight: bold;
 }
 
-/* Reset border untuk yang tidak aktif */
 .submenu-item {
   border-left: 3px solid transparent;
 }
-/* PARENT MENU AKTIF (Saat Submenu Dipilih) */
+
 .menu-item.parent-active {
-  background: rgba(255, 215, 0, 0.15); /* Emas transparan */
-  color: var(--gold); /* Teks Emas */
-  border-left: 3px solid var(--gold); /* Garis kiri Emas */
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--gold);
+  border-left: 3px solid var(--gold);
   font-weight: 600;
 }
-/* KOLOM CHECKBOX (Default Sembunyi) */
+
 .col-check {
   width: 40px;
   text-align: center;
-  background-color: #ffebee; /* Merah muda biar tau mode hapus */
+  background-color: #ffebee;
   border-right: 1px solid #ffcdd2;
 }
 
@@ -2554,7 +2514,6 @@ body.gateway-mode {
   display: none;
 }
 
-/* Biar tombol hapus kedip-kedip kalau ada yang dicentang */
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -2568,79 +2527,89 @@ body.gateway-mode {
 }
 
 /* ==================================================================
-   STYLE KHUSUS TABEL MONITORING & TOTAL
+   STYLE MONITORING PAGE
    ================================================================== */
-
-/* 1. PEMISAH BARIS (SEPARATOR) */
 .row-separator-year {
-    background-color: #1a252f !important; /* Warna Biru Gelap (Mirip Header) */
-    color: #ffd700 !important; /* Teks Emas */
-    font-weight: 800;
-    text-align: center;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-top: 2px solid #ffd700;
-    border-bottom: 2px solid #ffd700;
+  background-color: #1a252f !important;
+  color: #ffd700 !important;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-top: 2px solid #ffd700;
+  border-bottom: 2px solid #ffd700;
 }
 
 .row-separator-month {
-    background-color: #e3f2fd !important; /* Biru Langit Sangat Muda */
-    color: #0d47a1 !important; /* Biru Tua */
-    font-weight: bold;
-    font-style: italic;
-    text-align: left;
-    padding-left: 20px !important;
-    border-bottom: 2px solid #90caf9;
+  background-color: #e3f2fd !important;
+  color: #0d47a1 !important;
+  font-weight: bold;
+  font-style: italic;
+  text-align: left;
+  padding-left: 20px !important;
+  border-bottom: 2px solid #90caf9;
 }
 
-/* 2. PERATAAN KOLOM (ALIGNMENT) */
-/* Kolom Angka Layanan (Tengah) */
-#table-monitoring td:nth-child(2), /* Tahun */
-#table-monitoring td:nth-child(3), /* Bulan */
-#table-monitoring td:nth-child(5), /* Status Hukum */
-#table-monitoring td:nth-child(6), /* Sertifikasi */
-#table-monitoring td:nth-child(7), /* Pengesahan */
-#table-monitoring td:nth-child(8)  /* Exibhitum */
-{
-    text-align: center;
-    vertical-align: middle;
+#table-monitoring td:nth-child(2),
+#table-monitoring td:nth-child(3),
+#table-monitoring td:nth-child(5),
+#table-monitoring td:nth-child(6),
+#table-monitoring td:nth-child(7),
+#table-monitoring td:nth-child(8) {
+  text-align: center;
+  vertical-align: middle;
 }
 
-/* Kolom Nama Perusahaan (Kiri & Tebal Dikit) */
 #table-monitoring td:nth-child(4) {
-    text-align: left;
-    font-weight: 600;
-    color: #333;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
 }
 
-/* 3. STYLE SPESIAL KOLOM "TOTAL" (PALING KANAN) */
-
-/* Header Total */
 #table-monitoring th:last-child {
-    background-color: #ffecb3 !important; /* Background Emas Pucat */
-    color: #d84315 !important; /* Teks Merah Bata */
-    border-left: 4px solid #ffa000; /* Garis Batas Kiri Tebal */
-    text-align: center;
-    font-size: 14px;
+  background-color: #ffecb3 !important;
+  color: #d84315 !important;
+  border-left: 4px solid #ffa000;
+  text-align: center;
+  font-size: 14px;
 }
 
-/* Isi Data Total */
 #table-monitoring td:last-child {
-    background-color: #fff8e1 !important; /* Background Krem Terang */
-    color: #bf360c !important; /* Angka Merah Gelap */
-    font-weight: 900 !important; /* Font Sangat Tebal */
-    font-size: 1.2em; /* Ukuran Font Lebih Besar */
-    text-align: center;
-    vertical-align: middle;
-    border-left: 4px solid #ffa000; /* Garis Batas Kiri Tebal */
-    letter-spacing: 1px;
+  background-color: #fff8e1 !important;
+  color: #bf360c !important;
+  font-weight: 900 !important;
+  font-size: 1.2em;
+  text-align: center;
+  vertical-align: middle;
+  border-left: 4px solid #ffa000;
+  letter-spacing: 1px;
 }
 
-/* Efek Hover Keren di Kolom Total */
 #table-monitoring tr:hover td:last-child {
-    background-color: #ffcc80 !important; /* Jadi lebih gelap saat disorot */
-    color: #000 !important;
-    transform: scale(1.1); /* Angkanya membesar sedikit (Pop-up) */
-    transition: all 0.2s ease;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  background-color: #ffcc80 !important;
+  color: #000 !important;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.row-separator-exib {
+  background: linear-gradient(to right, #f8f9fa, #e9ecef) !important;
+}
+
+.row-separator-exib td {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 12px !important;
+  border-top: 2px solid #ffd700 !important;
+  border-bottom: 2px solid #ffd700 !important;
+}
+
+.row-separator-exib i {
+  color: var(--gold);
+  margin-right: 10px;
 }
