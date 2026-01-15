@@ -2613,3 +2613,13 @@ body.gateway-mode {
   color: var(--gold);
   margin-right: 10px;
 }
+.page-dots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  color: #666;
+  font-weight: bold;
+  user-select: none;
+}
