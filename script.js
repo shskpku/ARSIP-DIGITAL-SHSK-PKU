@@ -1839,12 +1839,12 @@ async function handleBulkSubmit(type) {
       }
     }
 
-    // 4. EXIBHITUM
+    // 4. EXIBHITUM (VERSI ANTI-DOUBLING & ANTI-ZONK)
     else if (type === "EXIBHITUM") {
       const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
 
       if (nama.trim()) {
-        // 🔥 PERBAIKAN 1: Buat object baru di dalam sini biar data form sebelumnya ke-reset total
+        // 🔥 Object baru di dalam loop agar data antar form tidak menimpa/doubling
         let currentItem = {}; 
 
         currentItem.namaKapal = nama.toUpperCase();
@@ -1857,7 +1857,6 @@ async function handleBulkSubmit(type) {
 
         const jenisBukuArray = [];
         const nomorSuratArray = [];
-
         const checkedBoxes = form.querySelectorAll(`input[type="checkbox"][name*="_${i}"]:checked`);
         
         checkedBoxes.forEach((cb) => {
@@ -1865,15 +1864,13 @@ async function handleBulkSubmit(type) {
           const inputNomor = form.querySelector(`input[name="nomorSurat_${safeName}_${i}"]`);
           const nomorVal = inputNomor ? inputNomor.value.trim() : "";
 
-          // 🔥 PERBAIKAN 2: Hanya push buku yang ADA nomornya. 
-          // Ini biar nggak ada baris "ZONK" di database.
+          // 🔥 Anti baris kosong: Hanya ambil buku yang ADA nomornya
           if (nomorVal !== "") {
             jenisBukuArray.push(cb.value);
             nomorSuratArray.push(nomorVal);
           }
         });
 
-        // 🔥 PERBAIKAN 3: Simpan ke items hanya jika ada buku yang valid
         if (jenisBukuArray.length > 0) {
           currentItem.jenisBukuArray = jenisBukuArray;
           currentItem.nomorSuratArray = nomorSuratArray;
