@@ -708,7 +708,12 @@ body.petugas-page {
   width: 80px; 
 }
 
-.sidebar.minimized .sidebar-info-text, 
+.sidebar.minimized .sidebar-info-text {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
+}
+
 .sidebar.minimized .sidebar-divider,
 .sidebar.minimized .menu-item span,
 .sidebar.minimized .submenu-item span,
@@ -730,6 +735,12 @@ body.petugas-page {
 .sidebar.minimized .submenu-item i {
   margin: 0;
   font-size: 20px;
+}
+
+.sidebar.minimized .profile-circle {
+   margin: 10px auto !important; 
+   width: 50px; 
+   height: 50px;
 }
 
 .sidebar-content {
@@ -2692,14 +2703,14 @@ body.gateway-mode {
 .profile-card-popup {
   position: absolute;
   top: 10px;
-  left: 90px; 
+  left: 85px; 
   width: 250px;
   background: white;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   padding: 25px;
   text-align: center;
-  z-index: 2000;
+  z-index: 9999 !important;
   border-top: 5px solid var(--gold);
   animation: zoomIn 0.3s ease;
 }
