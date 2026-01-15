@@ -86,12 +86,8 @@
 
     <nav class="navbar glass-nav">
       <div class="nav-left">
-        <i class="fa fa-bars mobile-toggle" onclick="toggleSidebar()"></i>
-        <div
-          class="logo-area"
-          onclick="showSection('dashboard')"
-          style="cursor: pointer"
-        >
+        <i class="fa fa-bars mobile-toggle" onclick="toggleSidebar()" style="display: block !important;"></i>
+        <div class="logo-area" onclick="showSection('dashboard')" style="cursor: pointer">
           <i class="fa-solid fa-anchor" style="color: var(--gold)"></i>
           <span>SEKSI SHSK KSOP PEKANBARU</span>
         </div>
@@ -111,15 +107,30 @@
     </nav>
 
     <div class="sidebar" id="sidebar">
-      <div class="sidebar-content">
-        <div class="profile-section">
-          <div class="profile-circle" id="sidebar-initial">P</div>
-          <h4 id="sidebar-name">Memuat...</h4>
-          <p id="sidebar-nip">NIP. -</p>
-          <span class="badge-role" id="sidebar-role">JABATAN</span>
-        </div>
-        <hr class="sidebar-divider" />
+  <div class="sidebar-content">
+    
+    <div class="profile-section" style="position: relative;">
+      <div class="profile-circle" id="sidebar-initial" onclick="toggleProfilePopup()" style="cursor: pointer;">P</div>
+      
+      <div class="sidebar-info-text">
+        <h4 id="sidebar-name">Memuat...</h4>
+        <p id="sidebar-nip">NIP. -</p>
+        <span class="badge-role" id="sidebar-role">JABATAN</span>
+      </div>
 
+      <div id="profile-popup" class="profile-card-popup hidden">
+        <div class="popup-photo-large" id="popup-foto"></div>
+        <h3 id="popup-name">Nama Petugas</h3>
+        <p id="popup-nip">NIP. -</p>
+        <p style="font-size: 11px; color: var(--navy); font-weight: bold;" id="popup-role">JABATAN</p>
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        <button class="btn-logout-popup" onclick="logout()">
+          <i class="fa fa-power-off"></i> LOGOUT
+        </button>
+      </div>
+    </div>
+
+    <hr class="sidebar-divider" />
         <div class="menu-item active" onclick="showSection('dashboard', this)">
           <i class="fa fa-chart-pie"></i> Dashboard
         </div>
@@ -1257,3 +1268,4 @@
     <script src="script.js"></script>
   </body>
 </html>
+
