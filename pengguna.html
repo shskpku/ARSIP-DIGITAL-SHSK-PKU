@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Pengguna - SHSK</title>
+    <title>Dashboard Layanan - SHSK</title>
     <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
@@ -238,7 +238,6 @@
 
     <script src="script.js"></script>
     <script>
-      // LOGIC UI MOBILE & AUTO EMAIL FILLER
       function toggleMobileProfile(e) {
         e.stopPropagation();
         const dropdown = document.getElementById("mobileProfileDropdown");
@@ -254,15 +253,12 @@
         }
       });
 
-      // AUTO FILL EMAIL SAAT HALAMAN DIMUAT
       document.addEventListener("DOMContentLoaded", () => {
         const u = JSON.parse(localStorage.getItem("user"));
         if (u) {
-          // Isi Email di Footer Form
           const footerEmail = document.getElementById("email-display-text");
           if (footerEmail) footerEmail.innerText = u.id;
 
-          // Isi Email di Dropdown Mobile
           const mobEmail = document.getElementById("mob-email-text");
           if (mobEmail) mobEmail.innerText = u.id;
         }
