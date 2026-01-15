@@ -721,15 +721,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  
-  if (window.innerWidth > 900) {
-    sidebar.classList.toggle("minimized");
-  } else {
-    sidebar.classList.toggle("show");
-    document.getElementById("sidebar-overlay").classList.toggle("active");
-  }
+  document.getElementById("sidebar").classList.toggle("show");
+  document.getElementById("sidebar-overlay").classList.toggle("active");
 }
+
 // ====================================================================
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
 // ====================================================================
@@ -2901,10 +2896,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => {
         console.error("Gagal Auto-Sync:", err);
       });
-     document.querySelectorAll('.menu-item, .submenu-item').forEach(item => {
-        const text = item.innerText.trim();
-        item.setAttribute('title', text); 
-     });
   }
 });
 
@@ -3203,28 +3194,5 @@ async function saveSmartBatch() {
   btn.innerHTML = oriText;
   btn.disabled = false;
 }
-function toggleProfilePopup() {
-  const popup = document.getElementById("profile-popup");
-  popup.classList.toggle("hidden");
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (user && !popup.classList.contains("hidden")) {
-    document.getElementById("popup-name").innerText = user.nama;
-    document.getElementById("popup-nip").innerText = "NIP. " + (user.id || "-");
-    document.getElementById("popup-role").innerText = user.extra || "PETUGAS";
-    if (user.foto) {
-      document.getElementById("popup-foto").style.backgroundImage = `url('${user.foto}')`;
-    }
-  }
-}
-
-document.addEventListener("click", (e) => {
-  const popup = document.getElementById("profile-popup");
-  const avatar = document.getElementById("sidebar-initial");
-  if (popup && !popup.classList.contains("hidden")) {
-    if (!popup.contains(e.target) && !avatar.contains(e.target)) {
-      popup.classList.add("hidden");
-    }
-  }
-});
 // --- END SCRIPT.JS V.17 ---
