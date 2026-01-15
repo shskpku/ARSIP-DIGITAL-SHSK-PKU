@@ -1418,10 +1418,10 @@ button:disabled {
   box-shadow: 0 2px 5px rgba(10, 25, 47, 0.3);
 }
 .table-card {
-  max-height: 70vh; 
+  max-height: 70vh;
   overflow-y: auto;
   overflow-x: auto;
-  position: relative; 
+  position: relative;
   border: 1px solid #ddd;
   border-radius: 8px;
 }
@@ -2616,18 +2616,28 @@ body.gateway-mode {
   background: linear-gradient(to right, #f8f9fa, #e9ecef) !important;
 }
 
+.row-separator-period td {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  text-align: left !important;
+  padding: 12px 20px !important;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border-left: 6px solid #64748b !important;
+  text-transform: uppercase;
+}
+
 .row-separator-exib td {
-  position: sticky;
-  left: 0;
-  background: #40bdf7 !important;
-  color: var(--navy);
-  text-align: center;
-  font-weight: bold;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  padding: 12px !important;
-  border-top: 2px solid var(--gold) !important;
-  border-bottom: 2px solid var(--gold) !important;
+  background-color: #fffbeb !important;
+  color: #92400e !important;
+  text-align: center !important;
+  padding: 10px !important;
+  font-weight: 700;
+  font-size: 11px;
+  border-left: 6px solid var(--gold) !important;
+  border-top: 1px solid #fde68a !important;
+  border-bottom: 1px solid #fde68a !important;
 }
 
 .row-separator-exib i {
