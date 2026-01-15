@@ -1844,63 +1844,52 @@ async function handleBulkSubmit(type) {
       const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
 
       if (nama.trim()) {
-        itemData.namaKapal = nama.toUpperCase();
-        itemData.tanggal = form.querySelector(`[name="tanggal_${i}"]`).value;
-        itemData.perusahaan = form
-          .querySelector(`[name="perusahaan_${i}"]`)
-          .value.toUpperCase();
-        itemData.pup = form.querySelector(`[name="pup_${i}"]`).value;
+        // 🔥 PERBAIKAN 1: Buat object baru di dalam sini biar data form sebelumnya ke-reset total
+        let currentItem = {}; 
 
-        // PENTING: Ambil No Urut untuk Edit Mode
-        itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
-        itemData.oldFolderUrl = form.querySelector(
-          `[name="oldFolderUrl_${i}"]`
-        ).value;
+        currentItem.namaKapal = nama.toUpperCase();
+        currentItem.tanggal = form.querySelector(`[name="tanggal_${i}"]`).value;
+        currentItem.perusahaan = form.querySelector(`[name="perusahaan_${i}"]`).value.toUpperCase();
+        currentItem.pup = form.querySelector(`[name="pup_${i}"]`).value; // Boleh kosong
 
-        // --- AMBIL CHECKBOX BUKU (SEBAGAI ARRAY) ---
+        currentItem.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
+        currentItem.oldFolderUrl = form.querySelector(`[name="oldFolderUrl_${i}"]`).value;
+
         const jenisBukuArray = [];
-        const checkedBoxes = form.querySelectorAll(
-          `input[type="checkbox"][name*="_${i}"]:checked`
-        );
-        checkedBoxes.forEach((cb) => {
-          jenisBukuArray.push(cb.value);
-        });
-
-        // --- AMBIL NOMOR SURAT ---
         const nomorSuratArray = [];
-        jenisBukuArray.forEach((jb) => {
-          let safeName = jb.replace(". ", ".");
-          const inputNomor = form.querySelector(
-            `input[name="nomorSurat_${safeName}_${i}"]`
-          );
-          if (inputNomor) {
-            nomorSuratArray.push(inputNomor.value);
-          } else {
-            nomorSuratArray.push("");
+
+        const checkedBoxes = form.querySelectorAll(`input[type="checkbox"][name*="_${i}"]:checked`);
+        
+        checkedBoxes.forEach((cb) => {
+          let safeName = cb.value.replace(". ", ".");
+          const inputNomor = form.querySelector(`input[name="nomorSurat_${safeName}_${i}"]`);
+          const nomorVal = inputNomor ? inputNomor.value.trim() : "";
+
+          // 🔥 PERBAIKAN 2: Hanya push buku yang ADA nomornya. 
+          // Ini biar nggak ada baris "ZONK" di database.
+          if (nomorVal !== "") {
+            jenisBukuArray.push(cb.value);
+            nomorSuratArray.push(nomorVal);
           }
         });
 
-        // Simpan ke Object Data
-        itemData.jenisBukuArray = jenisBukuArray;
-        itemData.nomorSuratArray = nomorSuratArray;
+        // 🔥 PERBAIKAN 3: Simpan ke items hanya jika ada buku yang valid
+        if (jenisBukuArray.length > 0) {
+          currentItem.jenisBukuArray = jenisBukuArray;
+          currentItem.nomorSuratArray = nomorSuratArray;
+          currentItem.jenisBuku = jenisBukuArray.join("\n");
+          currentItem.nomorSurat = nomorSuratArray.join("\n");
 
-        // Gabungan string untuk kompatibilitas tampilan tabel lama
-        itemData.jenisBuku = jenisBukuArray.join("\n");
-        itemData.nomorSurat = nomorSuratArray.join("\n");
+          currentItem.files = [];
+          const fPerm = getFile(`permohonan_${i}`);
+          if (fPerm) currentItem.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+          const fBilling = getFile(`billing_${i}`);
+          if (fBilling) currentItem.files.push({ jenis: "billing", ...(await read(fBilling)) });
 
-        // Upload File
-        itemData.files = [];
-        const fPerm = getFile(`permohonan_${i}`);
-        if (fPerm)
-          itemData.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
-        const fBilling = getFile(`billing_${i}`);
-        if (fBilling)
-          itemData.files.push({ jenis: "billing", ...(await read(fBilling)) });
-
-        items.push(itemData);
+          items.push(currentItem);
+        }
       }
     }
-  }
 
   // ==========================================================
   // INI LOGIKA CERDASNYA: BARU vs EDIT
