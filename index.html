@@ -59,7 +59,7 @@
 
         <div class="hero-footer">
           <p>&copy; 2026 Seksi SHSK - KSOP Kelas II Pekanbaru.</p>
-          <small>Version 15.1</small>
+          <small>Version 17</small>
         </div>
       </div>
     </div>
@@ -185,7 +185,6 @@
     <script src="script.js"></script>
 
     <script>
-      // Fungsi Toggle Password
       function togglePass(icon) {
         const input = icon.parentElement.querySelector("input");
         if (input.type === "password") {
@@ -197,7 +196,6 @@
         }
       }
 
-      // Fungsi Switch Role (Petugas/Pengguna)
       function switchRole(role) {
         const card = document.getElementById("loginCard");
         const title = document.getElementById("titleText");
@@ -206,7 +204,6 @@
         const formPetugas = document.getElementById("formPetugas");
         const formPengguna = document.getElementById("formPengguna");
 
-        // Reset field password saat switch
         document.getElementById("passPetugas").type = "password";
         document.getElementById("passPengguna").type = "password";
         document.querySelectorAll(".password-icon").forEach((i) => {
@@ -230,12 +227,9 @@
         }
       }
 
-      // Onload: Jalankan Intro & Cek Remember Me
       window.onload = function () {
-        // 1. Jalankan animasi intro (dari script.js)
         if (typeof initCinematic === "function") initCinematic();
 
-        // 2. Cek data Remember Me dari LocalStorage
         if (localStorage.getItem("shsk_nip")) {
           document.getElementById("nip").value =
             localStorage.getItem("shsk_nip");
@@ -245,7 +239,7 @@
           document.getElementById("email").value =
             localStorage.getItem("shsk_email");
           document.getElementById("checkPengguna").checked = true;
-          // Jika ingat pengguna, otomatis switch ke tab pengguna saat modal dibuka nanti
+
           switchRole("PENGGUNA");
         }
       };
