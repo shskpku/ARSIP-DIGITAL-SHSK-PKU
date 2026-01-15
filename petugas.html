@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Petugas - SHSK</title>
+    <title>Dashboard Pejuang - SHSK</title>
     <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
     <link
@@ -23,18 +23,26 @@
     </div>
 
     <div id="modal-bulk-confirm" class="modal-overlay hidden">
-  <div class="modal-box zoom-anim">
-    <div class="modal-icon-danger"><i class="fa fa-exclamation-triangle"></i></div>
-    <h3>Hapus Massal?</h3>
-    <p id="bulk-confirm-message">Yakin ingin menghapus data yang dipilih?</p>
-    <div class="modal-buttons">
-      <button class="btn-cancel" onclick="closeBulkConfirm()">Batal</button>
-      <button id="btn-do-bulk-delete" class="btn-confirm-logout" style="background: #ff3d00;">
-        Ya, Hapus Semua
-      </button>
+      <div class="modal-box zoom-anim">
+        <div class="modal-icon-danger">
+          <i class="fa fa-exclamation-triangle"></i>
+        </div>
+        <h3>Hapus Semua?</h3>
+        <p id="bulk-confirm-message">
+          Yakin ingin menghapus data yang dipilih?
+        </p>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeBulkConfirm()">CANCEL</button>
+          <button
+            id="btn-do-bulk-delete"
+            class="btn-confirm-logout"
+            style="background: #ff3d00"
+          >
+            DELETE ALL
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
     <div id="modal-logout" class="modal-overlay hidden">
       <div class="modal-box zoom-anim">
@@ -42,9 +50,9 @@
         <h3>Konfirmasi Keluar</h3>
         <p>Anda yakin ingin mengakhiri sesi?</p>
         <div class="modal-buttons">
-          <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
+          <button class="btn-cancel" onclick="closeLogoutModal()">CANCEL</button>
           <button class="btn-confirm-logout" onclick="confirmLogout()">
-            Ya, Keluar
+            LOGOUT
           </button>
         </div>
       </div>
@@ -56,9 +64,9 @@
         <h3>Hapus Data?</h3>
         <p>Data ini akan dihapus permanen dari sistem.</p>
         <div class="modal-buttons">
-          <button class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
+          <button class="btn-cancel" onclick="closeDeleteModal()">CANCEL</button>
           <button class="btn-confirm-logout" onclick="executeDelete()">
-            Ya, Hapus
+            DELETE
           </button>
         </div>
       </div>
@@ -442,71 +450,81 @@
         </div>
       </div>
       <div id="sec-monitoring" class="hidden">
-    <div class="section-header">
-    <h2><i class="fa fa-chart-line"></i> MONITORING LAYANAN</h2>
-    <div style="display:flex; gap:10px; align-items:center;">
-        <select id="monFilterBulan" class="form-control">
-            <option value="" selected>Semua Bulan</option>
-            <option value="1">Januari</option>
-            <option value="2">Februari</option>
-            <option value="3">Maret</option>
-            <option value="4">April</option>
-            <option value="5">Mei</option>
-            <option value="6">Juni</option>
-            <option value="7">Juli</option>
-            <option value="8">Agustus</option>
-            <option value="9">September</option>
-            <option value="10">Oktober</option>
-            <option value="11">November</option>
-            <option value="12">Desember</option>
-        </select>
-        <select id="monFilterTahun" class="form-control">
-            <option value="" selected>Semua Tahun</option>
-            <script>
-                for(let y=2024; y<=2030; y++) document.write(`<option value="${y}">${y}</option>`);
-            </script>
-        </select>
-        <button onclick="loadMonitoringData(1)" class="btn-action btn-filter" style="margin:0; height:38px;">
-            <i class="fa fa-check"></i> Terapkan
-        </button>
-    </div>
-</div>
-
-
-    <div class="filter-card" style="border-left: 5px solid #673ab7; margin-bottom:15px;">
-        <div style="display:flex; width:100%;">
-            <i class="fa fa-search" style="padding:10px; color:#666;"></i>
-            <input type="text" id="monSearch" class="form-control" 
-                   placeholder="Ketik Nama Perusahaan / Pemilik untuk filter otomatis..." 
-                   style="border:none; outline:none; font-size:16px;"
-                   onkeyup="debouncedMonitoringLoad()"> 
+        <div class="section-header">
+          <h2><i class="fa fa-chart-line"></i> MONITORING LAYANAN</h2>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <select id="monFilterBulan" class="form-control">
+              <option value="" selected>Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select id="monFilterTahun" class="form-control">
+              <option value="" selected>Semua Tahun</option>
+              <script>
+                for (let y = 2024; y <= 2030; y++)
+                  document.write(`<option value="${y}">${y}</option>`);
+              </script>
+            </select>
+            <button
+              onclick="loadMonitoringData(1)"
+              class="btn-action btn-filter"
+              style="margin: 0; height: 38px"
+            >
+              <i class="fa fa-check"></i> APPLY
+            </button>
+          </div>
         </div>
-    </div>
 
-    <div class="table-card">
-        <div class="table-responsive">
+        <div
+          class="filter-card"
+          style="border-left: 5px solid #673ab7; margin-bottom: 15px"
+        >
+          <div style="display: flex; width: 100%">
+            <i class="fa fa-search" style="padding: 10px; color: #666"></i>
+            <input
+              type="text"
+              id="monSearch"
+              class="form-control"
+              placeholder="Ketik Nama Perusahaan / Pemilik untuk filter otomatis..."
+              style="border: none; outline: none; font-size: 16px"
+              onkeyup="debouncedMonitoringLoad()"
+            />
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-responsive">
             <table class="data-table" id="table-monitoring">
-                <thead>
-                    <tr>
-                        <th>NO</th>
-                        <th>TAHUN</th>
-                        <th>BULAN</th>
-                        <th>NAMA PERUSAHAAN</th>
-                        <th>STATUS HUKUM</th>
-                        <th>SERTIFIKASI</th>
-                        <th>PENGESAHAN</th>
-                        <th>EXIBHITUM</th>
-                        <th>TOTAL</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-monitoring">
-                    </tbody>
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>TAHUN</th>
+                  <th>BULAN</th>
+                  <th>NAMA PERUSAHAAN</th>
+                  <th>STATUS HUKUM</th>
+                  <th>SERTIFIKASI</th>
+                  <th>PENGESAHAN</th>
+                  <th>EXIBHITUM</th>
+                  <th>TOTAL</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-monitoring"></tbody>
             </table>
+          </div>
         </div>
-    </div>
-    
-    <div id="pagination-MONITORING" class="pagination-wrapper"></div>
-</div>
+
+        <div id="pagination-MONITORING" class="pagination-wrapper"></div>
+      </div>
 
       <div id="sec-shsk-input" class="hidden">
         <div class="section-header">
@@ -563,7 +581,7 @@
             onclick="toggleDeleteMode('SHSK')"
             style="background: #555"
           >
-            <i class="fa fa-check-square"></i> Mode Hapus
+            <i class="fa fa-check-square"></i> SMART DELETE
           </button>
           <button
             id="btn-confirm-hapus-SHSK"
@@ -571,7 +589,7 @@
             onclick="executeBulkDelete('SHSK')"
             style="background: #ff3d00; animation: pulse 1s infinite"
           >
-            <i class="fa fa-trash"></i> Hapus (<span id="count-hapus-SHSK"
+            <i class="fa fa-trash"></i> DELETE (<span id="count-hapus-SHSK"
               >0</span
             >)
           </button>
@@ -614,7 +632,7 @@
               class="form-control"
             />
             <button onclick="applyFilter('SHSK')" class="btn-action btn-filter">
-              <i class="fa fa-filter"></i> Terapkan
+              <i class="fa fa-filter"></i> APPLY
             </button>
           </div>
         </div>
@@ -704,7 +722,7 @@
             onclick="toggleDeleteMode('SERTIFIKASI')"
             style="background: #555"
           >
-            <i class="fa fa-check-square"></i> Mode Hapus
+            <i class="fa fa-check-square"></i> SMART DELETE
           </button>
           <button
             id="btn-confirm-hapus-SERTIFIKASI"
@@ -712,7 +730,7 @@
             onclick="executeBulkDelete('SERTIFIKASI')"
             style="background: #ff3d00; animation: pulse 1s infinite"
           >
-            <i class="fa fa-trash"></i> Hapus (<span
+            <i class="fa fa-trash"></i> DELETE (<span
               id="count-hapus-SERTIFIKASI"
               >0</span
             >)
@@ -780,7 +798,7 @@
               onclick="applyFilter('SERTIFIKASI')"
               class="btn-action btn-filter"
             >
-              <i class="fa fa-filter"></i> Terapkan
+              <i class="fa fa-filter"></i> APPLY
             </button>
           </div>
         </div>
@@ -868,7 +886,7 @@
             onclick="toggleDeleteMode('SERVICE')"
             style="background: #555"
           >
-            <i class="fa fa-check-square"></i> Mode Hapus
+            <i class="fa fa-check-square"></i> SMART DELETE
           </button>
           <button
             id="btn-confirm-hapus-SERVICE"
@@ -876,7 +894,7 @@
             onclick="executeBulkDelete('SERVICE')"
             style="background: #ff3d00; animation: pulse 1s infinite"
           >
-            <i class="fa fa-trash"></i> Hapus (<span id="count-hapus-SERVICE"
+            <i class="fa fa-trash"></i> DELETE (<span id="count-hapus-SERVICE"
               >0</span
             >)
           </button>
@@ -925,7 +943,7 @@
               onclick="applyFilter('SERVICE')"
               class="btn-action btn-filter"
             >
-              <i class="fa fa-filter"></i> Terapkan
+              <i class="fa fa-filter"></i> APPLY
             </button>
           </div>
         </div>
@@ -1005,7 +1023,7 @@
             onclick="toggleDeleteMode('EXIBHITUM')"
             style="background: #555"
           >
-            <i class="fa fa-check-square"></i> Mode Hapus
+            <i class="fa fa-check-square"></i> SMART DELETE
           </button>
           <button
             id="btn-confirm-hapus-EXIBHITUM"
@@ -1013,7 +1031,7 @@
             onclick="executeBulkDelete('EXIBHITUM')"
             style="background: #ff3d00; animation: pulse 1s infinite"
           >
-            <i class="fa fa-trash"></i> Hapus (<span id="count-hapus-EXIBHITUM"
+            <i class="fa fa-trash"></i> Delete (<span id="count-hapus-EXIBHITUM"
               >0</span
             >)
           </button>
@@ -1068,7 +1086,7 @@
               onclick="applyFilter('EXIBHITUM')"
               class="btn-action btn-filter"
             >
-              <i class="fa fa-filter"></i> Terapkan
+              <i class="fa fa-filter"></i> APPLY
             </button>
           </div>
         </div>
@@ -1124,7 +1142,7 @@
           "
         >
           <h3 style="margin: 0; color: var(--navy)">
-            <i class="fa fa-magic"></i> SMART BATCH EDIT
+            <i class="fa fa-magic"></i> SMART EDIT
           </h3>
           <button
             onclick="closeSmartEdit()"
@@ -1150,7 +1168,7 @@
           "
         >
           <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 14px">
-            <i class="fa fa-sync"></i> 1. DATA UMUM (Ubah Sekaligus)
+            <i class="fa fa-sync"></i> 1. DATA KAPAL
           </h4>
           <div class="grid-form" style="grid-template-columns: 1fr 1fr 1fr 1fr">
             <input type="hidden" id="smart-id-batch" />
@@ -1186,7 +1204,7 @@
           "
         >
           <i class="fa fa-exclamation-triangle"></i>
-          <b>PERINGATAN DOMINO:</b> Mengubah nomor surat di sini akan otomatis
+          <b>PERINGATAN:</b> Mengubah nomor surat di sini akan otomatis
           <b>MENGGESER</b> nomor surat kapal lain yang urutannya berada di
           setelahnya.
         </div>
@@ -1205,9 +1223,9 @@
           class="modal-buttons"
           style="margin-top: 20px; justify-content: flex-end"
         >
-          <button class="btn-cancel" onclick="closeSmartEdit()">Batal</button>
+          <button class="btn-cancel" onclick="closeSmartEdit()">CANCEL</button>
           <button class="btn-gold-save" onclick="saveSmartBatch()">
-            <i class="fa fa-save"></i> SIMPAN PERUBAHAN & GESER NOMOR
+            <i class="fa fa-save"></i> SAVE EDIT
           </button>
         </div>
       </div>
@@ -1215,8 +1233,3 @@
     <script src="script.js"></script>
   </body>
 </html>
-
-
-
-
-
