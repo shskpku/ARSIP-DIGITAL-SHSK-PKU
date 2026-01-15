@@ -2430,10 +2430,53 @@ function renderTable(type) {
   }
 
   let lastX = null;
+  let lastPeriod = null;
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
     const uniqueId = row["NO_URUT"] || row["NO URUT"] || row["NO"];
+
+    let dateKey =
+      type === "SHSK"
+        ? "TANGGAL_PENGUKUHAN"
+        : type === "SERTIFIKASI"
+        ? "TANGGAL_TERBIT"
+        : type === "SERVICE"
+        ? "TANGGAL_VALIDASI_SERVICE_REPORT"
+        : "TANGGAL";
+
+    const tglStr = row[dateKey] || "";
+    if (tglStr) {
+      const tgl = new Date(tglStr);
+      if (!isNaN(tgl)) {
+        const monthNames = [
+          "JANUARI",
+          "FEBRUARI",
+          "MARET",
+          "APRIL",
+          "MEI",
+          "JUNI",
+          "JULI",
+          "AGUSTUS",
+          "SEPTEMBER",
+          "OKTOBER",
+          "NOVEMBER",
+          "DESEMBER",
+        ];
+        const currentPeriod = `${
+          monthNames[tgl.getMonth()]
+        } ${tgl.getFullYear()}`;
+
+        if (lastPeriod !== null && currentPeriod !== lastPeriod) {
+          tbody.innerHTML += `
+            <tr class="row-separator-period">
+              <td colspan="16"> <i class="fa fa-calendar-alt"></i> DATA BULAN: ${currentPeriod}
+              </td>
+            </tr>`;
+        }
+        lastPeriod = currentPeriod;
+      }
+    }
 
     if (type === "EXIBHITUM") {
       let currentX = null;
