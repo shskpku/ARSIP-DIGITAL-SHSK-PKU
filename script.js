@@ -688,6 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initAutoLogout();
   resetActivityTimer();
   initSmartSearch();
+  initMiniSidebarTooltips();
 
   if (document.querySelector(".dashboard-page")) {
     initPenggunaDashboard();
@@ -721,9 +722,45 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("show");
-  document.getElementById("sidebar-overlay").classList.toggle("active");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+
+  if (window.innerWidth > 900) {
+    sidebar.classList.toggle("minimized");
+
+    const popup = document.getElementById("profile-popup");
+    if (popup) popup.classList.add("hidden");
+  } else {
+    sidebar.classList.toggle("show");
+    if (overlay) overlay.classList.toggle("active");
+  }
 }
+
+function toggleProfilePopup(event) {
+  if (event) event.stopPropagation();
+  const popup = document.getElementById("profile-popup");
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (user) {
+    document.getElementById("popup-name").innerText = user.nama;
+    document.getElementById("popup-nip").innerText = "NIP. " + (user.id || "-");
+    document.getElementById("popup-role").innerText = user.extra || "PETUGAS";
+
+    const popupFoto = document.getElementById("popup-foto");
+    if (user.foto) {
+      popupFoto.style.backgroundImage = `url('${user.foto}')`;
+    }
+  }
+  popup.classList.toggle("hidden");
+}
+
+document.addEventListener("click", function (e) {
+  const popup = document.getElementById("profile-popup");
+  const trigger = document.getElementById("profile-trigger");
+  if (popup && !popup.contains(e.target) && !trigger.contains(e.target)) {
+    popup.classList.add("hidden");
+  }
+});
 
 // ====================================================================
 // NAVIGASI SIDEBAR (SHOW SECTION & TOGGLE SUBMENU)
@@ -734,23 +771,28 @@ function showSection(id, el) {
     .forEach((d) => d.classList.add("hidden"));
 
   const targetSection = document.getElementById(`sec-${id}`);
-  if (targetSection) {
-    targetSection.classList.remove("hidden");
-  }
+  if (targetSection) targetSection.classList.remove("hidden");
 
   document
     .querySelectorAll(".menu-item, .submenu-item")
     .forEach((m) => m.classList.remove("active"));
-  document.querySelectorAll(".menu-item").forEach((m) => {
-    m.classList.remove("parent-active");
-    m.classList.remove("open");
-  });
-  document
-    .querySelectorAll(".submenu-container")
-    .forEach((c) => c.classList.remove("show"));
+
+  const sidebar = document.getElementById("sidebar");
+  const isMinimized = sidebar.classList.contains("minimized");
+
+  if (isMinimized || id === "dashboard" || id === "monitoring") {
+    document.querySelectorAll(".submenu-container").forEach((sub) => {
+      sub.classList.remove("show");
+    });
+    document.querySelectorAll(".menu-item").forEach((m) => {
+      m.classList.remove("open");
+      m.classList.remove("parent-active");
+    });
+  }
 
   if (el) {
     el.classList.add("active");
+
     if (el.classList.contains("submenu-item")) {
       const container = el.closest(".submenu-container");
       if (container) {
@@ -3166,7 +3208,8 @@ async function saveSmartBatch() {
     });
   });
 
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES PERUBAHAN...';
+  btn.innerHTML =
+    '<i class="fa fa-spinner fa-spin"></i> MEMPROSES PERUBAHAN...';
   btn.disabled = true;
 
   try {
@@ -3178,10 +3221,7 @@ async function saveSmartBatch() {
     });
 
     if (res.status === "SUCCESS") {
-      showPopup(
-        "SUKSES! Data terupdate.",
-        "success"
-      );
+      showPopup("SUKSES! Data terupdate.", "success");
       closeSmartEdit();
       loadData("EXIBHITUM");
     } else {
@@ -3193,6 +3233,57 @@ async function saveSmartBatch() {
 
   btn.innerHTML = oriText;
   btn.disabled = false;
+}
+
+window.toggleProfilePopup = function (event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  const popup = document.getElementById("profile-popup");
+  if (!popup) {
+    console.error("Popup element tidak ditemukan!");
+    return;
+  }
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user) {
+    document.getElementById("popup-name").innerText = user.nama;
+    document.getElementById("popup-nip").innerText = "NIP. " + (user.id || "-");
+    document.getElementById("popup-role").innerText = user.extra || "PETUGAS";
+
+    if (user.foto) {
+      document.getElementById(
+        "popup-foto"
+      ).style.backgroundImage = `url('${user.foto}')`;
+      document.getElementById("popup-foto").style.backgroundSize = "cover";
+    }
+  }
+
+  popup.classList.toggle("hidden");
+};
+
+document.addEventListener("click", function (e) {
+  const popup = document.getElementById("profile-popup");
+  const trigger = document.getElementById("profile-trigger");
+
+  if (popup && !popup.classList.contains("hidden")) {
+    if (!popup.contains(e.target) && !trigger.contains(e.target)) {
+      popup.classList.add("hidden");
+    }
+  }
+});
+
+function initMiniSidebarTooltips() {
+  document
+    .querySelectorAll(".menu-item, .submenu-item, .shortcut-btn")
+    .forEach((item) => {
+      let menuName = item.innerText.replace(/[0-9]/g, "").trim();
+
+      item.setAttribute("data-tooltip", menuName);
+      item.removeAttribute("title");
+    });
 }
 
 // --- END SCRIPT.JS V.17 ---
