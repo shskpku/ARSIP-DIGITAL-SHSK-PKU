@@ -3166,7 +3166,7 @@ async function saveSmartBatch() {
     });
   });
 
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES DOMINO...';
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES PERUBAHAN...';
   btn.disabled = true;
 
   try {
@@ -3179,7 +3179,7 @@ async function saveSmartBatch() {
 
     if (res.status === "SUCCESS") {
       showPopup(
-        "SUKSES! Data terupdate & nomor lain telah digeser.",
+        "SUKSES! Data terupdate.",
         "success"
       );
       closeSmartEdit();
