@@ -2654,3 +2654,32 @@ body.gateway-mode {
   font-weight: bold;
   user-select: none;
 }
+
+#table-monitoring thead th {
+  position: sticky !important;
+  top: 0;
+  z-index: 100;
+  background-color: var(--navy) !important;
+  color: white !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#sec-monitoring .section-header,
+#sec-monitoring .filter-card {
+  position: sticky;
+  top: 0;
+  background: #f4f6f9;
+  z-index: 110;
+  margin-bottom: 10px;
+}
+
+#sec-monitoring .filter-card {
+  top: 60px;
+}
+
+#sec-monitoring .table-card {
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
