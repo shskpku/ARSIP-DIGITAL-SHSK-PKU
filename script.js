@@ -3206,7 +3206,7 @@ function closeSmartEdit() {
 
 async function saveSmartBatch() {
   const id = document.getElementById("smart-id-batch").value;
-  // GUNAKAN SELECTOR .btn-gold-save (Agar tombol berfungsi)
+
   const btn = document.querySelector("#modal-smart-edit .btn-gold-save");
   if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
 
