@@ -2476,7 +2476,10 @@ function renderTable(type) {
 
   pageData.forEach((row, i) => {
     const rowStr = encodeURIComponent(JSON.stringify(row));
-    const uniqueId = row["NO_URUT"] || row["NO URUT"] || row["NO"];
+    const uniqueId =
+      type === "EXIBHITUM"
+        ? row["NO_URUT"] || row["NO"]
+        : row["NO_URUT"] || row["NO URUT"] || row["NO"];
 
     let dateKey =
       type === "SHSK"
