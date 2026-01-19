@@ -3187,7 +3187,7 @@ async function openSmartEditModal(rowDataStr) {
                 <div style="font-weight:bold; font-size:12px; color:#555;">${r.JENIS_BUKU}</div>
                 <input type="text" class="form-control smart-item-input" 
                        data-jenis="${r.JENIS_BUKU}" 
-                       data-nourut="${r.NO_URUT}" 
+                       data-nourut="${r.NO_URUT}"  
                        value="${r.PENOMORAN}" 
                        style="width:100%; font-family:monospace; font-weight:bold; margin-top:2px;">
             </div>
@@ -3223,6 +3223,7 @@ async function saveSmartBatch() {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
+      nourut: inp.dataset.nourut,
     });
   });
 
