@@ -3206,8 +3206,12 @@ function closeSmartEdit() {
 
 async function saveSmartBatch() {
   const idBatch = document.getElementById("smart-id-batch").value;
-  const btn = document.querySelector("#modal-smart-edit .btn-save-batch");
-  if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
+  const btn = document.querySelector("#modal-smart-edit .btn-gold-save");
+  
+  if (!btn) {
+    showPopup("Sistem Error: Tombol simpan tidak terdeteksi!", "error");
+    return;
+  }
 
   const originalText = btn.innerHTML;
 
@@ -3215,18 +3219,11 @@ async function saveSmartBatch() {
     tanggal: document.getElementById("smart-date").value,
     perusahaan: document.getElementById("smart-company").value,
     namaKapal: document.getElementById("smart-ship").value,
-    pup: document.getElementById("smart-pup").value,
+    pup: document.getElementById("smart-pup").value, 
   };
 
   const items = [];
-  const inputElements = document.querySelectorAll(".smart-item-input");
-
-  if (inputElements.length === 0) {
-    showPopup("Tidak ada data buku untuk disimpan!", "error");
-    return;
-  }
-
-  inputElements.forEach((inp) => {
+  document.querySelectorAll(".smart-item-input").forEach((inp) => {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
@@ -3236,7 +3233,6 @@ async function saveSmartBatch() {
 
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
   btn.disabled = true;
-  showPopup("Sedang menyelaraskan data...", "info");
 
   try {
     const res = await postData({
@@ -3255,7 +3251,6 @@ async function saveSmartBatch() {
     }
   } catch (e) {
     showPopup("Terjadi kesalahan koneksi ke server.", "error");
-    console.error(e);
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;
