@@ -2594,8 +2594,18 @@ function renderTable(type) {
         row["PENOMORAN"]
       }</td><td>${row["PUP"]}</td>`;
     }
-    tr += `<td><div style="display:flex; justify-content:center; gap:5px;"><button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button><button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button><button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button></div></td></tr>`;
-    tbody.innerHTML += tr;
+    let editAction =
+      type === "EXIBHITUM"
+        ? `openSmartEditModal('${rowStr}')`
+        : `editData('${type}', '${rowStr}')`;
+
+    tr += `<td>
+    <div style="display:flex; justify-content:center; gap:5px;">
+      <button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button>
+      <button class="btn-act btn-edit" onclick="${editAction}"><i class="fa fa-pencil-alt"></i></button>
+      <button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button>
+    </div>
+  </td></tr>`;
   });
   renderPagination(type);
 }
@@ -2947,7 +2957,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ====================================================================
 // NAVIGASI SIDEBAR
 // ====================================================================
-
 function showSection(id, el) {
   document
     .querySelectorAll(".main-content > div")
@@ -3129,11 +3138,18 @@ async function processBulkDelete(type) {
 // ====================================================================
 // SMART BATCH EDIT
 // ====================================================================
+async function openSmartEditModal(rowDataStr) {
+  const rowData = JSON.parse(decodeURIComponent(rowDataStr));
+  const targetShip = rowData["NAMA_KAPAL"];
+  const targetDate = rowData["TANGGAL"];
 
-async function openSmartEditModal(noUrut) {
-  showPopup("Mengambil data satu kapal...", "info");
+  showPopup(`Mengambil data batch: ${targetShip}...`, "info");
 
-  const res = await postData({ action: "getBatchExibhitum", noUrut: noUrut });
+  const res = await postData({
+    action: "getBatchExibhitumByData",
+    namaKapal: targetShip,
+    tanggal: targetDate,
+  });
 
   if (res.status === "SUCCESS") {
     const rows = res.data;
@@ -3141,7 +3157,7 @@ async function openSmartEditModal(noUrut) {
 
     const first = rows[0];
 
-    document.getElementById("smart-id-batch").value = noUrut;
+    document.getElementById("smart-id-batch").value = first.NO_URUT;
     document.getElementById("smart-date").value = formatDateForInput(
       first.TANGGAL
     );
@@ -3152,90 +3168,35 @@ async function openSmartEditModal(noUrut) {
     const container = document.getElementById("smart-list-container");
     container.innerHTML = "";
 
-    rows.sort((a, b) => {
-      const isAEx = a.JENIS_BUKU.includes("EX");
-      const isBEx = b.JENIS_BUKU.includes("EX");
-      return isAEx - isBEx;
-    });
+    rows.sort(
+      (a, b) => a.JENIS_BUKU.includes("EX") - b.JENIS_BUKU.includes("EX")
+    );
 
     rows.forEach((r) => {
-      const jenis = r.JENIS_BUKU;
-      const nomor = r.PENOMORAN;
-      const isPsh = jenis.includes("PSH") || jenis.includes("PENGESAHAN");
-
+      const isPsh =
+        r.JENIS_BUKU.includes("PSH") || r.JENIS_BUKU.includes("PENGESAHAN");
       const bg = isPsh ? "#fff3e0" : "#e3f2fd";
       const icon = isPsh ? "fa-stamp" : "fa-book";
       const color = isPsh ? "#ef6c00" : "#1565c0";
 
       container.innerHTML += `
-                <div style="display:flex; align-items:center; gap:10px; padding:10px; background:${bg}; border-radius:6px; margin-bottom:8px; border:1px solid #ddd;">
-                    <div style="width:30px; text-align:center; color:${color};"><i class="fa ${icon}"></i></div>
-                    <div style="flex:1;">
-                        <div style="font-weight:bold; font-size:12px; color:#555;">${jenis}</div>
-                        <input type="text" class="form-control smart-item-input" 
-                               data-jenis="${jenis}" 
-                               value="${nomor}" 
-                               style="width:100%; font-family:monospace; font-weight:bold; margin-top:2px;">
-                    </div>
-                </div>
-            `;
+        <div style="display:flex; align-items:center; gap:10px; padding:10px; background:${bg}; border-radius:6px; margin-bottom:8px; border:1px solid #ddd;">
+            <div style="width:30px; text-align:center; color:${color};"><i class="fa ${icon}"></i></div>
+            <div style="flex:1;">
+                <div style="font-weight:bold; font-size:12px; color:#555;">${r.JENIS_BUKU}</div>
+                <input type="text" class="form-control smart-item-input" 
+                       data-jenis="${r.JENIS_BUKU}" 
+                       data-nourut="${r.NO_URUT}"
+                       value="${r.PENOMORAN}" 
+                       style="width:100%; font-family:monospace; font-weight:bold; margin-top:2px;">
+            </div>
+        </div>`;
     });
 
     document.getElementById("modal-smart-edit").classList.remove("hidden");
   } else {
-    showPopup("Gagal ambil data.", "error");
+    showPopup("Gagal ambil data: " + res.message, "error");
   }
-}
-
-function closeSmartEdit() {
-  document.getElementById("modal-smart-edit").classList.add("hidden");
-}
-
-async function saveSmartBatch() {
-  const id = document.getElementById("smart-id-batch").value;
-  const btn = event.currentTarget;
-  const oriText = btn.innerHTML;
-
-  const common = {
-    tanggal: document.getElementById("smart-date").value,
-    perusahaan: document.getElementById("smart-company").value,
-    namaKapal: document.getElementById("smart-ship").value,
-    pup: document.getElementById("smart-pup").value,
-  };
-
-  const items = [];
-  document.querySelectorAll(".smart-item-input").forEach((inp) => {
-    items.push({
-      jenis: inp.dataset.jenis,
-      nomor: inp.value,
-    });
-  });
-
-  btn.innerHTML =
-    '<i class="fa fa-spinner fa-spin"></i> MEMPROSES PERUBAHAN...';
-  btn.disabled = true;
-
-  try {
-    const res = await postData({
-      action: "updateSmartBatchExibhitum",
-      noUrut: id,
-      common: common,
-      items: items,
-    });
-
-    if (res.status === "SUCCESS") {
-      showPopup("SUKSES! Data terupdate.", "success");
-      closeSmartEdit();
-      loadData("EXIBHITUM");
-    } else {
-      showPopup("Gagal: " + res.message, "error");
-    }
-  } catch (e) {
-    showPopup("Error Server", "error");
-  }
-
-  btn.innerHTML = oriText;
-  btn.disabled = false;
 }
 
 window.toggleProfilePopup = function (event) {
@@ -3289,4 +3250,56 @@ function initMiniSidebarTooltips() {
     });
 }
 
+async function saveSmartBatch() {
+  const id = document.getElementById("smart-id-batch").value;
+
+  const btn = document.querySelector("#modal-smart-edit .btn-save-batch");
+  const oriText = btn.innerHTML;
+
+  const common = {
+    tanggal: document.getElementById("smart-date").value,
+    perusahaan: document.getElementById("smart-company").value,
+    namaKapal: document.getElementById("smart-ship").value,
+    pup: document.getElementById("smart-pup").value,
+  };
+
+  const items = [];
+  document.querySelectorAll(".smart-item-input").forEach((inp) => {
+    items.push({
+      jenis: inp.dataset.jenis,
+      nomor: inp.value,
+      nourut: inp.dataset.nourut,
+    });
+  });
+
+  btn.innerHTML =
+    '<i class="fa fa-spinner fa-spin"></i> MEMPROSES PERUBAHAN...';
+  btn.disabled = true;
+
+  try {
+    const res = await postData({
+      action: "updateSmartBatchExibhitum",
+      noUrut: id,
+      common: common,
+      items: items,
+    });
+
+    if (res.status === "SUCCESS") {
+      showPopup(
+        "SUKSES! Data dan nomor urut berhasil disinkronkan.",
+        "success"
+      );
+      closeSmartEdit();
+      loadData("EXIBHITUM");
+    } else {
+      showPopup("Gagal: " + res.message, "error");
+    }
+  } catch (e) {
+    console.error(e);
+    showPopup("Terjadi kesalahan koneksi ke server.", "error");
+  } finally {
+    btn.innerHTML = oriText;
+    btn.disabled = false;
+  }
+}
 // --- END SCRIPT.JS V.17 ---
