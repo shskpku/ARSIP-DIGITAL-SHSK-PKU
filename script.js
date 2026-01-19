@@ -2591,7 +2591,19 @@ function renderTable(type) {
         row["PENOMORAN"]
       }</td><td>${row["PUP"]}</td>`;
     }
-    tr += `<td><div style="display:flex; justify-content:center; gap:5px;"><button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button><button class="btn-act btn-edit" onclick="editData('${type}', '${rowStr}')"><i class="fa fa-pencil-alt"></i></button><button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button></div></td></tr>`;
+    let editAction =
+      type === "EXIBHITUM"
+        ? `openSmartEditModal('${rowStr}')`
+        : `editData('${type}', '${rowStr}')`;
+
+    tr += `<td>
+    <div style="display:flex; justify-content:center; gap:5px;">
+      <button class="btn-act btn-view" onclick="window.open('${row["LINK_FOLDER"]}', '_blank')"><i class="fa fa-folder-open"></i></button>
+      <button class="btn-act btn-edit" onclick="${editAction}"><i class="fa fa-pencil-alt"></i></button>
+      <button class="btn-act btn-del" onclick="prepareDelete('${type}', '${rowStr}')"><i class="fa fa-trash"></i></button>
+    </div>
+  </td></tr>`;
+
     tbody.innerHTML += tr;
   });
   renderPagination(type);
@@ -3144,7 +3156,6 @@ async function openSmartEditModal(rowDataStr) {
     if (rows.length === 0) return showPopup("Data tidak ditemukan", "error");
 
     const first = rows[0];
-
     document.getElementById("smart-id-batch").value = first.NO_URUT;
     document.getElementById("smart-date").value = formatDateForInput(
       first.TANGGAL
