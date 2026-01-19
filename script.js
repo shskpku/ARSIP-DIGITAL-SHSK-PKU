@@ -3205,21 +3205,17 @@ function closeSmartEdit() {
 }
 
 async function saveSmartBatch() {
-  const idBatch = document.getElementById("smart-id-batch").value;
+  const id = document.getElementById("smart-id-batch").value;
   const btn = document.querySelector("#modal-smart-edit .btn-gold-save");
-  
-  if (!btn) {
-    showPopup("Sistem Error: Tombol simpan tidak terdeteksi!", "error");
-    return;
-  }
+  if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
 
-  const originalText = btn.innerHTML;
+  const oriText = btn.innerHTML;
 
   const common = {
     tanggal: document.getElementById("smart-date").value,
     perusahaan: document.getElementById("smart-company").value,
     namaKapal: document.getElementById("smart-ship").value,
-    pup: document.getElementById("smart-pup").value, 
+    pup: document.getElementById("smart-pup").value,
   };
 
   const items = [];
@@ -3227,7 +3223,6 @@ async function saveSmartBatch() {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
-      nourut: inp.dataset.nourut,
     });
   });
 
@@ -3237,22 +3232,22 @@ async function saveSmartBatch() {
   try {
     const res = await postData({
       action: "updateSmartBatchExibhitum",
-      noUrut: idBatch,
+      noUrut: id,
       common: common,
       items: items,
     });
 
     if (res.status === "SUCCESS") {
-      showPopup("SUKSES! Data dan Domino Berhasil Disinkronkan.", "success");
+      showPopup("SUKSES! Data Kapal & PUP Terupdate Serentak.", "success");
       closeSmartEdit();
       loadData("EXIBHITUM");
     } else {
       showPopup("Gagal: " + res.message, "error");
     }
   } catch (e) {
-    showPopup("Terjadi kesalahan koneksi ke server.", "error");
+    showPopup("Error Server", "error");
   } finally {
-    btn.innerHTML = originalText;
+    btn.innerHTML = oriText;
     btn.disabled = false;
   }
 }
