@@ -3139,20 +3139,17 @@ async function processBulkDelete(type) {
 // SMART BATCH EDIT
 // ====================================================================
 async function openSmartEditModal(rowDataStr) {
-  const btn = event.currentTarget;
+  const rowData = JSON.parse(decodeURIComponent(rowDataStr));
 
-  const rowElement = btn.closest("tr");
-
-  const targetShip = rowElement.cells[4].innerText.trim();
-
-  const targetDate = rowElement.cells[1].innerText.trim();
+  const targetShip = String(rowData["NAMA_KAPAL"] || "").trim();
+  const rawDate = rowData["TANGGAL"];
 
   showPopup(`Mengambil data batch: ${targetShip}...`, "info");
 
   const res = await postData({
     action: "getBatchExibhitumByData",
     namaKapal: targetShip,
-    tanggal: targetDate,
+    tanggal: rawDate,
   });
 
   if (res.status === "SUCCESS") {
@@ -3160,6 +3157,7 @@ async function openSmartEditModal(rowDataStr) {
     if (rows.length === 0) return showPopup("Data tidak ditemukan", "error");
 
     const first = rows[0];
+
     document.getElementById("smart-id-batch").value = first.NO_URUT;
     document.getElementById("smart-date").value = formatDateForInput(
       first.TANGGAL
