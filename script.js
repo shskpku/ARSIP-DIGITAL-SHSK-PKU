@@ -3140,8 +3140,10 @@ async function processBulkDelete(type) {
 // ====================================================================
 async function openSmartEditModal(rowDataStr) {
   const rowData = JSON.parse(decodeURIComponent(rowDataStr));
-  const targetShip = rowData["NAMA_KAPAL"].replace(/\s+/g, " ").trim();
-  const targetDate = rowData["TANGGAL"].replace(/\s+/g, " ").trim();
+
+  const targetShip = String(rowData["NAMA_KAPAL"] || "").trim();
+
+  const targetDate = String(rowData["TANGGAL"] || "").trim();
 
   showPopup(`Mengambil data batch: ${targetShip}...`, "info");
 
