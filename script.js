@@ -3206,6 +3206,7 @@ function closeSmartEdit() {
 
 async function saveSmartBatch() {
   const id = document.getElementById("smart-id-batch").value;
+  // GUNAKAN SELECTOR .btn-gold-save (Agar tombol berfungsi)
   const btn = document.querySelector("#modal-smart-edit .btn-gold-save");
   if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
 
@@ -3223,7 +3224,6 @@ async function saveSmartBatch() {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
-      nourut: inp.dataset.nourut,
     });
   });
 
@@ -3239,7 +3239,7 @@ async function saveSmartBatch() {
     });
 
     if (res.status === "SUCCESS") {
-      showPopup("SUKSES! Data Kapal & PUP Terupdate Serentak.", "success");
+      showPopup("SUKSES! PUP Terupdate Serentak & Domino Rapih.", "success");
       closeSmartEdit();
       loadData("EXIBHITUM");
     } else {
