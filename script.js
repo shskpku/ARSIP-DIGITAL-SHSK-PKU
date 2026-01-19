@@ -3139,11 +3139,13 @@ async function processBulkDelete(type) {
 // SMART BATCH EDIT
 // ====================================================================
 async function openSmartEditModal(rowDataStr) {
-  const rowData = JSON.parse(decodeURIComponent(rowDataStr));
+  const btn = event.currentTarget;
 
-  const targetShip = String(rowData["NAMA_KAPAL"] || "").trim();
+  const rowElement = btn.closest("tr");
 
-  const targetDate = String(rowData["TANGGAL"] || "").trim();
+  const targetShip = rowElement.cells[4].innerText.trim();
+
+  const targetDate = rowElement.cells[1].innerText.trim();
 
   showPopup(`Mengambil data batch: ${targetShip}...`, "info");
 
