@@ -3206,10 +3206,9 @@ function closeSmartEdit() {
 
 async function saveSmartBatch() {
   const id = document.getElementById("smart-id-batch").value;
-
   const btn = document.querySelector("#modal-smart-edit .btn-gold-save");
   if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
-
+  
   const oriText = btn.innerHTML;
 
   const common = {
@@ -3220,14 +3219,16 @@ async function saveSmartBatch() {
   };
 
   const items = [];
+  // Perhatikan rincian item di bawah ini:
   document.querySelectorAll(".smart-item-input").forEach((inp) => {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
+      nourut: inp.dataset.nourut // WAJIB ada agar tidak nambah baris baru
     });
   });
 
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENYELARASKAN...';
   btn.disabled = true;
 
   try {
@@ -3239,14 +3240,14 @@ async function saveSmartBatch() {
     });
 
     if (res.status === "SUCCESS") {
-      showPopup("SUKSES! PUP Terupdate Serentak & Domino Rapih.", "success");
+      showPopup("SUKSES! Data & Domino Berhasil Disinkronkan.", "success");
       closeSmartEdit();
-      loadData("EXIBHITUM");
+      loadData("EXIBHITUM"); // Refresh tabel utama
     } else {
       showPopup("Gagal: " + res.message, "error");
     }
   } catch (e) {
-    showPopup("Error Server", "error");
+    showPopup("Terjadi kesalahan koneksi.", "error");
   } finally {
     btn.innerHTML = oriText;
     btn.disabled = false;
