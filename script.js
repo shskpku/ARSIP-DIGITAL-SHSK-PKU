@@ -3205,9 +3205,11 @@ function closeSmartEdit() {
 }
 
 async function saveSmartBatch() {
-  const id = document.getElementById("smart-id-batch").value;
+  const idBatch = document.getElementById("smart-id-batch").value;
   const btn = document.querySelector("#modal-smart-edit .btn-save-batch");
-  const oriText = btn.innerHTML;
+  if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
+
+  const originalText = btn.innerHTML;
 
   const common = {
     tanggal: document.getElementById("smart-date").value,
@@ -3217,8 +3219,14 @@ async function saveSmartBatch() {
   };
 
   const items = [];
+  const inputElements = document.querySelectorAll(".smart-item-input");
 
-  document.querySelectorAll(".smart-item-input").forEach((inp) => {
+  if (inputElements.length === 0) {
+    showPopup("Tidak ada data buku untuk disimpan!", "error");
+    return;
+  }
+
+  inputElements.forEach((inp) => {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
@@ -3226,23 +3234,20 @@ async function saveSmartBatch() {
     });
   });
 
-  btn.innerHTML =
-    '<i class="fa fa-spinner fa-spin"></i> MEMPROSES PERUBAHAN...';
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MEMPROSES...';
   btn.disabled = true;
+  showPopup("Sedang menyelaraskan data...", "info");
 
   try {
     const res = await postData({
       action: "updateSmartBatchExibhitum",
-      noUrut: id,
+      noUrut: idBatch,
       common: common,
       items: items,
     });
 
     if (res.status === "SUCCESS") {
-      showPopup(
-        "SUKSES! Data dan nomor urut berhasil disinkronkan.",
-        "success"
-      );
+      showPopup("SUKSES! Data dan Domino Berhasil Disinkronkan.", "success");
       closeSmartEdit();
       loadData("EXIBHITUM");
     } else {
@@ -3250,8 +3255,9 @@ async function saveSmartBatch() {
     }
   } catch (e) {
     showPopup("Terjadi kesalahan koneksi ke server.", "error");
+    console.error(e);
   } finally {
-    btn.innerHTML = oriText;
+    btn.innerHTML = originalText;
     btn.disabled = false;
   }
 }
