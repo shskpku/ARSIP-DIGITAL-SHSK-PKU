@@ -144,7 +144,7 @@ function speakWelcome(namaLengkap) {
     const setVoice = () => {
       voices = window.speechSynthesis.getVoices();
       const indoVoice = voices.find(
-        (v) => v.lang === "id-ID" || v.name.includes("Indonesia")
+        (v) => v.lang === "id-ID" || v.name.includes("Indonesia"),
       );
       if (indoVoice) utterance.voice = indoVoice;
       window.speechSynthesis.speak(utterance);
@@ -490,7 +490,7 @@ function initAutoLogout() {
       () => {
         resetActivityTimer();
       },
-      true
+      true,
     );
   });
 
@@ -703,14 +703,14 @@ document.addEventListener("DOMContentLoaded", () => {
       updateExibChart(
         "year",
         document.querySelector(".filter-btn-ex.active"),
-        "ex"
+        "ex",
       );
 
     if (document.getElementById("chartPengesahan"))
       updateExibChart(
         "year",
         document.querySelector(".filter-btn-psh.active"),
-        "psh"
+        "psh",
       );
 
     initAnnualReportUI();
@@ -822,10 +822,10 @@ function showSection(id, el) {
     const type = id.includes("shsk")
       ? "SHSK"
       : id.includes("sertifikasi")
-      ? "SERTIFIKASI"
-      : id.includes("service")
-      ? "SERVICE"
-      : "EXIBHITUM";
+        ? "SERTIFIKASI"
+        : id.includes("service")
+          ? "SERVICE"
+          : "EXIBHITUM";
     loadData(type);
   }
 
@@ -1011,18 +1011,39 @@ function loadProfilePetugas() {
     window.location.href = "index.html";
     return;
   }
+
+  let labelNavbar = "PETUGAS";
+  const logContainer = document.getElementById("log-notif-container");
+
+  if (user.id === "200208052024121001") {
+    labelNavbar = "ADMIN";
+    if (logContainer) {
+      logContainer.classList.remove("hidden");
+      fetchLogActivity();
+    }
+  } else if (user.id === "197309272009121001") {
+    labelNavbar = "KEPALA SEKSI";
+  }
+
   document.getElementById("nav-name").innerText = user.nama;
+  const navRoleSmall = document.getElementById("nav-role-small");
+  if (navRoleSmall) {
+    navRoleSmall.innerText = labelNavbar;
+  }
+
   document.getElementById("sidebar-name").innerText = user.nama;
   document.getElementById("sidebar-nip").innerText = "NIP. " + (user.id || "-");
   document.getElementById("dash-name").innerText = user.nama.split(" ")[0];
+
   document.getElementById("sidebar-role").innerText = user.extra || "PETUGAS";
+
   if (user.foto) {
-    document.getElementById(
-      "sidebar-initial"
-    ).innerHTML = `<img src="${user.foto}" class="profile-img-fit">`;
+    document.getElementById("sidebar-initial").innerHTML =
+      `<img src="${user.foto}" class="profile-img-fit">`;
     document.getElementById("sidebar-initial").style.border =
       "2px solid var(--gold)";
   }
+
   speakWelcome(user.nama);
 }
 // ====================================================================
@@ -1065,7 +1086,7 @@ window.togglePacketMode = function (index, mode, btn) {
     .forEach((b) => b.classList.remove("active"));
 
   const checkboxes = document.querySelectorAll(
-    `input[name="cert_select_${index}"]`
+    `input[name="cert_select_${index}"]`,
   );
 
   if (isAlreadyActive) {
@@ -1101,7 +1122,7 @@ window.togglePacketMode = function (index, mode, btn) {
 window.renderCertForms = function (index) {
   const container = document.getElementById(`dynamic-cert-forms-${index}`);
   const selectedCerts = Array.from(
-    document.querySelectorAll(`input[name="cert_select_${index}"]:checked`)
+    document.querySelectorAll(`input[name="cert_select_${index}"]:checked`),
   ).map((c) => c.value);
 
   if (selectedCerts.length === 0) {
@@ -1242,7 +1263,7 @@ window.updateExibhitumForms = function () {
     const pad = (num) => num.toString().padStart(2, "0");
 
     const numStr = `AL.531/${pad(currentX)}/${pad(
-      currentY
+      currentY,
     )}/KSOP.PKU/${currentYear}`;
 
     currentY++;
@@ -1312,7 +1333,7 @@ window.updateExibhitumForms = function () {
 window.updateServiceQty = function (i) {
   const container = document.getElementById(`qty-container-${i}`);
   const liferaftCheck = document.querySelector(
-    `input[name="check_liferaft_${i}"]`
+    `input[name="check_liferaft_${i}"]`,
   );
   const feCheck = document.querySelector(`input[name="check_fe_${i}"]`);
   let html = "";
@@ -1478,7 +1499,7 @@ function renderBulkForm(type) {
                             <input type="checkbox" name="cert_select_${i}" value="${cert}" onchange="renderCertForms(${i})">
                             <div class="cert-card-ui">${cert}</div>
                         </label>
-                    `
+                    `,
                     ).join("")}
                 </div>
             </div>
@@ -1548,7 +1569,7 @@ function renderBulkForm(type) {
                           <input type="checkbox" name="check_PSH_${b}_${i}" value="PSH. ${b}" onchange="updateExibhitumForms()">
                           <div class="book-ui">${b}</div>
                           </label>
-                        `
+                        `,
                           )
                           .join("")}
                       </div>
@@ -1572,7 +1593,7 @@ function renderBulkForm(type) {
                         <input type="checkbox" name="check_EX_${b}_${i}" value="EX. ${b}" onchange="updateExibhitumForms()">
                         <div class="book-ui">${b}</div>
                         </label>
-                      `
+                      `,
                         )
                         .join("")}
                       </div>
@@ -1671,7 +1692,7 @@ async function handleBulkSubmit(type) {
       if (!hasData) continue;
 
       const selectedCerts = Array.from(
-        form.querySelectorAll(`input[name="cert_select_${i}"]:checked`)
+        form.querySelectorAll(`input[name="cert_select_${i}"]:checked`),
       ).map((c) => c.value);
       const isPacket = packetModeState[i];
 
@@ -1700,7 +1721,7 @@ async function handleBulkSubmit(type) {
 
         rowItem.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
         rowItem.oldFolderUrl = form.querySelector(
-          `[name="oldFolderUrl_${i}"]`
+          `[name="oldFolderUrl_${i}"]`,
         ).value;
 
         let packetCerts = [];
@@ -1719,13 +1740,13 @@ async function handleBulkSubmit(type) {
 
         if (isPacket && packetCerts.includes(cert)) {
           rowItem.kodeBilling = form.querySelector(
-            `[name="billing_shared_${i}"]`
+            `[name="billing_shared_${i}"]`,
           ).value;
           rowItem.tglBerlaku = form.querySelector(
-            `[name="berlaku_shared_${i}"]`
+            `[name="berlaku_shared_${i}"]`,
           ).value;
           rowItem.noSertifikat = form.querySelector(
-            `[name="no_sert_${cert}_${i}"]`
+            `[name="no_sert_${cert}_${i}"]`,
           ).value;
           const fPerm = getFile(`permohonan_shared_${i}`);
           if (fPerm)
@@ -1744,13 +1765,13 @@ async function handleBulkSubmit(type) {
             });
         } else {
           rowItem.kodeBilling = form.querySelector(
-            `[name="billing_${cert}_${i}"]`
+            `[name="billing_${cert}_${i}"]`,
           ).value;
           rowItem.tglBerlaku = form.querySelector(
-            `[name="berlaku_${cert}_${i}"]`
+            `[name="berlaku_${cert}_${i}"]`,
           ).value;
           rowItem.noSertifikat = form.querySelector(
-            `[name="no_sert_${cert}_${i}"]`
+            `[name="no_sert_${cert}_${i}"]`,
           ).value;
           const fPerm = getFile(`permohonan_${cert}_${i}`);
           if (fPerm)
@@ -1800,7 +1821,7 @@ async function handleBulkSubmit(type) {
       items.push(itemData);
     } else if (type === "SERVICE") {
       const penyedia = form.querySelector(
-        `[name="namaPenyediaJasa_${i}"]`
+        `[name="namaPenyediaJasa_${i}"]`,
       ).value;
       if (penyedia.trim()) {
         itemData.namaPenyediaJasa = penyedia.toUpperCase();
@@ -1808,18 +1829,18 @@ async function handleBulkSubmit(type) {
           .querySelector(`[name="namaKapal_${i}"]`)
           .value.toUpperCase();
         itemData.tglValidasi = form.querySelector(
-          `[name="tglValidasi_${i}"]`
+          `[name="tglValidasi_${i}"]`,
         ).value;
         itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
         itemData.oldFolderUrl = form.querySelector(
-          `[name="oldFolderUrl_${i}"]`
+          `[name="oldFolderUrl_${i}"]`,
         ).value;
         let jenisArr = [];
         let jumlahArr = [];
         if (form.querySelector(`[name="check_liferaft_${i}"]`).checked) {
           jenisArr.push("1. LIFERAFT");
           jumlahArr.push(
-            form.querySelector(`[name="jumlah_LIFERAFT_${i}"]`).value
+            form.querySelector(`[name="jumlah_LIFERAFT_${i}"]`).value,
           );
         }
         if (form.querySelector(`[name="check_fe_${i}"]`).checked) {
@@ -1858,19 +1879,19 @@ async function handleBulkSubmit(type) {
 
         currentItem.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
         currentItem.oldFolderUrl = form.querySelector(
-          `[name="oldFolderUrl_${i}"]`
+          `[name="oldFolderUrl_${i}"]`,
         ).value;
 
         const jenisBukuArray = [];
         const nomorSuratArray = [];
         const checkedBoxes = form.querySelectorAll(
-          `input[type="checkbox"][name*="_${i}"]:checked`
+          `input[type="checkbox"][name*="_${i}"]:checked`,
         );
 
         checkedBoxes.forEach((cb) => {
           let safeName = cb.value.replace(". ", ".");
           const inputNomor = form.querySelector(
-            `input[name="nomorSurat_${safeName}_${i}"]`
+            `input[name="nomorSurat_${safeName}_${i}"]`,
           );
           const nomorVal = inputNomor ? inputNomor.value.trim() : "";
 
@@ -2060,7 +2081,7 @@ function editData(type, rowDataStr) {
 
     const jenisSert = getRowVal(["JENIS_SERTIFIKAT", "JENIS"]);
     const certCheck = form.querySelector(
-      `input[name="cert_select_1"][value="${jenisSert}"]`
+      `input[name="cert_select_1"][value="${jenisSert}"]`,
     );
 
     if (certCheck) {
@@ -2130,13 +2151,13 @@ function editData(type, rowDataStr) {
     }
 
     const targetCheck = form.querySelector(
-      `input[name="check_${prefix}_${bookType}_1"]`
+      `input[name="check_${prefix}_${bookType}_1"]`,
     );
     if (targetCheck) {
       targetCheck.checked = true;
       updateExibhitumForms(1);
       const noSuratInput = form.querySelector(
-        `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`
+        `input[name="nomorSurat_${jb.replace(". ", ".")}_1"]`,
       );
       if (noSuratInput) noSuratInput.value = nomor;
     }
@@ -2211,10 +2232,10 @@ function cancelEdit(type) {
     type === "SHSK"
       ? "formSHSK"
       : type === "SERTIFIKASI"
-      ? "formSertifikasi"
-      : type === "SERVICE"
-      ? "formService"
-      : "formExibhitum";
+        ? "formSertifikasi"
+        : type === "SERVICE"
+          ? "formService"
+          : "formExibhitum";
   const form = document.getElementById(formId);
   form.reset();
   renderBulkForm(type);
@@ -2447,7 +2468,7 @@ function applyFilter(type) {
   renderTable(type);
   showPopup(
     `Filter diterapkan: ${filteredData[type].length} data ditemukan.`,
-    "info"
+    "info",
   );
 }
 
@@ -2482,10 +2503,10 @@ function renderTable(type) {
       type === "SHSK"
         ? "TANGGAL_PENGUKUHAN"
         : type === "SERTIFIKASI"
-        ? "TANGGAL_TERBIT"
-        : type === "SERVICE"
-        ? "TANGGAL_VALIDASI_SERVICE_REPORT"
-        : "TANGGAL";
+          ? "TANGGAL_TERBIT"
+          : type === "SERVICE"
+            ? "TANGGAL_VALIDASI_SERVICE_REPORT"
+            : "TANGGAL";
 
     const tglStr = row[dateKey] || "";
     if (tglStr) {
@@ -2565,24 +2586,24 @@ function renderTable(type) {
       }</td><td>${row["KETERANGAN"]}</td><td>${
         row["JENIS_SERTIFIKAT"]
       }</td><td>${formatDate(row["TANGGAL_TERBIT"])}</td><td>${formatDate(
-        row["TANGGAL_MASA_BERLAKU"]
+        row["TANGGAL_MASA_BERLAKU"],
       )}</td><td>${row["DAERAH_PELAYARAN"] || "-"}</td><td>${
         row["NOMOR_SERTIFIKAT"]
       }</td><td>${row["KODE_BILLING"]}</td><td>${row["NAMA_PEMERIKSA"]}</td>`;
     } else if (type === "SERVICE") {
       const jenisTampil = String(row["JENIS_ALAT_YANG_DISERVICE"]).replace(
         /\n/g,
-        "<br>"
+        "<br>",
       );
       const jumlahTampil = String(row["JUMLAH"]).replace(/\n/g, "<br>");
       tr += `<td>${row["NAMA_PENYEDIA_JASA"]}</td><td>${
         row["NAMA_KAPAL"]
       }</td><td style="text-align:left;">${jenisTampil}</td><td style="text-align:center;">${jumlahTampil}</td><td>${formatDate(
-        row["TANGGAL_VALIDASI_SERVICE_REPORT"]
+        row["TANGGAL_VALIDASI_SERVICE_REPORT"],
       )}</td>`;
     } else if (type === "EXIBHITUM") {
       tr += `<td>${formatDate(
-        row["TANGGAL"]
+        row["TANGGAL"],
       )}</td><td style="text-align:left;">${
         row["PERUSAHAAN"]
       }</td><td style="text-align:left;">${
@@ -2616,7 +2637,7 @@ function renderPagination(
   type,
   totalCustom = null,
   pageCustom = null,
-  limitCustom = null
+  limitCustom = null,
 ) {
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
@@ -2704,7 +2725,7 @@ function closeDeleteModal() {
 async function executeDelete() {
   if (!pendingDelete) return;
   const btnConfirm = document.querySelector(
-    "#modal-delete .btn-confirm-logout"
+    "#modal-delete .btn-confirm-logout",
   );
   const originalHtml = btnConfirm.innerHTML;
   btnConfirm.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
@@ -2797,7 +2818,7 @@ window.filterMonth = function () {
     ...new Set(penggunaFiles.filter((i) => i.tahun == y).map((i) => i.bulan)),
   ].sort((a, b) => a - b);
   m.forEach(
-    (v) => (s.innerHTML += `<option value="${v}">${getMonthName(v)}</option>`)
+    (v) => (s.innerHTML += `<option value="${v}">${getMonthName(v)}</option>`),
   );
   s.disabled = false;
 };
@@ -2814,7 +2835,7 @@ window.filterShip = function () {
     ...new Set(
       penggunaFiles
         .filter((i) => i.tahun == y && i.bulan == m)
-        .map((i) => i.kapal)
+        .map((i) => i.kapal),
     ),
   ];
   ships.forEach((v) => (s.innerHTML += `<option value="${v}">${v}</option>`));
@@ -2831,13 +2852,13 @@ window.filterType = function () {
     return;
   }
   const docs = penggunaFiles.filter(
-    (i) => i.tahun == y && i.bulan == m && i.kapal == sh
+    (i) => i.tahun == y && i.bulan == m && i.kapal == sh,
   );
   if (docs.length === 0) {
     s.innerHTML = "<option>Nihil</option>";
   } else {
     docs.forEach(
-      (v) => (s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`)
+      (v) => (s.innerHTML += `<option value="${v.link}">${v.jenis}</option>`),
     );
   }
   s.disabled = false;
@@ -3003,10 +3024,10 @@ function showSection(id, el) {
     const type = id.includes("shsk")
       ? "SHSK"
       : id.includes("sertifikasi")
-      ? "SERTIFIKASI"
-      : id.includes("service")
-      ? "SERVICE"
-      : "EXIBHITUM";
+        ? "SERTIFIKASI"
+        : id.includes("service")
+          ? "SERVICE"
+          : "EXIBHITUM";
     loadData(type);
   }
 
@@ -3052,7 +3073,7 @@ function toggleDeleteMode(type) {
   const confirmBtn = document.getElementById(`btn-confirm-hapus-${type}`);
 
   const checkCols = document.querySelectorAll(
-    "#table-" + type.toLowerCase() + " .col-check"
+    "#table-" + type.toLowerCase() + " .col-check",
   );
 
   if (isDeleteMode) {
@@ -3075,20 +3096,19 @@ function toggleDeleteMode(type) {
 
 function updateDeleteCount(type) {
   const count = document.querySelectorAll(
-    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+    "#table-" + type.toLowerCase() + " .bulk-check:checked",
   ).length;
   document.getElementById(`count-hapus-${type}`).innerText = count;
 }
 
 function executeBulkDelete(type) {
   const checked = document.querySelectorAll(
-    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+    "#table-" + type.toLowerCase() + " .bulk-check:checked",
   );
   if (checked.length === 0) return showPopup("Pilih data dulu!", "error");
 
-  document.getElementById(
-    "bulk-confirm-message"
-  ).innerText = `Yakin hapus ${checked.length} data ini secara permanen?`;
+  document.getElementById("bulk-confirm-message").innerText =
+    `Yakin hapus ${checked.length} data ini secara permanen?`;
 
   document.getElementById("btn-do-bulk-delete").onclick = function () {
     processBulkDelete(type);
@@ -3105,7 +3125,7 @@ async function processBulkDelete(type) {
   closeBulkConfirm();
 
   const checked = document.querySelectorAll(
-    "#table-" + type.toLowerCase() + " .bulk-check:checked"
+    "#table-" + type.toLowerCase() + " .bulk-check:checked",
   );
   const ids = Array.from(checked).map((cb) => cb.value);
   const btn = document.getElementById(`btn-confirm-hapus-${type}`);
@@ -3160,7 +3180,7 @@ async function openSmartEditModal(rowDataStr) {
 
     document.getElementById("smart-id-batch").value = first.NO_URUT;
     document.getElementById("smart-date").value = formatDateForInput(
-      first.TANGGAL
+      first.TANGGAL,
     );
     document.getElementById("smart-company").value = first.PERUSAHAAN;
     document.getElementById("smart-ship").value = first.NAMA_KAPAL;
@@ -3170,7 +3190,7 @@ async function openSmartEditModal(rowDataStr) {
     container.innerHTML = "";
 
     rows.sort(
-      (a, b) => a.JENIS_BUKU.includes("EX") - b.JENIS_BUKU.includes("EX")
+      (a, b) => a.JENIS_BUKU.includes("EX") - b.JENIS_BUKU.includes("EX"),
     );
 
     rows.forEach((r) => {
@@ -3208,7 +3228,7 @@ async function saveSmartBatch() {
   const id = document.getElementById("smart-id-batch").value;
   const btn = document.querySelector("#modal-smart-edit .btn-gold-save");
   if (!btn) return console.error("Tombol Simpan tidak ditemukan!");
-  
+
   const oriText = btn.innerHTML;
 
   const common = {
@@ -3219,12 +3239,12 @@ async function saveSmartBatch() {
   };
 
   const items = [];
-  // Perhatikan rincian item di bawah ini:
+
   document.querySelectorAll(".smart-item-input").forEach((inp) => {
     items.push({
       jenis: inp.dataset.jenis,
       nomor: inp.value,
-      nourut: inp.dataset.nourut // WAJIB ada agar tidak nambah baris baru
+      nourut: inp.dataset.nourut,
     });
   });
 
@@ -3273,9 +3293,8 @@ window.toggleProfilePopup = function (event) {
     document.getElementById("popup-role").innerText = user.extra || "PETUGAS";
 
     if (user.foto) {
-      document.getElementById(
-        "popup-foto"
-      ).style.backgroundImage = `url('${user.foto}')`;
+      document.getElementById("popup-foto").style.backgroundImage =
+        `url('${user.foto}')`;
       document.getElementById("popup-foto").style.backgroundSize = "cover";
     }
   }
@@ -3304,5 +3323,75 @@ function initMiniSidebarTooltips() {
       item.removeAttribute("title");
     });
 }
+
+function toggleLogPopup(e) {
+  if (e) e.stopPropagation();
+  const popup = document.getElementById("log-popup");
+  if (popup) popup.classList.toggle("hidden");
+}
+
+document.addEventListener("click", function (e) {
+  const popup = document.getElementById("log-popup");
+  const container = document.getElementById("log-notif-container");
+  if (popup && container && !container.contains(e.target)) {
+    popup.classList.add("hidden");
+  }
+});
+
+async function fetchLogActivity() {
+  const res = await postData({ action: "getLogActivity" });
+  if (res.status === "SUCCESS") {
+    renderLogs(res.data);
+  }
+}
+
+function renderLogs(logs) {
+  const list = document.getElementById("log-list");
+  const badge = document.getElementById("log-badge");
+  if (!list || !badge) return;
+
+  list.innerHTML = "";
+  let unreadCount = 0;
+
+  logs.forEach((log) => {
+    if (log.status === "BELUM") unreadCount++;
+    const isUnread = log.status === "BELUM" ? "unread" : "";
+    const time = new Date(log.timestamp).toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    list.innerHTML += `
+            <div class="log-item ${isUnread}">
+                <b>${log.nama}</b> ${log.aktivitas}
+                <span class="time-text"><i class="fa fa-clock"></i> ${time}</span>
+            </div>
+        `;
+  });
+
+  if (unreadCount > 0) {
+    badge.innerText = unreadCount;
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+}
+
+async function markLogsAsRead() {
+  const res = await postData({ action: "markAllLogsAsRead" });
+  if (res.status === "SUCCESS") {
+    fetchLogActivity();
+    showPopup("Semua pemberitahuan telah dibaca", "success");
+  }
+}
+
+setInterval(() => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (user && user.id === "200208052024121001") {
+    console.log("🔄 Auto-syncing Log Activity...");
+    fetchLogActivity();
+  }
+}, 60000);
 
 // --- END SCRIPT.JS V.17 ---
