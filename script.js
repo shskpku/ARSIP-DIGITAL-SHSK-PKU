@@ -3346,8 +3346,8 @@ async function fetchLogActivity() {
 }
 
 function renderLogs(logs) {
-  const list = document.getElementById("log-list");
-  const badge = document.getElementById("log-badge");
+  const list = document.getElementById("log-activity-list");
+  const badge = document.getElementById("log-activity-badge");
   if (!list || !badge) return;
 
   list.innerHTML = "";
@@ -3355,16 +3355,16 @@ function renderLogs(logs) {
 
   logs.forEach((log) => {
     if (log.status === "BELUM") unreadCount++;
-    const isUnread = log.status === "BELUM" ? "unread" : "";
+    const isUnreadClass = log.status === "BELUM" ? "is-unread" : "";
     const time = new Date(log.timestamp).toLocaleString("id-ID", {
       dateStyle: "medium",
       timeStyle: "short",
     });
 
     list.innerHTML += `
-            <div class="log-item ${isUnread}">
+            <div class="log-activity-item ${isUnreadClass}">
                 <b>${log.nama}</b> ${log.aktivitas}
-                <span class="time-text"><i class="fa fa-clock"></i> ${time}</span>
+                <span style="display:block; font-size:9px; color:#999; margin-top:5px;"><i class="fa fa-clock"></i> ${time}</span>
             </div>
         `;
   });
@@ -3376,7 +3376,6 @@ function renderLogs(logs) {
     badge.classList.add("hidden");
   }
 }
-
 async function markLogsAsRead() {
   const res = await postData({ action: "markAllLogsAsRead" });
   if (res.status === "SUCCESS") {
