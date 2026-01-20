@@ -2874,7 +2874,16 @@ body.gateway-mode {
   background: #d50000;
 }
 
-.badge-count {
+.log-activity-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  position: relative;
+}
+
+.log-activity-badge-ui {
   position: absolute;
   top: -8px;
   right: -8px;
@@ -2887,7 +2896,7 @@ body.gateway-mode {
   border: 2px solid var(--navy);
 }
 
-.log-popup-box {
+.log-activity-popup-panel {
   position: absolute;
   top: 45px;
   left: 0;
@@ -2900,7 +2909,7 @@ body.gateway-mode {
   color: #333;
 }
 
-.log-popup-header {
+.log-activity-header {
   padding: 12px;
   background: var(--navy);
   color: white;
@@ -2910,7 +2919,7 @@ body.gateway-mode {
   font-size: 12px;
 }
 
-.log-popup-header button {
+.log-activity-header button {
   background: var(--gold);
   border: none;
   padding: 4px 8px;
@@ -2920,30 +2929,19 @@ body.gateway-mode {
   font-weight: bold;
 }
 
-.log-list-content {
+.log-activity-list-scroll {
   max-height: 350px;
   overflow-y: auto;
 }
 
-.log-item {
+.log-activity-item {
   padding: 12px;
   border-bottom: 1px solid #eee;
   font-size: 11px;
   line-height: 1.4;
 }
 
-.log-item.unread {
+.log-activity-item.is-unread {
   background: #f0f7ff;
   border-left: 4px solid #007bff;
-}
-
-.log-item b {
-  color: var(--navy);
-}
-
-.log-item .time-text {
-  display: block;
-  font-size: 9px;
-  color: #999;
-  margin-top: 5px;
 }
