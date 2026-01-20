@@ -98,28 +98,19 @@
             margin: 0 10px;
           "
         >
-          <button
-            class="notif-btn"
-            onclick="toggleLogPopup(event)"
-            style="
-              background: none;
-              border: none;
-              color: white;
-              font-size: 18px;
-              cursor: pointer;
-              position: relative;
-            "
-          >
+          <button class="log-activity-btn" onclick="toggleLogPopup(event)">
             <i class="fa fa-bell"></i>
-            <span id="log-badge" class="badge-count hidden">0</span>
+            <span id="log-activity-badge" class="log-activity-badge-ui hidden"
+              >0</span
+            >
           </button>
 
-          <div id="log-popup" class="log-popup-box hidden">
-            <div class="log-popup-header">
+          <div id="log-popup" class="log-activity-popup-panel hidden">
+            <div class="log-activity-header">
               <span>Log Aktivitas</span>
               <button onclick="markLogsAsRead()">Baca Semua</button>
             </div>
-            <div id="log-list" class="log-list-content"></div>
+            <div id="log-activity-list" class="log-activity-list-scroll"></div>
           </div>
         </div>
 
@@ -1327,4 +1318,3 @@
     <script src="script.js"></script>
   </body>
 </html>
-
