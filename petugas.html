@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -89,6 +89,41 @@
         <i class="fa fa-bars hamburger-btn" onclick="toggleSidebar()"></i>
 
         <div
+          id="log-notif-container"
+          class="hidden"
+          style="
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+          "
+        >
+          <button
+            class="notif-btn"
+            onclick="toggleLogPopup(event)"
+            style="
+              background: none;
+              border: none;
+              color: white;
+              font-size: 18px;
+              cursor: pointer;
+              position: relative;
+            "
+          >
+            <i class="fa fa-bell"></i>
+            <span id="log-badge" class="badge-count hidden">0</span>
+          </button>
+
+          <div id="log-popup" class="log-popup-box hidden">
+            <div class="log-popup-header">
+              <span>Log Aktivitas</span>
+              <button onclick="markLogsAsRead()">Baca Semua</button>
+            </div>
+            <div id="log-list" class="log-list-content"></div>
+          </div>
+        </div>
+
+        <div
           class="logo-area"
           onclick="showSection('dashboard')"
           style="cursor: pointer"
@@ -105,8 +140,8 @@
 
       <div class="nav-right">
         <div class="user-info-nav">
-          <span id="nav-name">Petugas</span
-          ><small id="nav-role-small">Admin</small>
+          <span id="nav-name">Petugas</span>
+          <small id="nav-role-small">Admin</small>
         </div>
         <button onclick="logout()" class="btn-logout-nav" title="Keluar">
           <i class="fa fa-sign-out-alt"></i>
@@ -571,7 +606,10 @@
         </div>
         <form
           id="formSHSK"
-          onsubmit="event.preventDefault(); handleBulkSubmit('SHSK')"
+          onsubmit="
+            event.preventDefault();
+            handleBulkSubmit('SHSK');
+          "
         >
           <div id="bulk-container-SHSK"></div>
           <div id="btn-container-SHSK" class="form-actions">
@@ -716,7 +754,10 @@
         </div>
         <form
           id="formSertifikasi"
-          onsubmit="event.preventDefault(); handleBulkSubmit('SERTIFIKASI')"
+          onsubmit="
+            event.preventDefault();
+            handleBulkSubmit('SERTIFIKASI');
+          "
         >
           <div id="bulk-container-SERTIFIKASI"></div>
           <div id="btn-container-SERTIFIKASI" class="form-actions">
@@ -886,7 +927,10 @@
         </div>
         <form
           id="formService"
-          onsubmit="event.preventDefault(); handleBulkSubmit('SERVICE')"
+          onsubmit="
+            event.preventDefault();
+            handleBulkSubmit('SERVICE');
+          "
         >
           <div id="bulk-container-SERVICE"></div>
           <div id="btn-container-SERVICE" class="form-actions">
@@ -1028,7 +1072,10 @@
         </div>
         <form
           id="formExibhitum"
-          onsubmit="event.preventDefault(); handleBulkSubmit('EXIBHITUM')"
+          onsubmit="
+            event.preventDefault();
+            handleBulkSubmit('EXIBHITUM');
+          "
         >
           <div id="bulk-container-EXIBHITUM"></div>
           <div id="btn-container-EXIBHITUM" class="form-actions">
