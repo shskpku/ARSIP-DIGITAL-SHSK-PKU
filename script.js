@@ -1939,7 +1939,7 @@ async function handleBulkSubmit(type) {
 
   const firstItem = items[0];
   const isEditMode = firstItem.noUrut && String(firstItem.noUrut).trim() !== "";
-
+  const userActive = JSON.parse(localStorage.getItem("user"));
   let payload = {};
 
   if (isEditMode) {
@@ -1949,7 +1949,12 @@ async function handleBulkSubmit(type) {
     else if (type === "SERVICE") action = "updateService";
     else if (type === "EXIBHITUM") action = "updateExibhitum";
 
-    payload = { action: action, ...firstItem };
+    payload = {
+      action: action,
+      ...firstItem,
+      petugasNip: userActive.id,
+      petugasNama: userActive.nama,
+    };
     console.log("Mengirim Update:", payload);
   } else {
     let action = "";
@@ -1958,7 +1963,12 @@ async function handleBulkSubmit(type) {
     else if (type === "SERVICE") action = "uploadBulkService";
     else if (type === "EXIBHITUM") action = "uploadBulkExibhitum";
 
-    payload = { action: action, items: items };
+    payload = {
+      action: action,
+      ...firstItem,
+      petugasNip: userActive.id,
+      petugasNama: userActive.nama,
+    };
     console.log("Mengirim Baru:", payload);
   }
 
@@ -3250,13 +3260,15 @@ async function saveSmartBatch() {
 
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> MENYELARASKAN...';
   btn.disabled = true;
-
+  const userActive = JSON.parse(localStorage.getItem("user"));
   try {
     const res = await postData({
       action: "updateSmartBatchExibhitum",
       noUrut: id,
       common: common,
       items: items,
+      petugasNip: userActive.id,
+      petugasNama: userActive.nama,
     });
 
     if (res.status === "SUCCESS") {
