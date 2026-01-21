@@ -1937,9 +1937,10 @@ async function handleBulkSubmit(type) {
     return;
   }
 
+  const userActive = JSON.parse(localStorage.getItem("user")); // Ambil user login
   const firstItem = items[0];
   const isEditMode = firstItem.noUrut && String(firstItem.noUrut).trim() !== "";
-  const userActive = JSON.parse(localStorage.getItem("user"));
+
   let payload = {};
 
   if (isEditMode) {
@@ -1949,13 +1950,12 @@ async function handleBulkSubmit(type) {
     else if (type === "SERVICE") action = "updateService";
     else if (type === "EXIBHITUM") action = "updateExibhitum";
 
-    payload = {
-      action: action,
-      ...firstItem,
-      petugasNip: userActive.id,
-      petugasNama: userActive.nama,
+    payload = { 
+        action: action, 
+        ...firstItem,
+        petugasNip: userActive ? userActive.id : "000",   
+        petugasNama: userActive ? userActive.nama : "Sistem" 
     };
-    console.log("Mengirim Update:", payload);
   } else {
     let action = "";
     if (type === "SHSK") action = "uploadBulkSHSK";
@@ -1963,13 +1963,12 @@ async function handleBulkSubmit(type) {
     else if (type === "SERVICE") action = "uploadBulkService";
     else if (type === "EXIBHITUM") action = "uploadBulkExibhitum";
 
-    payload = {
-      action: action,
-      ...firstItem,
-      petugasNip: userActive.id,
-      petugasNama: userActive.nama,
+    payload = { 
+        action: action, 
+        items: items, 
+        petugasNip: userActive ? userActive.id : "000",
+        petugasNama: userActive ? userActive.nama : "Sistem"
     };
-    console.log("Mengirim Baru:", payload);
   }
 
   try {
