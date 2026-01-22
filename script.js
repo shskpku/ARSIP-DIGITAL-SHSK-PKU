@@ -3604,4 +3604,25 @@ async function openDirectPDF(kapal, jenis) {
     }
 }
 
+window.toggleUserPopup = function(e) {
+    if (e) e.stopPropagation();
+    const popup = document.getElementById("user-profile-popup");
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    if (user && popup.classList.contains("hidden")) {
+        document.getElementById("popup-user-name").innerText = user.nama.toUpperCase();
+        document.getElementById("popup-user-company").innerText = user.extra.toUpperCase();
+        document.getElementById("popup-user-email").innerText = user.id;
+    }
+    popup.classList.toggle("hidden");
+};
+
+// Poin 2: Logika tutup popup klik di mana saja
+window.addEventListener("click", function(e) {
+    const popup = document.getElementById("user-profile-popup");
+    if (popup && !popup.classList.contains("hidden") && !e.target.closest('.profile-card-popup') && !e.target.closest('.profile-trigger')) {
+        popup.classList.add("hidden");
+    }
+});
+
 // --- END SCRIPT.JS V.17 ---
