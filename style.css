@@ -2946,47 +2946,193 @@ body.gateway-mode {
   border-left: 4px solid #007bff;
 }
 
-/* NAVBAR CENTER INDICATOR */
+/* ====================================================================
+   FULL ADDITIONAL CSS - PORTAL PENGGUNA V23 (NEON MASTER)
+   ==================================================================== */
+
+/* --- 1. NAVBAR & CENTER STATUS --- */
 .system-status-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 12px; /* Jarak dot dan teks sesuai permintaan */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Jarak dot dan teks presisi */
+    pointer-events: none; /* Agar tidak menghalangi klik navbar */
 }
 
-/* SIDEBAR MINI TOOLTIP & BADGE HIDE */
-#sidebar.minimized .badge-count { display: none !important; }
+.status-indicator-wrapper {
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    padding: 6px 15px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-indicator-wrapper span {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--neon-blue);
+    letter-spacing: 1.5px;
+}
+
+/* --- 2. SIDEBAR MINI & TOOLTIP LOGIC --- */
+#sidebar.minimized {
+    width: 80px !important;
+}
+
+#sidebar.minimized .sidebar-info-text,
+#sidebar.minimized span,
+#sidebar.minimized .badge-count {
+    display: none !important;
+}
+
+/* Tooltip Popup saat Sidebar Mini di-Hover */
 #sidebar.minimized .menu-item:hover::after {
-  content: attr(data-title);
-  position: absolute;
-  left: 85px;
-  background: var(--navy);
-  color: var(--neon-blue);
-  padding: 8px 15px;
-  border-radius: 6px;
-  border: 1px solid var(--neon-blue);
-  font-size: 12px;
-  white-space: nowrap;
-  box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
-  z-index: 10000;
+    content: attr(data-title);
+    position: absolute;
+    left: 85px;
+    background: var(--navy);
+    color: var(--neon-blue);
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--neon-blue);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+    z-index: 10000;
+    animation: fadeIn 0.2s ease-in-out;
 }
 
-/* CONTAINER ALARM DASHBOARD */
+/* --- 3. DASHBOARD EWS (EARLY WARNING SYSTEM) --- */
 .ews-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 25px;
 }
+
 .ews-card {
-  background: rgba(10, 25, 47, 0.8);
-  border: 1px solid var(--neon-blue);
-  border-radius: 15px;
-  height: 400px; /* Scrollable height */
-  overflow-y: auto;
-  padding: 20px;
+    background: rgba(10, 25, 47, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 15px;
+    height: 380px; /* Scrollable height */
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
-.ews-card::-webkit-scrollbar { width: 5px; }
+
+.ews-card::-webkit-scrollbar { width: 4px; }
 .ews-card::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+
+.alert-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 4px solid #555;
+    transition: 0.3s;
+}
+
+.alert-card.danger { border-left-color: #ff3d00; background: rgba(255, 61, 0, 0.05); }
+.alert-card.warning { border-left-color: var(--neon-gold); background: rgba(255, 215, 0, 0.05); }
+
+.alert-card b { display: block; font-size: 13px; color: #fff; margin-bottom: 3px; }
+.alert-card p { font-size: 11px; color: #aaa; margin: 0; }
+
+/* --- 4. DATA TABLE STICKY & NEON STYLE --- */
+.table-card {
+    background: rgba(15, 25, 45, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-height: 75vh;
+    overflow: auto;
+    border-radius: 12px;
+}
+
+/* Judul Kolom Tidak Ikut Scroll (Sticky) */
+.data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--navy) !important;
+    color: var(--neon-blue) !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--neon-blue);
+    padding: 15px;
+}
+
+/* Separator Baris Periode (Poin 4) */
+.row-separator-period td {
+    background: rgba(0, 243, 255, 0.1) !important;
+    color: var(--neon-blue) !important;
+    font-weight: 700;
+    font-size: 12px;
+    text-align: left !important;
+    padding: 12px 25px !important;
+    border-left: 5px solid var(--neon-blue) !important;
+}
+
+/* --- 5. POPUP PROFIL MODAL --- */
+.profile-card-popup {
+    position: fixed;
+    top: 85px;
+    right: 30px;
+    width: 280px;
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    z-index: 10001;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border-top: 5px solid var(--neon-blue);
+}
+
+.profile-card-popup h3 { color: var(--navy); font-size: 16px; margin-bottom: 5px; }
+.profile-card-popup p { color: var(--neon-gold); font-weight: 700; font-size: 12px; margin-bottom: 15px; }
+
+.btn-logout-sidebar {
+    background: linear-gradient(90deg, #ff3d00, #d50000);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.btn-logout-sidebar:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px rgba(255, 61, 0, 0.4);
+}
+
+/* --- 6. MISC PERFECTION --- */
+.dashboard-container {
+    max-width: 1200px; /* Diperlebar untuk dashboard canggih */
+    margin: 100px auto 50px auto;
+}
+
+.info-card i {
+    font-size: 30px;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.info-card:hover {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    transform: translateY(-5px);
+}
