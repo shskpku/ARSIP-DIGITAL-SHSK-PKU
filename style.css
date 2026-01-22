@@ -2945,3 +2945,48 @@ body.gateway-mode {
   background: #f0f7ff;
   border-left: 4px solid #007bff;
 }
+
+/* NAVBAR CENTER INDICATOR */
+.system-status-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Jarak dot dan teks sesuai permintaan */
+}
+
+/* SIDEBAR MINI TOOLTIP & BADGE HIDE */
+#sidebar.minimized .badge-count { display: none !important; }
+#sidebar.minimized .menu-item:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 85px;
+  background: var(--navy);
+  color: var(--neon-blue);
+  padding: 8px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--neon-blue);
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+  z-index: 10000;
+}
+
+/* CONTAINER ALARM DASHBOARD */
+.ews-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 25px;
+}
+.ews-card {
+  background: rgba(10, 25, 47, 0.8);
+  border: 1px solid var(--neon-blue);
+  border-radius: 15px;
+  height: 400px; /* Scrollable height */
+  overflow-y: auto;
+  padding: 20px;
+}
+.ews-card::-webkit-scrollbar { width: 5px; }
+.ews-card::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
