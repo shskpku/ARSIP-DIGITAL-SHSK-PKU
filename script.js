@@ -3404,46 +3404,204 @@ setInterval(() => {
   }
 }, 60000);
 
-// LOGIKA WINDOW 6 BULAN (NOMOR 3)
-function calculateEWS(type, data) {
-  const container = document.getElementById(`ews-${type.toLowerCase()}`);
-  container.innerHTML = "";
-  const today = new Date();
+/* ====================================================================
+   SCRIPT OVERRIDE - PENGGUNA JASA PORTAL (V23 MASTER)
+   JANGAN DIEDIT, TEMPEL DI PALING BAWAH
+   ==================================================================== */
 
-  data.forEach(item => {
-    let tglBase = new Date(item.TANGGAL_STKK || item.TANGGAL_MASA_BERLAKU);
-    if (isNaN(tglBase.getTime())) return;
+(function() {
+    // 1. TAMBAHKAN EVENT LISTENER BARU UNTUK TAKE OVER DOMCONTENTLOADED
+    window.addEventListener("load", function() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) return;
 
-    // Kalkulasi selisih bulan
-    let diffMonth = (today.getFullYear() - tglBase.getFullYear()) * 12 + (today.getMonth() - tglBase.getMonth());
-    let currentCycleMonth = diffMonth % 12; 
-    
-    // Logika Window -3 sampai +3
-    if (currentCycleMonth >= 9 || currentCycleMonth <= 3) {
-      let statusText = currentCycleMonth >= 9 ? `-${12-currentCycleMonth} Bulan` : `+${currentCycleMonth} Bulan`;
-      
-      container.innerHTML += `
-        <div class="alert-card ${currentCycleMonth > 0 ? 'danger' : 'warning'}">
-          <i class="fa fa-clock"></i>
-          <div>
-            <b>${item.NAMA_KAPAL}</b>
-            <p>Memasuki periode pengukuhan (${statusText})</p>
-          </div>
-        </div>
-      `;
+        // Cek apakah ini halaman Pengguna
+        if (document.body.classList.contains("dashboard-page") || document.querySelector(".dashboard-container")) {
+            console.log("Portal Pengguna Terdeteksi: Menjalankan Sistem V23...");
+            
+            // Re-inisialisasi UI
+            setupUserInterfaceV23(user);
+            speakUserWelcomeV23(user.nama);
+            
+            // Load Data secara background untuk Dashboard & Sidebar
+            initUserEngineV23(user.extra);
+            
+            // Aktifkan Live Search tanpa button
+            setupLiveSearchV23();
+        }
+    });
+
+    // 2. FUNGSI SETUP UI (UPPERCASE & NEON)
+    function setupUserInterfaceV23(u) {
+        const nameRaw = u.nama.split(' ')[0].split(',')[0].toUpperCase();
+        
+        const navName = document.getElementById("nav-user-name");
+        const navComp = document.getElementById("nav-company-name");
+        const dashGreet = document.getElementById("dash-greeting");
+
+        if(navName) navName.innerText = nameRaw;
+        if(navComp) navComp.innerText = u.extra.toUpperCase();
+        if(dashGreet) dashGreet.innerText = `SELAMAT DATANG, ${nameRaw}!`;
     }
-  });
-}
 
-// SUARA LOGIN (NOMOR 8)
-function speakUserWelcome(namaLengkap) {
-    if (!('speechSynthesis' in window) || sessionStorage.getItem('welcome_played')) return;
-    let nameOnly = namaLengkap.split(' ')[0].toUpperCase();
-    const msg = new SpeechSynthesisUtterance(`Selamat datang ${nameOnly} di Portal Digital Seksi SHSK`);
-    msg.lang = 'id-ID';
-    window.speechSynthesis.speak(msg);
-    sessionStorage.setItem('welcome_played', 'true');
-}
+    // 3. FUNGSI SUARA LOGIN (NAMA DEPAN)
+    function speakUserWelcomeV23(namaLengkap) {
+        if (!('speechSynthesis' in window) || sessionStorage.getItem('welcome_v23_played')) return;
+        const nameOnly = namaLengkap.split(' ')[0].toUpperCase();
+        const msg = new SpeechSynthesisUtterance(`Selamat datang ${nameOnly} di Portal Digital Seksi SHSK Pekanbaru`);
+        msg.lang = 'id-ID';
+        window.speechSynthesis.speak(msg);
+        sessionStorage.setItem('welcome_v23_played', 'true');
+    }
 
+    // 4. ENGINE UTAMA: BADGE, EWS, & TABLE
+    async function initUserEngineV23(perusahaan) {
+        const types = ['SHSK', 'SERTIFIKASI', 'EXIBHITUM'];
+        const compTarget = perusahaan.toUpperCase().trim();
+
+        for (const type of types) {
+            const res = await postData({ action: `getData${type}` });
+            if (res.status === "SUCCESS") {
+                const privateData = res.data.filter(item => {
+                    const rowComp = (item.PEMILIK || item.NAMA_PERUSAHAAN || item.PERUSAHAAN || "").toUpperCase();
+                    return rowComp.includes(compTarget);
+                });
+
+                // Simpan ke Global Cache untuk Pencarian
+                window[`cache${type}`] = privateData;
+
+                // Update Badge Sidebar
+                const badge = document.getElementById(`badge-${type.toLowerCase()}`);
+                if (badge) badge.innerText = privateData.length;
+
+                // Jalankan EWS (Alarm) di Dashboard
+                if (type === 'SHSK' || type === 'SERTIFIKASI') runEWSV23(type, privateData);
+                if (type === 'EXIBHITUM') runExibAlertV23(privateData);
+                
+                // Render Tabel Awal
+                renderTabelV23(type, privateData, 1);
+            }
+        }
+    }
+
+    // 5. LOGIKA RENDER TABEL (25 BARIS + SEPARATOR)
+    function renderTabelV23(type, data, page) {
+        const tbodyId = `tbody-${type.toLowerCase()}`;
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const limit = 25;
+        const start = (page - 1) * limit;
+        const pageData = data.slice(start, start + limit);
+        let lastPeriod = "";
+
+        pageData.forEach((row, i) => {
+            // Baris Pembatas Periode
+            const dateVal = row.TANGGAL_PENGUKUHAN || row.TANGGAL_TERBIT || row.TANGGAL;
+            if (dateVal) {
+                const d = new Date(dateVal);
+                const currentPeriod = `${d.toLocaleString('id-ID', {month:'long'})} ${d.getFullYear()}`.toUpperCase();
+                if (currentPeriod !== lastPeriod) {
+                    tbody.innerHTML += `<tr class="row-separator-period"><td colspan="15"><i class="fa fa-calendar"></i> PERIODE: ${currentPeriod}</td></tr>`;
+                    lastPeriod = currentPeriod;
+                }
+            }
+
+            let tr = `<tr><td>${start + i + 1}</td>`;
+            if (type === "SHSK") {
+                tr += `<td>${row.NAMA_KAPAL}</td><td>${row.TONASE_GT}</td><td>${row.TANDA_PENDAFTARAN}</td><td>${row.PEMILIK}</td><td>${row.TEMPAT_STKK}</td><td>${formatDate(row.TANGGAL_STKK)}</td><td>${row.NO_URUT_STKK}</td><td>${formatDate(row.TANGGAL_PENGUKUHAN)}</td>`;
+            } else if (type === "SERTIFIKASI") {
+                tr += `<td>${row.NAMA_PERUSAHAAN}</td><td>${row.NAMA_KAPAL}</td><td>${row.UKURAN_GT}</td><td>${row.CALL_SIGN}</td><td>${row.BAHAN_KAPAL}</td><td>${row.KETERANGAN}</td><td>${row.JENIS_SERTIFIKAT}</td><td>${formatDate(row.TANGGAL_TERBIT)}</td><td>${formatDate(row.TANGGAL_MASA_BERLAKU)}</td><td>${row.DAERAH_PELAYARAN}</td><td>${row.NOMOR_SERTIFIKAT}</td>`;
+            } else if (type === "EXIBHITUM") {
+                tr += `<td>${formatDate(row.TANGGAL)}</td><td>${row.PERUSAHAAN}</td><td>${row.JENIS_BUKU}</td><td>${row.NAMA_KAPAL}</td><td>${row.PENOMORAN}</td>`;
+            }
+            tbody.innerHTML += tr + "</tr>";
+        });
+    }
+
+    // 6. LOGIKA EWS (WINDOW 6 BULAN & H-14)
+    function runEWSV23(type, data) {
+        const container = document.getElementById(`ews-${type.toLowerCase()}`);
+        if (!container) return;
+        const today = new Date();
+
+        data.forEach(item => {
+            const tglBase = new Date(item.TANGGAL_STKK || item.TANGGAL_MASA_BERLAKU);
+            if (isNaN(tglBase.getTime())) return;
+
+            const isEndors = (item.JENIS_SERTIFIKAT || "").toUpperCase().includes("ENDORS");
+            
+            if (type === 'SHSK' || isEndors) {
+                // Window -3 s/d +3
+                let monthDiff = (today.getFullYear() - tglBase.getFullYear()) * 12 + (today.getMonth() - tglBase.getMonth());
+                let cycle = monthDiff % 12;
+                if (cycle >= 9 || cycle <= 3) {
+                    let label = cycle >= 9 ? `-${12-cycle} Bln` : `+${cycle} Bln`;
+                    container.innerHTML += `<div class="alert-card ${cycle > 0 ? 'danger' : 'warning'}"><b>${item.NAMA_KAPAL}</b><p>Masa Pengukuhan (${label})</p></div>`;
+                }
+            } else {
+                // Non-Endors H-14
+                const diffDays = Math.ceil((tglBase - today) / (1000 * 60 * 60 * 24));
+                if (diffDays <= 14 && diffDays >= 0) {
+                    container.innerHTML += `<div class="alert-card danger"><b>${item.NAMA_KAPAL}</b><p>Habis dalam ${diffDays} Hari</p></div>`;
+                }
+            }
+        });
+    }
+
+    // 7. EXIBHITUM ALERT (Tiap Tanggal 1)
+    function runExibAlertV23(data) {
+        const container = document.getElementById("ews-exibhitum");
+        if (!container) return;
+        const today = new Date();
+        const listKapal = [...new Set(data.map(i => i.NAMA_KAPAL))];
+        listKapal.forEach(k => {
+            const sudah = data.some(i => {
+                const d = new Date(i.TANGGAL);
+                return i.NAMA_KAPAL === k && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+            });
+            if (!sudah) container.innerHTML += `<div class="alert-card warning"><b>${k}</b><p>Belum Exibhitum Bulan Ini</p></div>`;
+        });
+    }
+
+    // 8. LIVE SEARCH TAKE OVER
+    function setupLiveSearchV23() {
+        ['SHSK', 'Sertifikasi', 'Exibhitum'].forEach(type => {
+            const inp = document.getElementById(`search${type}`);
+            if (inp) {
+                inp.addEventListener('input', (e) => {
+                    const term = e.target.value.toUpperCase();
+                    const filtered = window[`cache${type.toUpperCase()}`].filter(i => 
+                        Object.values(i).join(" ").toUpperCase().includes(term)
+                    );
+                    renderTabelV23(type.toUpperCase(), filtered, 1);
+                });
+            }
+        });
+    }
+})();
+
+// FUNGSI UNTUK MEMBUKA FILE PDF LANGSUNG (POIN 3)
+async function openDirectPDF(kapal, jenis) {
+    showPopup(`Mencari file laporan ${kapal}...`, "info");
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    // Tarik data dropdown yang sudah divalidasi di server (GS)
+    const res = await postData({ action: "getDropdownData", perusahaan: user.extra });
+    
+    if (res.status === "SUCCESS") {
+        const item = res.data.find(d => d.kapal === kapal);
+        if (item && item.allFiles) {
+            // Cari file yang namanya mengandung jenis laporan tersebut
+            const file = item.allFiles.find(f => f.name.toUpperCase().includes(jenis.toUpperCase()));
+            if (file) {
+                window.open(file.url, "_blank");
+            } else {
+                showPopup("Maaf, file PDF belum tersedia di folder.", "error");
+            }
+        }
+    }
+}
 
 // --- END SCRIPT.JS V.17 ---
