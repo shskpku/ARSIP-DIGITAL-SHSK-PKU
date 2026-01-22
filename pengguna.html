@@ -1,249 +1,268 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Pengguna Jasa - SHSK</title>
+    <title>Dashboard Layanan - SHSK</title>
     <link href="logo-shsk.png" rel="icon" />
     <link rel="stylesheet" href="style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-</head>
-<body class="dashboard-page user-portal">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="dashboard-page">
     <div id="app-notification" class="popup">
-        <i class="fa fa-info-circle"></i><span id="popup-message">Pesan...</span>
+      <i class="fa fa-info-circle"></i><span id="popup-message">Pesan...</span>
     </div>
 
     <div id="modal-logout" class="modal-overlay hidden">
-        <div class="modal-box zoom-anim">
-            <div class="modal-icon-danger"><i class="fa fa-power-off"></i></div>
-            <h3>Akhiri Sesi?</h3>
-            <p>Anda yakin ingin keluar dari portal layanan mandiri?</p>
-            <div class="modal-buttons">
-                <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
-                <button class="btn-confirm-logout" onclick="confirmLogout()">Ya, Keluar</button>
-            </div>
+      <div class="modal-box zoom-anim">
+        <div class="modal-icon-danger"><i class="fa fa-power-off"></i></div>
+        <h3>Akhiri Sesi?</h3>
+        <p>Anda yakin ingin keluar dari layanan mandiri?</p>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
+          <button class="btn-confirm-logout" onclick="confirmLogout()">
+            Ya, Keluar
+          </button>
         </div>
-    </div>
-
-    <div id="user-profile-popup" class="profile-card-popup hidden">
-        <div class="popup-photo"><i class="fa fa-user"></i></div>
-        <h3 id="popup-user-name">USER NAME</h3>
-        <p id="popup-user-company">COMPANY NAME</p>
-        <div id="popup-user-email" style="font-size: 11px; color: #888; margin-bottom: 20px;">email@user.com</div>
-        <button onclick="logout()" class="btn-logout-sidebar" style="width: 100%;">
-            <i class="fa fa-sign-out-alt"></i> KELUAR SISTEM
-        </button>
+      </div>
     </div>
 
     <nav class="navbar-glass">
-        <div class="nav-left">
-            <div class="hamburger-btn" onclick="toggleSidebar()">
-                <i class="fa fa-bars"></i>
+      <div class="brand-logo">
+        <i class="fa-solid fa-anchor"></i>
+        <span>SHSK PEKANBARU</span>
+      </div>
+
+      <div class="profile-area">
+        <div class="desktop-profile-info">
+          <div class="text-right" style="text-align: right; line-height: 1.2">
+            <div class="profile-text" style="font-weight: 600">
+              Halo, <span id="nav-user-name">User</span>
             </div>
-            <div class="brand-logo" onclick="showSection('dashboard')" style="cursor: pointer;">
-                <i class="fa-solid fa-anchor"></i>
-                <span>SHSK PEKANBARU</span>
+            <div
+              class="profile-company"
+              id="nav-company-name"
+              style="font-size: 11px; color: var(--neon-gold)"
+            >
+              PERUSAHAAN
             </div>
+          </div>
+          <div class="separator"></div>
+          <button onclick="logout()" class="btn-logout">KELUAR</button>
         </div>
 
-        <div class="system-status-center">
-            <div class="status-indicator-wrapper">
-                <div class="blink-dot-green"></div>
-                <span>SYSTEM ONLINE</span>
-            </div>
+        <div class="mobile-profile-wrapper">
+          <div class="user-icon-btn" onclick="toggleMobileProfile(event)">
+            <i class="fa fa-user"></i>
+          </div>
+          <div id="mobileProfileDropdown" class="profile-dropdown">
+            <p style="margin-bottom: 5px">
+              Halo, <b id="mob-user-name">User</b>
+            </p>
+            <div class="separator-hor"></div>
+            <small
+              id="mob-company-name"
+              style="
+                display: block;
+                margin-bottom: 5px;
+                color: var(--neon-gold);
+              "
+              >PERUSAHAAN</small
+            >
+            <p
+              id="mob-email-text"
+              style="
+                font-size: 11px;
+                color: #aaa;
+                margin-bottom: 15px;
+                word-break: break-all;
+              "
+            >
+              -
+            </p>
+            <button
+              onclick="logout()"
+              class="btn-logout"
+              style="
+                width: 100%;
+                margin: 0;
+                border-color: rgba(255, 255, 255, 0.3);
+                color: #fff;
+              "
+            >
+              KELUAR
+            </button>
+          </div>
         </div>
-
-        <div class="nav-right">
-            <div class="profile-trigger" id="profile-trigger-nav" onclick="toggleUserPopup(event)">
-                <div class="profile-info-nav">
-                    <span id="nav-user-name">LOADING...</span>
-                    <small id="nav-company-name">LOADING...</small>
-                </div>
-            </div>
-        </div>
+      </div>
     </nav>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="profile-section" id="user-profile-trigger-sidebar" onclick="toggleUserPopup(event)">
-            <div class="profile-circle"><i class="fa fa-user"></i></div>
-            <div class="sidebar-info-text">
-                <h4 id="sidebar-name">NAME</h4>
-                <p id="sidebar-company">COMPANY</p>
-                <small id="sidebar-email">email@user.com</small>
+    <div class="dashboard-container">
+      <div class="req-card">
+        <div class="req-header">
+          <div class="header-title-group" style="width: 100%">
+            <h2
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+              "
+            >
+              <span
+                ><i
+                  class="fa fa-ship"
+                  style="margin-right: 10px; color: var(--neon-blue)"
+                ></i>
+                PERMOHONAN LAPORAN PEMERIKSAAN</span
+              >
+            </h2>
+
+            <div
+              class="status-indicator-wrapper"
+              style="margin-top: 10px; margin-bottom: 15px"
+            >
+              <div class="blink-dot-green"></div>
+              <span
+                style="
+                  color: #00ff00;
+                  font-size: 12px;
+                  font-weight: 700;
+                  letter-spacing: 1px;
+                  margin-left: 8px;
+                "
+                >LAYANAN ONLINE & AKTIF</span
+              >
             </div>
+
+            <p style="color: #ccc; font-size: 14px; line-height: 1.5">
+              Silakan pilih kapal dan jenis laporan yang dibutuhkan. Sistem akan
+              mengirimkan link download dokumen PDF secara otomatis ke email
+              Anda.
+            </p>
+          </div>
         </div>
 
-        <hr class="sidebar-divider">
+        <form id="formRequest" onsubmit="window.handleRequestSubmit(event)">
+          <input type="hidden" id="userEmailHidden" />
 
-        <div class="sidebar-content">
-            <div class="menu-item active" onclick="showSection('dashboard', this)" data-title="Dashboard">
-                <i class="fa fa-th-large"></i><span>Dashboard</span>
-            </div>
-            <div class="menu-item" onclick="showSection('shsk-data', this)" data-title="Status Hukum">
-                <i class="fa fa-balance-scale"></i><span>Status Hukum</span>
-                <span class="badge-count" id="badge-shsk">0</span>
-            </div>
-            <div class="menu-item" onclick="showSection('sertifikasi-data', this)" data-title="Sertifikasi">
-                <i class="fa fa-certificate"></i><span>Sertifikasi</span>
-                <span class="badge-count" id="badge-sertifikasi">0</span>
-            </div>
-            <div class="menu-item" onclick="showSection('ex-psh-data', this)" data-title="Exibhitum & Psh">
-                <i class="fa fa-book"></i><span>Exibhitum & Psh</span>
-                <span class="badge-count" id="badge-exibhitum">0</span>
-            </div>
-            <div class="menu-item" onclick="showSection('permohonan', this)" data-title="Permohonan">
-                <i class="fa fa-file-export"></i><span>Permohonan</span>
-            </div>
-        </div>
+          <div class="dash-group">
+            <label>1. Tahun Pemeriksaan</label>
+            <select
+              id="reqTahun"
+              class="dash-control"
+              onchange="window.filterMonth()"
+            >
+              <option value="">Sedang memuat data...</option>
+            </select>
+          </div>
 
-        <div class="sidebar-footer">
-            <button onclick="logout()" class="btn-logout-sidebar">
-                <i class="fa fa-power-off"></i><span>KELUAR SISTEM</span>
-            </button>
-        </div>
-    </aside>
+          <div class="dash-group">
+            <label>2. Bulan Pemeriksaan</label>
+            <select
+              id="reqBulan"
+              class="dash-control"
+              onchange="window.filterShip()"
+              disabled
+            >
+              <option value="">-- Pilih Tahun Terlebih Dahulu --</option>
+            </select>
+          </div>
 
-    <main class="main-content">
-        
-        <div id="sec-dashboard" class="section-container">
-            <div class="welcome-banner">
-                <h2 id="dash-greeting">SELAMAT DATANG!</h2>
-                <p>Seksi Status Hukum dan Sertifikasi Kapal - KSOP Kelas II Pekanbaru</p>
-            </div>
+          <div class="dash-group">
+            <label>3. Nama Kapal</label>
+            <select
+              id="reqKapal"
+              class="dash-control"
+              onchange="window.filterType()"
+              disabled
+            >
+              <option value="">-- Pilih Bulan Terlebih Dahulu --</option>
+            </select>
+          </div>
 
-            <div class="info-grid">
-                <div class="info-card" onclick="showSection('shsk-data')">
-                    <i class="fa fa-anchor"></i>
-                    <div><h3>Status Hukum</h3><p>Data pengukuhan & STKK</p></div>
-                </div>
-                <div class="info-card" onclick="showSection('sertifikasi-data')">
-                    <i class="fa fa-award"></i>
-                    <div><h3>Sertifikasi</h3><p>Cek masa berlaku sertifikat</p></div>
-                </div>
-                <div class="info-card" onclick="showSection('ex-psh-data')">
-                    <i class="fa fa-book-open"></i>
-                    <div><h3>Exibhitum</h3><p>Pemeriksaan buku harian</p></div>
-                </div>
-                <div class="info-card" onclick="showSection('permohonan')">
-                    <i class="fa fa-envelope-open-text"></i>
-                    <div><h3>Permohonan</h3><p>Download laporan PDF</p></div>
-                </div>
-            </div>
+          <div class="dash-group">
+            <label>4. Pilih Dokumen (Bisa lebih dari satu)</label>
+            <select
+              id="reqJenis"
+              class="dash-control"
+              multiple
+              disabled
+              style="height: 120px; padding: 10px; overflow-y: auto"
+            >
+              <option value="">-- Pilih Kapal Terlebih Dahulu --</option>
+            </select>
+            <small
+              style="
+                color: #8892b0;
+                font-size: 11px;
+                margin-top: 5px;
+                display: block;
+              "
+            >
+              * Tahan tombol <b>CTRL</b> (Windows) atau <b>Command</b> (Mac)
+              untuk memilih beberapa dokumen sekaligus.
+            </small>
+          </div>
 
-            <h3 style="color: var(--neon-blue); margin: 30px 0 15px 0;"><i class="fa fa-bullhorn"></i> PUSAT PERINGATAN (ATTENTION)</h3>
-            <div class="ews-container">
-                <div class="ews-card">
-                    <h4 style="color: var(--neon-gold); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-                        <i class="fa fa-clock"></i> STATUS HUKUM (-3/+3 bln)
-                    </h4>
-                    <div id="ews-shsk" class="ews-list"></div>
-                </div>
-                <div class="ews-card">
-                    <h4 style="color: var(--neon-gold); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-                        <i class="fa fa-shield-alt"></i> SERTIFIKASI (H-14/Window)
-                    </h4>
-                    <div id="ews-sertifikasi" class="ews-list"></div>
-                </div>
-                <div class="ews-card">
-                    <h4 style="color: var(--neon-gold); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-                        <i class="fa fa-calendar-check"></i> EXHIBHITUM (Bulanan)
-                    </h4>
-                    <div id="ews-exibhitum" class="ews-list"></div>
-                </div>
-            </div>
-        </div>
+          <button type="submit" class="btn-submit-req" id="btnKirimReq">
+            <i class="fa fa-paper-plane"></i> KIRIM DOKUMEN
+          </button>
 
-        <div id="sec-shsk-data" class="section-container hidden">
-            <div class="section-header">
-                <h2>DATA STATUS HUKUM</h2>
-                <div class="header-actions">
-                    <input type="text" id="searchSHSK" class="form-control" placeholder="Cari Kapal..." style="width: 250px; display: inline-block;">
-                    <button class="btn-refresh" onclick="loadDataPengguna('SHSK')"><i class="fa fa-sync"></i> REFRESH</button>
-                </div>
-            </div>
-            <div class="table-card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>NO</th><th>NAMA KAPAL</th><th>TONASE</th><th>TANDA PENDAFTARAN</th><th>PEMILIK</th><th>TEMPAT STKK</th><th>TANGGAL STKK</th><th>NO URUT</th><th>TGL PENGUKUHAN</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-shsk"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="sec-sertifikasi-data" class="section-container hidden">
-            <div class="section-header">
-                <h2>DATA SERTIFIKASI KAPAL</h2>
-                <div class="header-actions">
-                    <input type="text" id="searchSERTIFIKASI" class="form-control" placeholder="Cari Kapal..." style="width: 250px; display: inline-block;">
-                    <button class="btn-refresh" onclick="loadDataPengguna('SERTIFIKASI')"><i class="fa fa-sync"></i> REFRESH</button>
-                </div>
-            </div>
-            <div class="table-card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>NO</th><th>PERUSAHAAN</th><th>NAMA KAPAL</th><th>UKURAN</th><th>CALL SIGN</th><th>BAHAN</th><th>KET</th><th>JENIS</th><th>TERBIT</th><th>MASA BERLAKU</th><th>DAERAH</th><th>NO SERTIFIKAT</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-sertifikasi"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="sec-ex-psh-data" class="section-container hidden">
-            <div class="section-header">
-                <h2>DATA EXHIBHITUM & PENGESAHAN</h2>
-                <div class="header-actions">
-                    <input type="text" id="searchEXIBHITUM" class="form-control" placeholder="Cari data..." style="width: 250px; display: inline-block;">
-                    <button class="btn-refresh" onclick="loadDataPengguna('EXIBHITUM')"><i class="fa fa-sync"></i> REFRESH</button>
-                </div>
-            </div>
-            <div class="table-card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>NO</th><th>TANGGAL</th><th>PERUSAHAAN</th><th>JENIS BUKU</th><th>NAMA KAPAL</th><th>NOMOR</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-exibhitum"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="sec-permohonan" class="section-container hidden">
-            <div class="req-card">
-                <h2 style="color: #fff; margin-bottom: 20px;"><i class="fa fa-ship"></i> FORM PERMOHONAN LAPORAN</h2>
-                <form id="formRequest" onsubmit="window.handleRequestSubmit(event)">
-                    <div class="dash-group">
-                        <label>1. TAHUN PEMERIKSAAN</label>
-                        <select id="reqTahun" class="dash-control" onchange="window.filterMonth()"><option value="">Memuat...</option></select>
-                    </div>
-                    <div class="dash-group">
-                        <label>2. BULAN PEMERIKSAAN</label>
-                        <select id="reqBulan" class="dash-control" onchange="window.filterShip()" disabled><option value="">-- Pilih Tahun --</option></select>
-                    </div>
-                    <div class="dash-group">
-                        <label>3. NAMA KAPAL</label>
-                        <select id="reqKapal" class="dash-control" onchange="window.filterType()" disabled><option value="">-- Pilih Bulan --</option></select>
-                    </div>
-                    <div class="dash-group">
-                        <label>4. PILIH JENIS LAPORAN (GRADING OTOMATIS)</label>
-                        <select id="reqJenis" class="dash-control" multiple disabled style="height: 120px;"></select>
-                    </div>
-                    <button type="submit" class="btn-submit-req" id="btnKirimReq"><i class="fa fa-paper-plane"></i> KIRIM LINK KE EMAIL</button>
-                </form>
-                <div style="text-align: center; margin-top: 20px; color: #8892b0; font-size: 13px;">
-                    <i class="fa fa-envelope"></i> Link PDF akan dikirim ke: <b id="email-display-text" style="color: #fff;">-</b>
-                </div>
-            </div>
-        </div>
-
-    </main>
+          <p
+            style="
+              text-align: center;
+              margin-top: 20px;
+              font-size: 13px;
+              color: #8892b0;
+              border-top: 1px solid rgba(255, 255, 255, 0.1);
+              padding-top: 15px;
+            "
+          >
+            <i class="fa fa-envelope" style="color: var(--neon-gold)"></i>
+            Dokumen akan dikirim ke: <br />
+            <b id="email-display-text" style="color: #fff; font-size: 14px"
+              >Memuat email...</b
+            >
+          </p>
+        </form>
+      </div>
+    </div>
 
     <script src="script.js"></script>
-</body>
+    <script>
+      function toggleMobileProfile(e) {
+        e.stopPropagation();
+        const dropdown = document.getElementById("mobileProfileDropdown");
+        dropdown.classList.toggle("show");
+      }
+
+      window.addEventListener("click", function (e) {
+        if (!e.target.closest(".mobile-profile-wrapper")) {
+          const dropdown = document.getElementById("mobileProfileDropdown");
+          if (dropdown && dropdown.classList.contains("show")) {
+            dropdown.classList.remove("show");
+          }
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const u = JSON.parse(localStorage.getItem("user"));
+        if (u) {
+          const footerEmail = document.getElementById("email-display-text");
+          if (footerEmail) footerEmail.innerText = u.id;
+
+          const mobEmail = document.getElementById("mob-email-text");
+          if (mobEmail) mobEmail.innerText = u.id;
+        }
+      });
+    </script>
+  </body>
 </html>
