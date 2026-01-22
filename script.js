@@ -3404,4 +3404,46 @@ setInterval(() => {
   }
 }, 60000);
 
+// LOGIKA WINDOW 6 BULAN (NOMOR 3)
+function calculateEWS(type, data) {
+  const container = document.getElementById(`ews-${type.toLowerCase()}`);
+  container.innerHTML = "";
+  const today = new Date();
+
+  data.forEach(item => {
+    let tglBase = new Date(item.TANGGAL_STKK || item.TANGGAL_MASA_BERLAKU);
+    if (isNaN(tglBase.getTime())) return;
+
+    // Kalkulasi selisih bulan
+    let diffMonth = (today.getFullYear() - tglBase.getFullYear()) * 12 + (today.getMonth() - tglBase.getMonth());
+    let currentCycleMonth = diffMonth % 12; 
+    
+    // Logika Window -3 sampai +3
+    if (currentCycleMonth >= 9 || currentCycleMonth <= 3) {
+      let statusText = currentCycleMonth >= 9 ? `-${12-currentCycleMonth} Bulan` : `+${currentCycleMonth} Bulan`;
+      
+      container.innerHTML += `
+        <div class="alert-card ${currentCycleMonth > 0 ? 'danger' : 'warning'}">
+          <i class="fa fa-clock"></i>
+          <div>
+            <b>${item.NAMA_KAPAL}</b>
+            <p>Memasuki periode pengukuhan (${statusText})</p>
+          </div>
+        </div>
+      `;
+    }
+  });
+}
+
+// SUARA LOGIN (NOMOR 8)
+function speakUserWelcome(namaLengkap) {
+    if (!('speechSynthesis' in window) || sessionStorage.getItem('welcome_played')) return;
+    let nameOnly = namaLengkap.split(' ')[0].toUpperCase();
+    const msg = new SpeechSynthesisUtterance(`Selamat datang ${nameOnly} di Portal Digital Seksi SHSK`);
+    msg.lang = 'id-ID';
+    window.speechSynthesis.speak(msg);
+    sessionStorage.setItem('welcome_played', 'true');
+}
+
+
 // --- END SCRIPT.JS V.17 ---
