@@ -31,14 +31,10 @@
 
 /* --- LOGIN PAGE --- */
 body.login-page {
-  background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop")
-    no-repeat center center fixed;
-  background-size: cover;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #000;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
+              url("https://images.unsplash.com/photo-1498196724034-70f7f329972c?q=80&w=2070&auto=format&fit=crop") 
+              no-repeat center center fixed !important;
+  background-size: cover !important;
 }
 .auth-container {
   width: 100%;
@@ -596,11 +592,11 @@ select[multiple].dash-control option:checked {
 
 /* --- DASHBOARD PETUGAS --- */
 body.petugas-page {
-  background-color: #f4f6f9;
-  min-height: 100vh;
-  color: #333;
-  overflow-x: hidden;
-  font-size: 14px;
+  /* Kita kasih overlay navy gelap agar teks dan dashboard putih di atasnya tetap tajam */
+  background: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.9)), 
+              url("https://images.unsplash.com/photo-1544413647-ad519890913a?q=80&w=2070&auto=format&fit=crop") 
+              no-repeat center center fixed !important;
+  background-size: cover !important;
 }
 .navbar.glass-nav {
   position: fixed;
@@ -2944,4 +2940,19 @@ body.gateway-mode {
 .log-activity-item.is-unread {
   background: #f0f7ff;
   border-left: 4px solid #007bff;
+}
+
+@media (max-width: 900px) {
+  body.login-page, body.petugas-page {
+    /* Di mobile Safari/iPad, fixed background kadang berat, kita ubah jadi scroll */
+    background-attachment: scroll !important;
+    background-position: center center !important;
+  }
+}
+
+/* 4. PENYESUAIAN WARNA TEXT PETUGAS */
+/* Karena background sekarang gelap, judul section kita buat lebih terang */
+body.petugas-page .section-header h2 {
+    color: var(--white) !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
