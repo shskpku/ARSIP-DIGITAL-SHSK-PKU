@@ -597,11 +597,15 @@ select[multiple].dash-control option:checked {
 
 /* --- DASHBOARD PETUGAS --- */
 body.petugas-page {
-  /* Overlay Navy gelap agar dashboard putih di atasnya tetap tajam dan profesional */
+  /* Overlay Navy gelap + Gambar Kapal Kargo Merah Biru */
   background: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.9)), 
               url("https://images.unsplash.com/photo-1544413647-ad519890913a?q=80&w=2070&auto=format&fit=crop") 
               no-repeat center center fixed !important;
   background-size: cover !important;
+  min-height: 100vh;
+  color: #333;
+  overflow-x: hidden;
+  font-size: 14px;
 }
 .navbar.glass-nav {
   position: fixed;
