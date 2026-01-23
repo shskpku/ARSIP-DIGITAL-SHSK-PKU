@@ -491,7 +491,191 @@
             </div>
           </div>
         </div>
+
+        <div class="section-header" style="margin-top: 30px">
+          <h2>
+            <i class="fa fa-triangle-exclamation" style="color: #ff3d00"></i>
+            PUSAT PERHATIAN & PENGAWASAN
+          </h2>
+        </div>
+
+        <div class="ews-container">
+          <div class="ews-card">
+            <div class="ews-header-inner">
+              <div class="ews-title-group">
+                <i class="fa fa-ship fa-lg" style="color: var(--gold)"></i>
+                <h2 style="font-size: 1.4rem; margin: 0; color: #fff">
+                  Status Hukum
+                </h2>
+                <span id="badge-ews-shsk" class="badge-count-neon">0</span>
+              </div>
+              <div class="ews-actions">
+                <button class="ews-btn-small" onclick="initUserEngineV23()">
+                  REFRESH
+                </button>
+                <button
+                  class="ews-btn-small"
+                  onclick="markAllModuleAsRead('shsk')"
+                >
+                  BACA SEMUA
+                </button>
+                <button
+                  class="ews-btn-del"
+                  onclick="toggleBulkDeleteBar('shsk')"
+                >
+                  <i class="fa fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <div id="bulk-bar-shsk" class="ews-bulk-bar hidden">
+              <label style="color: #fff; font-size: 11px"
+                ><input type="checkbox" onclick="selectAllEWS('shsk', this)" />
+                Pilih Semua</label
+              >
+              <button
+                onclick="processPermanentDelete('shsk')"
+                class="btn-confirm-del"
+              >
+                HAPUS
+              </button>
+            </div>
+            <div id="ews-shsk" class="ews-list-content"></div>
+          </div>
+
+          <div class="ews-card">
+            <div class="ews-header-inner">
+              <div class="ews-title-group">
+                <i
+                  class="fa fa-certificate fa-lg"
+                  style="color: var(--gold)"
+                ></i>
+                <h2 style="font-size: 1.4rem; margin: 0; color: #fff">
+                  Sertifikasi
+                </h2>
+                <span id="badge-ews-sert" class="badge-count-neon">0</span>
+              </div>
+              <div class="ews-actions">
+                <button class="ews-btn-small" onclick="initUserEngineV23()">
+                  REFRESH
+                </button>
+                <button
+                  class="ews-btn-small"
+                  onclick="markAllModuleAsRead('sert')"
+                >
+                  BACA SEMUA
+                </button>
+                <button
+                  class="ews-btn-del"
+                  onclick="toggleBulkDeleteBar('sert')"
+                >
+                  <i class="fa fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <div id="bulk-bar-sert" class="ews-bulk-bar hidden">
+              <label style="color: #fff; font-size: 11px"
+                ><input type="checkbox" onclick="selectAllEWS('sert', this)" />
+                Pilih Semua</label
+              >
+              <button
+                onclick="processPermanentDelete('sert')"
+                class="btn-confirm-del"
+              >
+                HAPUS
+              </button>
+            </div>
+            <div id="ews-sert" class="ews-list-content"></div>
+          </div>
+
+          <div class="ews-card">
+            <div class="ews-header-inner">
+              <div class="ews-title-group">
+                <i class="fa fa-tools fa-lg" style="color: var(--gold)"></i>
+                <h2 style="font-size: 1.4rem; margin: 0; color: #fff">
+                  Service Station
+                </h2>
+                <span id="badge-ews-service" class="badge-count-neon">0</span>
+              </div>
+              <div class="ews-actions">
+                <button class="ews-btn-small" onclick="initUserEngineV23()">
+                  REFRESH
+                </button>
+                <button
+                  class="ews-btn-small"
+                  onclick="markAllModuleAsRead('service')"
+                >
+                  BACA SEMUA
+                </button>
+                <button
+                  class="ews-btn-del"
+                  onclick="toggleBulkDeleteBar('service')"
+                >
+                  <i class="fa fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <div id="bulk-bar-service" class="ews-bulk-bar hidden">
+              <label style="color: #fff; font-size: 11px"
+                ><input
+                  type="checkbox"
+                  onclick="selectAllEWS('service', this)"
+                />
+                Pilih Semua</label
+              >
+              <button
+                onclick="processPermanentDelete('service')"
+                class="btn-confirm-del"
+              >
+                HAPUS
+              </button>
+            </div>
+            <div id="ews-service" class="ews-list-content"></div>
+          </div>
+
+          <div class="ews-card">
+            <div class="ews-header-inner">
+              <div class="ews-title-group">
+                <i class="fa fa-book-open fa-lg" style="color: var(--gold)"></i>
+                <h2 style="font-size: 1.4rem; margin: 0; color: #fff">
+                  Exhibitum
+                </h2>
+                <span id="badge-ews-exib" class="badge-count-neon">0</span>
+              </div>
+              <div class="ews-actions">
+                <button class="ews-btn-small" onclick="initUserEngineV23()">
+                  REFRESH
+                </button>
+                <button
+                  class="ews-btn-small"
+                  onclick="markAllModuleAsRead('exib')"
+                >
+                  BACA SEMUA
+                </button>
+                <button
+                  class="ews-btn-del"
+                  onclick="toggleBulkDeleteBar('exib')"
+                >
+                  <i class="fa fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <div id="bulk-bar-exib" class="ews-bulk-bar hidden">
+              <label style="color: #fff; font-size: 11px"
+                ><input type="checkbox" onclick="selectAllEWS('exib', this)" />
+                Pilih Semua</label
+              >
+              <button
+                onclick="processPermanentDelete('exib')"
+                class="btn-confirm-del"
+              >
+                HAPUS
+              </button>
+            </div>
+            <div id="ews-exibhitum" class="ews-list-content"></div>
+          </div>
+        </div>
       </div>
+
       <div id="sec-monitoring" class="hidden">
         <div class="section-header">
           <h2><i class="fa fa-chart-line"></i> MONITORING LAYANAN</h2>
