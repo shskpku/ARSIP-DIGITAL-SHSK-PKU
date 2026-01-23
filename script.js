@@ -1015,7 +1015,7 @@ function loadProfilePetugas() {
   let labelNavbar = "PETUGAS";
   const logContainer = document.getElementById("log-notif-container");
 
-  if (user.id === "200208052024121001") {
+  if (user.id === "200208052024121001", "198604172015031003") {
     labelNavbar = "ADMIN";
     if (logContainer) {
       logContainer.classList.remove("hidden");
