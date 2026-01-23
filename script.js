@@ -1,5 +1,5 @@
 /* ====================================================================
-   SCRIPT.JS - ULTIMATE MASTER (V17)
+   SCRIPT.JS 
    ==================================================================== */
 
 // ---- API URL GOOGLE APPSCRIPT --- //
@@ -1015,7 +1015,7 @@ function loadProfilePetugas() {
   let labelNavbar = "PETUGAS";
   const logContainer = document.getElementById("log-notif-container");
 
-  if (user.id === "200208052024121001", "198604172015031003") {
+  if ((user.id === "200208052024121001", "198604172015031003")) {
     labelNavbar = "ADMIN";
     if (logContainer) {
       logContainer.classList.remove("hidden");
@@ -1950,11 +1950,11 @@ async function handleBulkSubmit(type) {
     else if (type === "SERVICE") action = "updateService";
     else if (type === "EXIBHITUM") action = "updateExibhitum";
 
-    payload = { 
-        action: action, 
-        ...firstItem,
-        petugasNip: userActive ? userActive.id : "000",   
-        petugasNama: userActive ? userActive.nama : "Sistem" 
+    payload = {
+      action: action,
+      ...firstItem,
+      petugasNip: userActive ? userActive.id : "000",
+      petugasNama: userActive ? userActive.nama : "Sistem",
     };
   } else {
     let action = "";
@@ -1963,11 +1963,11 @@ async function handleBulkSubmit(type) {
     else if (type === "SERVICE") action = "uploadBulkService";
     else if (type === "EXIBHITUM") action = "uploadBulkExibhitum";
 
-    payload = { 
-        action: action, 
-        items: items, 
-        petugasNip: userActive ? userActive.id : "000",
-        petugasNama: userActive ? userActive.nama : "Sistem"
+    payload = {
+      action: action,
+      items: items,
+      petugasNip: userActive ? userActive.id : "000",
+      petugasNama: userActive ? userActive.nama : "Sistem",
     };
   }
 
@@ -2983,16 +2983,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ====================================================================
-// NAVIGASI SIDEBAR
-// ====================================================================
-
+/* ====================================================================
+   FUNGSI NAVIGASI 
+   ==================================================================== */
 function showSection(id, el) {
   document
     .querySelectorAll(".main-content > div")
     .forEach((d) => d.classList.add("hidden"));
+
   const targetSection = document.getElementById(`sec-${id}`);
   if (targetSection) targetSection.classList.remove("hidden");
+
+  if (id === "dashboard") {
+    initUserEngineV23();
+  }
 
   document
     .querySelectorAll(".menu-item, .submenu-item")
@@ -3007,6 +3011,7 @@ function showSection(id, el) {
 
   if (el) {
     el.classList.add("active");
+
     if (el.classList.contains("submenu-item")) {
       const container = el.closest(".submenu-container");
       if (container) {
@@ -3273,7 +3278,7 @@ async function saveSmartBatch() {
     if (res.status === "SUCCESS") {
       showPopup("SUKSES! Data & Domino Berhasil Disinkronkan.", "success");
       closeSmartEdit();
-      loadData("EXIBHITUM"); // Refresh tabel utama
+      loadData("EXIBHITUM");
     } else {
       showPopup("Gagal: " + res.message, "error");
     }
@@ -3404,4 +3409,286 @@ setInterval(() => {
   }
 }, 60000);
 
-// --- END SCRIPT.JS V.17 ---
+let globalDeletedIDs = [];
+
+async function initUserEngineV23() {
+  try {
+    const resDel = await postData({ action: "getDeletedEWSLog" });
+    if (resDel.status === "SUCCESS") globalDeletedIDs = resDel.data;
+  } catch (e) {
+    console.log("Gagal ambil daftar hitam");
+  }
+
+  const containers = ["shsk", "sert", "service", "exibhitum"];
+  containers.forEach((id) => {
+    const el = document.getElementById(`ews-${id}`);
+    if (el)
+      el.innerHTML =
+        '<div style="text-align:center; padding:30px; color:#aaa; font-size:12px;"><i class="fa fa-spinner fa-spin"></i> Memindai database...</div>';
+  });
+
+  const [resSHSK, resSert, resServ, resExib] = await Promise.all([
+    postData({ action: "getDataSHSK" }),
+    postData({ action: "getDataSertifikasi" }),
+    postData({ action: "getDataService" }),
+    postData({ action: "getDataExibhitum" }),
+  ]);
+
+  if (resSHSK.status === "SUCCESS") processSHSK_EWS(resSHSK.data);
+  if (resSert.status === "SUCCESS") processSert_EWS(resSert.data);
+  if (resServ.status === "SUCCESS") processService_EWS(resServ.data);
+  if (resExib.status === "SUCCESS") processExib_EWS(resExib.data);
+}
+
+function updateLiveBadge(module) {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const key = `ews_read_${user ? user.id : "anon"}`;
+  const readLog = JSON.parse(localStorage.getItem(key) || "[]");
+  const items = document.querySelectorAll(`#ews-${module} .ews-item`);
+  let unreadCount = 0;
+  items.forEach((item) => {
+    const itemID = item.id.replace("row-", "");
+    if (!readLog.includes(itemID)) unreadCount++;
+  });
+  const badge = document.getElementById(
+    `badge-ews-${module === "exibhitum" ? "exib" : module === "sert" ? "sert" : module === "service" ? "service" : "shsk"}`,
+  );
+  if (badge) badge.innerText = unreadCount;
+}
+
+function createAlertCard(ship, msg, dateObj, type, module) {
+  const formattedDate = dateObj.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const itemID = btoa(ship + msg + formattedDate);
+
+  if (globalDeletedIDs.includes(itemID)) return "";
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const readLogKey = `ews_read_${user ? user.id : "anon"}`;
+  const readLog = JSON.parse(localStorage.getItem(readLogKey) || "[]");
+  const isRead = readLog.includes(itemID);
+
+  return `
+        <div class="ews-item ${isRead ? "read" : "unread"}" id="row-${itemID}">
+            <div class="ews-checkbox-container">
+                <input type="checkbox" class="cb-${module}" value="${itemID}" onclick="event.stopPropagation()">
+            </div>
+            <div style="flex:1" onclick="markAsReadV23('${itemID}', '${module}')">
+                <b>${ship}</b>
+                <p>${msg}</p>
+                <small><i class="fa fa-calendar-alt"></i> JATUH TEMPO: ${formattedDate}</small>
+            </div>
+        </div>
+    `;
+}
+
+function processSHSK_EWS(data) {
+  const container = document.getElementById("ews-shsk");
+  container.innerHTML = "";
+  let count = 0;
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const latestData = {};
+  data.forEach((item) => {
+    const ship = item.NAMA_KAPAL;
+    const dateVal = new Date(item.TANGGAL_PENGUKUHAN);
+    if (
+      !latestData[ship] ||
+      dateVal > new Date(latestData[ship].TANGGAL_PENGUKUHAN)
+    )
+      latestData[ship] = item;
+  });
+  Object.values(latestData).forEach((item) => {
+    const tglLastUpdate = new Date(item.TANGGAL_PENGUKUHAN);
+    if (tglLastUpdate.getFullYear() === currentYear) return;
+    const tglStkk = new Date(item.TANGGAL_STKK);
+    if (isNaN(tglStkk.getTime())) return;
+    let monthDiff =
+      (today.getFullYear() - tglStkk.getFullYear()) * 12 +
+      (today.getMonth() - tglStkk.getMonth());
+    let cycle = monthDiff % 12;
+    if (cycle >= 9 || (cycle >= 0 && cycle <= 3)) {
+      const dueDate = new Date(
+        currentYear,
+        tglStkk.getMonth(),
+        tglStkk.getDate(),
+      );
+      const card = createAlertCard(
+        item.NAMA_KAPAL,
+        "Masa Pengukuhan STKK",
+        dueDate,
+        "warning",
+        "shsk",
+      );
+      if (card) container.innerHTML += card;
+    }
+  });
+  updateLiveBadge("shsk");
+}
+
+function processSert_EWS(data) {
+  const container = document.getElementById("ews-sert");
+  container.innerHTML = "";
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const latestCerts = {};
+  data.forEach((item) => {
+    const key = `${item.NAMA_KAPAL}_${item.JENIS_SERTIFIKAT}`;
+    const dateVal = new Date(item.TANGGAL_TERBIT);
+    if (
+      !latestCerts[key] ||
+      dateVal > new Date(latestCerts[key].TANGGAL_TERBIT)
+    )
+      latestCerts[key] = item;
+  });
+  Object.values(latestCerts).forEach((item) => {
+    const tglMasa = new Date(item.TANGGAL_MASA_BERLAKU);
+    const tglTerbit = new Date(item.TANGGAL_TERBIT);
+    if (isNaN(tglMasa.getTime())) return;
+    const isEndors = item.JENIS_SERTIFIKAT.toUpperCase().includes("ENDORS");
+    const diffDays = Math.ceil((tglMasa - today) / (1000 * 60 * 60 * 24));
+    if (isEndors) {
+      if (tglTerbit.getFullYear() === currentYear) return;
+      let monthDiff =
+        (today.getFullYear() - tglMasa.getFullYear()) * 12 +
+        (today.getMonth() - tglMasa.getMonth());
+      let cycle = monthDiff % 12;
+      if (cycle >= 9 || (cycle >= 0 && cycle <= 3)) {
+        const card = createAlertCard(
+          item.NAMA_KAPAL,
+          `Wajib ${item.JENIS_SERTIFIKAT}`,
+          tglMasa,
+          "warning",
+          "sert",
+        );
+        if (card) container.innerHTML += card;
+      }
+    } else {
+      if (diffDays <= 14) {
+        const msg =
+          diffDays < 0
+            ? `${item.JENIS_SERTIFIKAT} (EXPIRED)`
+            : `${item.JENIS_SERTIFIKAT} (H-${diffDays})`;
+        const card = createAlertCard(
+          item.NAMA_KAPAL,
+          msg,
+          tglMasa,
+          "danger",
+          "sert",
+        );
+        if (card) container.innerHTML += card;
+      }
+    }
+  });
+  updateLiveBadge("sert");
+}
+
+function processService_EWS(data) {
+  const container = document.getElementById("ews-service");
+  container.innerHTML = "";
+  const today = new Date();
+  data.forEach((item) => {
+    const tglValid = new Date(item.TANGGAL_VALIDASI_SERVICE_REPORT);
+    tglValid.setFullYear(tglValid.getFullYear() + 1);
+    const diffDays = Math.ceil((tglValid - today) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 14 && diffDays >= -30) {
+      const card = createAlertCard(
+        item.NAMA_KAPAL,
+        `Masa Berlaku Alat (H-${diffDays})`,
+        tglValid,
+        "danger",
+        "service",
+      );
+      if (card) container.innerHTML += card;
+    }
+  });
+  updateLiveBadge("service");
+}
+
+function processExib_EWS(data) {
+  const container = document.getElementById("ews-exibhitum");
+  container.innerHTML = "";
+  const today = new Date();
+  const ships = [...new Set(data.map((i) => i.NAMA_KAPAL))];
+  ships.forEach((ship) => {
+    const hasExibThisMonth = data.some((i) => {
+      const d = new Date(i.TANGGAL);
+      return (
+        i.NAMA_KAPAL === ship &&
+        d.getMonth() === today.getMonth() &&
+        d.getFullYear() === today.getFullYear()
+      );
+    });
+    if (!hasExibThisMonth) {
+      const dueDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      const card = createAlertCard(
+        ship,
+        "Belum Exhibitum Bulan Ini",
+        dueDate,
+        "warning",
+        "exibhitum",
+      );
+      if (card) container.innerHTML += card;
+    }
+  });
+  updateLiveBadge("exibhitum");
+}
+
+function markAsReadV23(id, mod) {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const key = `ews_read_${user ? user.id : "anon"}`;
+  let readLog = JSON.parse(localStorage.getItem(key) || "[]");
+  if (!readLog.includes(id)) {
+    readLog.push(id);
+    localStorage.setItem(key, JSON.stringify(readLog));
+    const el = document.getElementById(`row-${id}`);
+    if (el) el.className = "ews-item read";
+    updateLiveBadge(mod === "exib" ? "exibhitum" : mod);
+  }
+}
+
+function toggleBulkDeleteBar(mod) {
+  const bar = document.getElementById(`bulk-bar-${mod}`);
+  if (bar) bar.classList.toggle("hidden");
+}
+
+function selectAllEWS(mod, source) {
+  document
+    .querySelectorAll(`.cb-${mod}`)
+    .forEach((cb) => (cb.checked = source.checked));
+}
+
+async function processPermanentDelete(mod) {
+  const checked = document.querySelectorAll(`.cb-${mod}:checked`);
+  if (checked.length === 0) return showPopup("Pilih data dulu!", "error");
+  document.getElementById("bulk-confirm-message").innerText =
+    `Hapus permanen ${checked.length} data ini untuk SEMUA AKUN?`;
+  document.getElementById("modal-bulk-confirm").classList.remove("hidden");
+  document.getElementById("btn-do-bulk-delete").onclick = async function () {
+    const ids = Array.from(checked).map((cb) => cb.value);
+    showPopup("Menghapus...", "info");
+    const res = await postData({ action: "deletePermanenEWS", ids: ids });
+    if (res.status === "SUCCESS") {
+      closeBulkConfirm();
+      showPopup("Berhasil dihapus!", "success");
+      initUserEngineV23();
+      toggleBulkDeleteBar(mod);
+    }
+  };
+}
+
+function markAllModuleAsRead(mod) {
+  const items = document.querySelectorAll(`.cb-${mod}`);
+  items.forEach((item) => markAsReadV23(item.value, mod));
+  showPopup(`Selesai!`, "success");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.querySelector(".petugas-page"))
+    setTimeout(initUserEngineV23, 1500);
+});
+
+// --- END SCRIPT.JS --- //
