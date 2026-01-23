@@ -31,10 +31,15 @@
 
 /* --- LOGIN PAGE --- */
 body.login-page {
+  /* Overlay gelap agar form login tetap menyala */
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
               url("https://images.unsplash.com/photo-1498196724034-70f7f329972c?q=80&w=2070&auto=format&fit=crop") 
               no-repeat center center fixed !important;
   background-size: cover !important;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .auth-container {
   width: 100%;
@@ -592,7 +597,7 @@ select[multiple].dash-control option:checked {
 
 /* --- DASHBOARD PETUGAS --- */
 body.petugas-page {
-  /* Kita kasih overlay navy gelap agar teks dan dashboard putih di atasnya tetap tajam */
+  /* Overlay Navy gelap agar dashboard putih di atasnya tetap tajam dan profesional */
   background: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.9)), 
               url("https://images.unsplash.com/photo-1544413647-ad519890913a?q=80&w=2070&auto=format&fit=crop") 
               no-repeat center center fixed !important;
@@ -2943,10 +2948,11 @@ body.gateway-mode {
 }
 
 @media (max-width: 900px) {
-  body.login-page, body.petugas-page {
-    /* Di mobile Safari/iPad, fixed background kadang berat, kita ubah jadi scroll */
-    background-attachment: scroll !important;
+ body.login-page, body.petugas-page {
+    /* Menghindari lag pada Safari iPad dan memastikan gambar tetap proporsional */
+    background-attachment: scroll !important; 
     background-position: center center !important;
+    background-size: cover !important;
   }
 }
 
@@ -2955,4 +2961,5 @@ body.gateway-mode {
 body.petugas-page .section-header h2 {
     color: var(--white) !important;
     text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    border-left: 5px solid var(--neon-gold);
 }
