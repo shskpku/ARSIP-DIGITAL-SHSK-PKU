@@ -1921,58 +1921,55 @@ async function handleBulkSubmit(type) {
       const fPnbp = getFile(`pnbp_${i}`);
       if (fPnbp) itemData.files.push({ jenis: "pnbp", ...(await read(fPnbp)) });
       items.push(itemData);
-    } else if (type === "SERVICE") {
-      const penyedia = form.querySelector(
-        `[name="namaPenyediaJasa_${i}"]`,
-      ).value;
-      if (penyedia.trim()) {
+    } // --- CARI BAGIAN INI DI DALAM handleBulkSubmit(type) ---
+else if (type === "SERVICE") {
+    const penyedia = form.querySelector(`[name="namaPenyediaJasa_${i}"]`).value;
+    if (penyedia.trim()) {
         itemData.namaPenyediaJasa = penyedia.toUpperCase();
-        itemData.namaKapal = form
-          .querySelector(`[name="namaKapal_${i}"]`)
-          .value.toUpperCase();
-        itemData.tglValidasi = form.querySelector(
-          `[name="tglValidasi_${i}"]`,
-        ).value;
+        itemData.namaKapal = form.querySelector(`[name="namaKapal_${i}"]`).value.toUpperCase();
+        itemData.tglValidasi = form.querySelector(`[name="tglValidasi_${i}"]`).value;
         itemData.noUrut = form.querySelector(`[name="noUrut_${i}"]`).value;
-        itemData.oldFolderUrl = form.querySelector(
-          `[name="oldFolderUrl_${i}"]`,
-        ).value;
+        itemData.oldFolderUrl = form.querySelector(`[name="oldFolderUrl_${i}"]`).value;
+
         let jenisArr = [];
-let jumlahArr = [];
-const itemsConfig = [
-    {key: 'liferaft', label: '1. LIFERAFT'},
-    {key: 'fe', label: '2. FIRE EXTINGUISHER'},
-    {key: 'co2', label: '3. CO2 SYSTEM'},
-    {key: 'lifeboat', label: '4. LIFEBOAT'}
-];
+        let jumlahArr = [];
+        
+        // Pemetaan ID Checkbox ke Label Tabel
+        const itemsConfig = [
+            { key: 'liferaft', label: '1. LIFERAFT' },
+            { key: 'fe',       label: '2. FIRE EXTINGUISHER' },
+            { key: 'co2',      label: '3. CO2 SYSTEM' },
+            { key: 'lifeboat', label: '4. LIFEBOAT' }
+        ];
 
-itemsConfig.forEach(conf => {
-    const ck = form.querySelector(`[name="check_${conf.key}_${i}"]`);
-    const jml = form.querySelector(`[name="jumlah_${conf.key.toUpperCase()}_${i}"]`).value;
-    if (ck && ck.checked) {
-        jenisArr.push(conf.label);
-        jumlahArr.push(jml || "0");
-    }
-});
+        itemsConfig.forEach(conf => {
+            const ck = form.querySelector(`[name="check_${conf.key}_${i}"]`);
+            const jmlInput = form.querySelector(`[name="jumlah_${conf.key.toUpperCase()}_${i}"]`);
+            
+            if (ck && ck.checked) {
+                jenisArr.push(conf.label);
+                // Jika input jumlah kosong, kita kasih default "0"
+                jumlahArr.push(jmlInput.value || "0");
+            }
+        });
 
-itemData.jenisAlat = jenisArr.join("\n");
-itemData.jumlah = jumlahArr.join("\n");
+        // POIN PENTING: Menggunakan join("\n") agar di Google Sheet & Tabel tampil bertumpuk
+        itemData.jenisAlat = jenisArr.join("\n");
+        itemData.jumlah = jumlahArr.join("\n");
+
         itemData.files = [];
         const fPerm = getFile(`permohonan_${i}`);
-        if (fPerm)
-          itemData.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+        if (fPerm) itemData.files.push({ jenis: "permohonan", ...(await read(fPerm)) });
+        
         const fStkk = getFile(`stkk_${i}`);
-        if (fStkk)
-          itemData.files.push({ jenis: "stkk", ...(await read(fStkk)) });
+        if (fStkk) itemData.files.push({ jenis: "stkk", ...(await read(fStkk)) });
+        
         const fSert = getFile(`sertifikat_${i}`);
-        if (fSert)
-          itemData.files.push({
-            jenis: "sertifikat_ilr_pmk",
-            ...(await read(fSert)),
-          });
+        if (fSert) itemData.files.push({ jenis: "sertifikat_ilr_pmk", ...(await read(fSert)) });
+
         items.push(itemData);
-      }
-    } else if (type === "EXIBHITUM") {
+    }
+} else if (type === "EXIBHITUM") {
       const nama = form.querySelector(`[name="namaKapal_${i}"]`).value;
 
       if (nama.trim()) {
