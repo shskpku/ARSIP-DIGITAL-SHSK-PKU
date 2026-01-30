@@ -3134,3 +3134,48 @@ body.gateway-mode {
     font-size: 11px;
   }
 }
+
+/* =========================================================
+   TAMBAHAN CSS KHUSUS SERVICE STATION PETUGAS (INLINE)
+   ========================================================= */
+
+/* Kontainer utama untuk tiap item alat */
+.tool-option-wrapper {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tool-option-wrapper:hover {
+    border-color: var(--neon-blue);
+    box-shadow: 0 4px 8px rgba(0, 243, 255, 0.2);
+}
+
+/* Penyesuaian input jumlah agar pas di bawah checkbox */
+.qty-inline-new {
+    margin-top: 10px !important;
+    border: 1px solid var(--neon-blue) !important;
+    background: #f0fdf4 !important; /* Hijau sangat muda agar kontras */
+    height: 38px !important;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--navy);
+}
+
+/* Memastikan teks label checkbox rapi */
+.tool-text {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+/* Memberi jarak antar grid item */
+.service-grid-new {
+    margin-top: 10px;
+}
