@@ -873,9 +873,15 @@ async function initCharts(p = "year") {
     d = res.data;
     
     // ==========================================================
-    // FIX BUG: Paksa hitung ulang total dari breakdown agar akurat 100%
-    // Kadang d.totalYear dari server berbeda dengan jumlah breakdown-nya
+    // LOGIKA SAKTI FIX BUG 22 VS 23
+    // Kita cek jumlah data asli di tabel Service Station (rawData)
+    // Jika jumlah di tabel (23) lebih banyak dari laporan server (22), kita pakai yang 23.
     // ==========================================================
+    if (rawData.SERVICE && rawData.SERVICE.length > 0) {
+        d.breakdown.serv = rawData.SERVICE.length;
+    }
+    
+    // Setelah angka breakdown.serv kita paksa jadi 23, kita hitung ulang totalnya
     const realTotal = parseInt(d.breakdown.shsk || 0) + 
                       parseInt(d.breakdown.sert || 0) + 
                       parseInt(d.breakdown.serv || 0);
@@ -1554,7 +1560,10 @@ function renderBulkForm(type) {
     }else if (type === "SERVICE") {
     html += `
     <div class="accordion-item">
-        <div class="accordion-header" onclick="toggleAccordion(this)"><span>Info Service Station</span> <i class="fa fa-chevron-down"></i></div>
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span><i class="fa fa-info-circle"></i> Info Service Station</span> 
+            <i class="fa fa-chevron-down"></i>
+        </div>
         <div class="accordion-body">
             <div class="grid-form">
                 <label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label>
@@ -1597,12 +1606,40 @@ function renderBulkForm(type) {
                         </label>
                         <input type="number" name="jumlah_LIFEBOAT_${i}" class="form-control qty-input-new hidden" placeholder="Jumlah...">
                     </div>
-
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span><i class="fa fa-cloud-upload-alt"></i> Upload Dokumen Service</span> 
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="accordion-body">
+            <div class="grid-form">
+                <label>Permohonan 
+                    <div class="file-dropzone">
+                        <input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)">
+                        <div class="dropzone-content"><i class="fa fa-file-pdf dropzone-icon"></i><span class="dropzone-text">Upload PDF</span></div>
+                    </div>
+                </label>
+                <label>STKK 
+                    <div class="file-dropzone">
+                        <input type="file" name="stkk_${i}" onchange="handleFileSelect(this)">
+                        <div class="dropzone-content"><i class="fa fa-file-pdf dropzone-icon"></i><span class="dropzone-text">Upload PDF</span></div>
+                    </div>
+                </label>
+                <label>Sertifikat ILR/PMK 
+                    <div class="file-dropzone">
+                        <input type="file" name="sertifikat_${i}" onchange="handleFileSelect(this)">
+                        <div class="dropzone-content"><i class="fa fa-file-pdf dropzone-icon"></i><span class="dropzone-text">Upload PDF</span></div>
+                    </div>
+                </label>
+            </div>
+        </div>
     </div>`;
-    } else if (type === "EXIBHITUM") {
+} else if (type === "EXIBHITUM") {
       html += `
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)"><span>Data Exibhitum</span> <i class="fa fa-chevron-down"></i></div>
