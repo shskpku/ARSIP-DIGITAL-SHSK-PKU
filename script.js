@@ -873,15 +873,27 @@ async function initCharts(p = "year") {
     d = res.data;
     
     // ==========================================================
-    // LOGIKA SAKTI FIX BUG 22 VS 23
+    // LOGIKA SAKTI FIX BUG 23 VS 42 (FILTER TAHUN AKTIF)
     // Kita cek jumlah data asli di tabel Service Station (rawData)
-    // Jika jumlah di tabel (23) lebih banyak dari laporan server (22), kita pakai yang 23.
+    // Tapi kita filter hanya yang tahunnya sama dengan d.year
     // ==========================================================
     if (rawData.SERVICE && rawData.SERVICE.length > 0) {
-        d.breakdown.serv = rawData.SERVICE.length;
+        const targetYear = d.year; // Tahun yang sedang aktif di dashboard
+        
+        const dataTahunBerjalan = rawData.SERVICE.filter(item => {
+            const tglStr = item.TANGGAL_VALIDASI_SERVICE_REPORT;
+            if (!tglStr || tglStr === "-") return false;
+            
+            const tglObj = new Date(tglStr);
+            // Hanya ambil data yang tahunnya cocok dengan filter dashboard
+            return tglObj.getFullYear() === targetYear;
+        });
+
+        // Paksa angka breakdown service menjadi hasil filter (23 data)
+        d.breakdown.serv = dataTahunBerjalan.length;
     }
     
-    // Setelah angka breakdown.serv kita paksa jadi 23, kita hitung ulang totalnya
+    // Hitung ulang totalYear agar sinkron 100%
     const realTotal = parseInt(d.breakdown.shsk || 0) + 
                       parseInt(d.breakdown.sert || 0) + 
                       parseInt(d.breakdown.serv || 0);
