@@ -860,6 +860,7 @@ function updateChartFilter(period, btnElement) {
 async function initCharts(p = "year") {
   if (!document.getElementById("barChart")) return;
   const res = await postData({ action: "getDashboardStats", period: p });
+  
   let d = {
     year: new Date().getFullYear(),
     totalYear: 0,
@@ -867,16 +868,43 @@ async function initCharts(p = "year") {
     labels: [],
     datasets: { shsk: [], sert: [], serv: [] },
   };
-  if (res.status === "SUCCESS") d = res.data;
 
+  if (res.status === "SUCCESS") {
+    d = res.data;
+    
+    // ==========================================================
+    // FIX BUG: Paksa hitung ulang total dari breakdown agar akurat 100%
+    // Kadang d.totalYear dari server berbeda dengan jumlah breakdown-nya
+    // ==========================================================
+    const realTotal = parseInt(d.breakdown.shsk || 0) + 
+                      parseInt(d.breakdown.sert || 0) + 
+                      parseInt(d.breakdown.serv || 0);
+    d.totalYear = realTotal;
+  }
+
+  // Update angka target di judul kartu
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
-  if (titleEl && titleEl.parentNode)
+  if (titleEl && titleEl.parentNode) {
     titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
-  const sisa = 2040 - d.totalYear;
-  const targetInfo = document.querySelector(".target-info");
-  if (targetInfo)
-    targetInfo.innerHTML = `<div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px;"><span><i class="fa fa-circle" style="color: #ffd700"></i> Status Hukum: <b>${d.breakdown.shsk}</b></span><span><i class="fa fa-circle" style="color: #0a192f"></i> Sertifikasi: <b>${d.breakdown.sert}</b></span><span><i class="fa fa-circle" style="color: #00c853"></i> ILR & PMK: <b>${d.breakdown.serv}</b></span></div>`;
+  }
 
+  // Update angka besar di tengah diagram doughnut
+  const centerText = document.querySelector(".chart-card strong");
+  if (centerText) centerText.innerText = d.totalYear;
+
+  const sisa = 2040 - d.totalYear;
+  
+  const targetInfo = document.querySelector(".target-info");
+  if (targetInfo) {
+    targetInfo.innerHTML = `
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px;">
+        <span><i class="fa fa-circle" style="color: #ffd700"></i> Status Hukum: <b>${d.breakdown.shsk}</b></span>
+        <span><i class="fa fa-circle" style="color: #0a192f"></i> Sertifikasi: <b>${d.breakdown.sert}</b></span>
+        <span><i class="fa fa-circle" style="color: #00c853"></i> Service Station: <b>${d.breakdown.serv}</b></span>
+      </div>`;
+  }
+
+  // --- BAR CHART RENDER ---
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -901,7 +929,7 @@ async function initCharts(p = "year") {
           borderRadius: 3,
         },
         {
-          label: "ILR & PMK",
+          label: "Service Station",
           data: d.datasets.serv,
           backgroundColor: "rgba(0, 200, 83, 0.8)",
           borderColor: "rgba(0, 200, 83, 1)",
@@ -918,12 +946,13 @@ async function initCharts(p = "year") {
     },
   });
 
+  // --- DOUGHNUT CHART RENDER ---
   const ctxD = document.getElementById("doughnutChart").getContext("2d");
   if (doughnutChartInstance) doughnutChartInstance.destroy();
   doughnutChartInstance = new Chart(ctxD, {
     type: "doughnut",
     data: {
-      labels: ["Status Hukum", "Sertifikasi", "ILR & PMK", "Sisa Target"],
+      labels: ["Status Hukum", "Sertifikasi", "Service Station", "Sisa Target"],
       datasets: [
         {
           data: [
@@ -1331,17 +1360,33 @@ window.updateExibhitumForms = function () {
 };
 
 window.updateServiceQty = function (i) {
-  const container = document.getElementById(`qty-container-${i}`);
-  const liferaftCheck = document.querySelector(
-    `input[name="check_liferaft_${i}"]`,
-  );
-  const feCheck = document.querySelector(`input[name="check_fe_${i}"]`);
-  let html = "";
-  if (liferaftCheck && liferaftCheck.checked)
-    html += `<label>Jumlah LIFERAFT <input type="number" name="jumlah_LIFERAFT_${i}" class="form-control" placeholder="0"></label>`;
-  if (feCheck && feCheck.checked)
-    html += `<label>Jumlah FIRE EXTINGUISHER <input type="number" name="jumlah_FE_${i}" class="form-control" placeholder="0"></label>`;
-  container.innerHTML = html ? `<div class="grid-form">${html}</div>` : "";
+    // Daftar ID checkbox dan prefix nama input jumlahnya
+    const config = [
+        { chk: 'liferaft', inp: 'LIFERAFT' },
+        { chk: 'fe',       inp: 'FE' },
+        { chk: 'co2',      inp: 'CO2' },
+        { chk: 'lifeboat', inp: 'LIFEBOAT' }
+    ];
+
+    config.forEach(item => {
+        // Cari elemen checkbox berdasarkan nama
+        const checkbox = document.querySelector(`input[name="check_${item.chk}_${i}"]`);
+        // Cari elemen input jumlah berdasarkan nama
+        const inputField = document.querySelector(`input[name="jumlah_${item.inp}_${i}"]`);
+
+        if (checkbox && inputField) {
+            if (checkbox.checked) {
+                // Tampilkan input jika dicentang
+                inputField.classList.remove("hidden");
+                inputField.required = true; // Opsional: paksa isi jika dicentang
+            } else {
+                // Sembunyikan dan kosongkan nilai jika centang dilepas
+                inputField.classList.add("hidden");
+                inputField.value = "";
+                inputField.required = false;
+            }
+        }
+    });
 };
 
 window.handleFileSelect = function (input) {
@@ -1506,38 +1551,57 @@ function renderBulkForm(type) {
             </div>
         </div>
         <div id="dynamic-cert-forms-${i}" style="margin-top:20px;"></div>`;
-    } else if (type === "SERVICE") {
-      html += `
-        <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Info Service</span> <i class="fa fa-chevron-down"></i></div>
-            <div class="accordion-body">
-                <div class="grid-form"><label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label><label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label><label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label></div>
-                <div class="service-selection-box">
-                    <label class="form-label-bold">Pilih Jenis Alat Keselamatan:</label>
-                    <div class="service-options-container">
+    }else if (type === "SERVICE") {
+    html += `
+    <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(this)"><span>Info Service Station</span> <i class="fa fa-chevron-down"></i></div>
+        <div class="accordion-body">
+            <div class="grid-form">
+                <label>Penyedia Jasa <input type="text" name="namaPenyediaJasa_${i}" class="form-control" list="companyList" style="text-transform:uppercase"></label>
+                <label>Nama Kapal <input type="text" name="namaKapal_${i}" class="form-control" style="text-transform:uppercase"></label>
+                <label>Tanggal Validasi <input type="date" name="tglValidasi_${i}" class="form-control"></label>
+            </div>
+            
+            <div class="service-selection-box" style="margin-top:20px;">
+                <label class="form-label-bold">Pilih Jenis Alat & Masukkan Jumlah:</label>
+                <div class="service-grid-new" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    
+                    <div class="tool-item-box">
                         <label class="tool-checkbox-card">
-                            <input type="checkbox" name="check_liferaft_${i}" value="LIFERAFT" onchange="updateServiceQty(${i})">
-                            <div class="tool-card-design"><div class="tool-icon"><i class="fa fa-life-ring"></i></div><span class="tool-text">1. LIFERAFT</span></div>
+                            <input type="checkbox" name="check_liferaft_${i}" value="1. LIFERAFT" onchange="updateServiceQty(${i})">
+                            <div class="tool-card-design"><i class="fa fa-life-ring"></i> <span>1. LIFERAFT</span></div>
                         </label>
-                        <label class="tool-checkbox-card">
-                            <input type="checkbox" name="check_fe_${i}" value="FIRE EXTINGUISHER" onchange="updateServiceQty(${i})">
-                            <div class="tool-card-design"><div class="tool-icon"><i class="fa fa-fire-extinguisher"></i></div><span class="tool-text">2. FIRE EXTINGUISHER</span></div>
-                        </label>
+                        <input type="number" name="jumlah_LIFERAFT_${i}" class="form-control qty-input-new hidden" placeholder="Jumlah...">
                     </div>
-                    <div id="qty-container-${i}" class="qty-dynamic-area"></div>
+
+                    <div class="tool-item-box">
+                        <label class="tool-checkbox-card">
+                            <input type="checkbox" name="check_fe_${i}" value="2. FIRE EXTINGUISHER" onchange="updateServiceQty(${i})">
+                            <div class="tool-card-design"><i class="fa fa-fire-extinguisher"></i> <span>2. FIRE EXT</span></div>
+                        </label>
+                        <input type="number" name="jumlah_FE_${i}" class="form-control qty-input-new hidden" placeholder="Jumlah...">
+                    </div>
+
+                    <div class="tool-item-box">
+                        <label class="tool-checkbox-card">
+                            <input type="checkbox" name="check_co2_${i}" value="3. CO2 SYSTEM" onchange="updateServiceQty(${i})">
+                            <div class="tool-card-design"><i class="fa fa-flask"></i> <span>3. CO2 SYSTEM</span></div>
+                        </label>
+                        <input type="number" name="jumlah_CO2_${i}" class="form-control qty-input-new hidden" placeholder="Jumlah...">
+                    </div>
+
+                    <div class="tool-item-box">
+                        <label class="tool-checkbox-card">
+                            <input type="checkbox" name="check_lifeboat_${i}" value="4. LIFEBOAT" onchange="updateServiceQty(${i})">
+                            <div class="tool-card-design"><i class="fa fa-ship"></i> <span>4. LIFEBOAT</span></div>
+                        </label>
+                        <input type="number" name="jumlah_LIFEBOAT_${i}" class="form-control qty-input-new hidden" placeholder="Jumlah...">
+                    </div>
+
                 </div>
             </div>
         </div>
-        <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)"><span>Upload Dokumen</span> <i class="fa fa-chevron-down"></i></div>
-            <div class="accordion-body">
-                <div class="grid-form">
-                    <label>Permohonan <div class="file-dropzone"><input type="file" name="permohonan_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-                    <label>STKK <div class="file-dropzone"><input type="file" name="stkk_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-                    <label>Sertifikat ILR/PMK <div class="file-dropzone"><input type="file" name="sertifikat_${i}" onchange="handleFileSelect(this)"><div class="dropzone-content"><i class="fa fa-cloud-upload-alt dropzone-icon"></i><span class="dropzone-text">Upload</span></div></div></label>
-                </div>
-            </div>
-        </div>`;
+    </div>`;
     } else if (type === "EXIBHITUM") {
       html += `
         <div class="accordion-item">
@@ -1837,19 +1901,25 @@ async function handleBulkSubmit(type) {
           `[name="oldFolderUrl_${i}"]`,
         ).value;
         let jenisArr = [];
-        let jumlahArr = [];
-        if (form.querySelector(`[name="check_liferaft_${i}"]`).checked) {
-          jenisArr.push("1. LIFERAFT");
-          jumlahArr.push(
-            form.querySelector(`[name="jumlah_LIFERAFT_${i}"]`).value,
-          );
-        }
-        if (form.querySelector(`[name="check_fe_${i}"]`).checked) {
-          jenisArr.push("2. FIRE EXT");
-          jumlahArr.push(form.querySelector(`[name="jumlah_FE_${i}"]`).value);
-        }
-        itemData.jenisAlat = jenisArr.join("\n");
-        itemData.jumlah = jumlahArr.join("\n");
+let jumlahArr = [];
+const itemsConfig = [
+    {key: 'liferaft', label: '1. LIFERAFT'},
+    {key: 'fe', label: '2. FIRE EXTINGUISHER'},
+    {key: 'co2', label: '3. CO2 SYSTEM'},
+    {key: 'lifeboat', label: '4. LIFEBOAT'}
+];
+
+itemsConfig.forEach(conf => {
+    const ck = form.querySelector(`[name="check_${conf.key}_${i}"]`);
+    const jml = form.querySelector(`[name="jumlah_${conf.key.toUpperCase()}_${i}"]`).value;
+    if (ck && ck.checked) {
+        jenisArr.push(conf.label);
+        jumlahArr.push(jml || "0");
+    }
+});
+
+itemData.jenisAlat = jenisArr.join("\n");
+itemData.jumlah = jumlahArr.join("\n");
         itemData.files = [];
         const fPerm = getFile(`permohonan_${i}`);
         if (fPerm)
