@@ -1452,6 +1452,7 @@ function renderBulkForm(type) {
                     <label>Tanggal Terbit <input type="date" name="tglTerbit_${i}" class="form-control"></label>
                     <label>Pemeriksa <select name="pemeriksa_${i}" class="form-control">
                         <option value="">-- Pilih --</option>
+                        <option value="IRWAN JOSUA HUTAJULU, S.Si.T, M.H.">IRWAN JOSUA HUTAJULU, S.Si.T, M.H.</option>
                         <option value="ANTON SUJARWADI, S.Si.T, M.M.">ANTON SUJARWADI, S.Si.T, M.M.</option>
                         <option value="HARNO SIAGIAN, A.Md">HARNO SIAGIAN, A.Md</option>
                         <option value="BUSTANUL ARIFIN, S.A.P.">BUSTANUL ARIFIN, S.A.P.</option>
