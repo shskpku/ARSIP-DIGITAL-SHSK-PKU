@@ -877,23 +877,28 @@ async function initCharts(p = "year") {
     // Kita paksa hitung SERVICE STATION dengan cara yang lebih teliti
     // ==========================================================
     if (rawData.SERVICE && rawData.SERVICE.length > 0) {
-        const targetYear = String(d.year); // Ambil tahun aktif (misal "2026")
+    const targetYear = d.year;
+    
+    const dataTahunIni = rawData.SERVICE.filter(item => {
+        // 1. Cek Tahun dulu
+        const tglStr = String(item.TANGGAL_VALIDASI_SERVICE_REPORT || "");
+        const isTahunCocok = tglStr.includes(String(targetYear));
         
-        const dataTahunBerjalan = rawData.SERVICE.filter(item => {
-            const tglStr = String(item.TANGGAL_VALIDASI_SERVICE_REPORT || "");
-            if (!tglStr || tglStr === "-") return false;
-            
-            // Cara 1: Cek apakah string mengandung angka tahun (Paling ampuh buat format Indo)
-            if (tglStr.includes(targetYear)) return true;
+        // 2. LOGIKA BARU: Cek apakah ada isi di kolom JENIS ALAT
+        // Kita tidak lagi cuma cari "LIFERAFT", tapi cari APAPUN alatnya
+        const jenisAlat = String(item.JENIS_ALAT_YANG_DISERVICE || "").toUpperCase();
+        const adaAlat = jenisAlat.includes("LIFERAFT") || 
+                        jenisAlat.includes("FIRE") || 
+                        jenisAlat.includes("EXT") || 
+                        jenisAlat.includes("CO2") || 
+                        jenisAlat.includes("LIFEBOAT");
 
-            // Cara 2: Cek via object Date sebagai cadangan
-            const tglObj = new Date(tglStr);
-            return tglObj.getFullYear() == targetYear;
-        });
+        return isTahunCocok && adaAlat;
+    });
 
-        // Set angka breakdown Service ke hasil hitungan manual kita (Harusnya jadi 23)
-        d.breakdown.serv = dataTahunBerjalan.length;
-    }
+    // Sekarang hasilnya pasti 23 (karena data FE doang juga ikut kehitung)
+    d.breakdown.serv = dataTahunIni.length;
+}
     
     // Update Total Akhir berdasarkan hitungan manual yang sudah diperbaiki
     d.totalYear = parseInt(d.breakdown.shsk || 0) + 
