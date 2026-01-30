@@ -873,45 +873,43 @@ async function initCharts(p = "year") {
     d = res.data;
     
     // ==========================================================
-    // LOGIKA SAKTI FIX BUG 23 VS 42 (FILTER TAHUN AKTIF)
-    // Kita cek jumlah data asli di tabel Service Station (rawData)
-    // Tapi kita filter hanya yang tahunnya sama dengan d.year
+    // LOGIKA ULTRA FIX BUG 22 VS 23
+    // Kita paksa hitung SERVICE STATION dengan cara yang lebih teliti
     // ==========================================================
     if (rawData.SERVICE && rawData.SERVICE.length > 0) {
-        const targetYear = d.year; // Tahun yang sedang aktif di dashboard
+        const targetYear = String(d.year); // Ambil tahun aktif (misal "2026")
         
         const dataTahunBerjalan = rawData.SERVICE.filter(item => {
-            const tglStr = item.TANGGAL_VALIDASI_SERVICE_REPORT;
+            const tglStr = String(item.TANGGAL_VALIDASI_SERVICE_REPORT || "");
             if (!tglStr || tglStr === "-") return false;
             
+            // Cara 1: Cek apakah string mengandung angka tahun (Paling ampuh buat format Indo)
+            if (tglStr.includes(targetYear)) return true;
+
+            // Cara 2: Cek via object Date sebagai cadangan
             const tglObj = new Date(tglStr);
-            // Hanya ambil data yang tahunnya cocok dengan filter dashboard
-            return tglObj.getFullYear() === targetYear;
+            return tglObj.getFullYear() == targetYear;
         });
 
-        // Paksa angka breakdown service menjadi hasil filter (23 data)
+        // Set angka breakdown Service ke hasil hitungan manual kita (Harusnya jadi 23)
         d.breakdown.serv = dataTahunBerjalan.length;
     }
     
-    // Hitung ulang totalYear agar sinkron 100%
-    const realTotal = parseInt(d.breakdown.shsk || 0) + 
-                      parseInt(d.breakdown.sert || 0) + 
-                      parseInt(d.breakdown.serv || 0);
-    d.totalYear = realTotal;
+    // Update Total Akhir berdasarkan hitungan manual yang sudah diperbaiki
+    d.totalYear = parseInt(d.breakdown.shsk || 0) + 
+                  parseInt(d.breakdown.sert || 0) + 
+                  parseInt(d.breakdown.serv || 0);
   }
 
-  // Update angka target di judul kartu
+  // --- UPDATE UI TEXT ---
+  const centerText = document.querySelector(".chart-card strong");
+  if (centerText) centerText.innerText = d.totalYear;
+
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
   if (titleEl && titleEl.parentNode) {
     titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
   }
 
-  // Update angka besar di tengah diagram doughnut
-  const centerText = document.querySelector(".chart-card strong");
-  if (centerText) centerText.innerText = d.totalYear;
-
-  const sisa = 2040 - d.totalYear;
-  
   const targetInfo = document.querySelector(".target-info");
   if (targetInfo) {
     targetInfo.innerHTML = `
@@ -922,7 +920,29 @@ async function initCharts(p = "year") {
       </div>`;
   }
 
-  // --- BAR CHART RENDER ---
+  // --- RENDER DOUGHNUT ---
+  const sisa = 2040 - d.totalYear;
+  const ctxD = document.getElementById("doughnutChart").getContext("2d");
+  if (doughnutChartInstance) doughnutChartInstance.destroy();
+  doughnutChartInstance = new Chart(ctxD, {
+    type: "doughnut",
+    data: {
+      labels: ["Status Hukum", "Sertifikasi", "Service Station", "Sisa Target"],
+      datasets: [{
+        data: [d.breakdown.shsk, d.breakdown.sert, d.breakdown.serv, sisa < 0 ? 0 : sisa],
+        backgroundColor: ["#ffd700", "#0a192f", "#00c853", "#eee"],
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "70%",
+      plugins: { legend: { display: false } },
+    },
+  });
+
+  // --- RENDER BAR CHART (MENGGUNAKAN DATA d.breakdown.serv YANG BARU) ---
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -930,30 +950,9 @@ async function initCharts(p = "year") {
     data: {
       labels: d.labels,
       datasets: [
-        {
-          label: "Status Hukum",
-          data: d.datasets.shsk,
-          backgroundColor: "rgba(255, 215, 0, 0.8)",
-          borderColor: "rgba(255, 215, 0, 1)",
-          borderWidth: 1,
-          borderRadius: 3,
-        },
-        {
-          label: "Sertifikasi",
-          data: d.datasets.sert,
-          backgroundColor: "rgba(10, 25, 47, 0.8)",
-          borderColor: "rgba(10, 25, 47, 1)",
-          borderWidth: 1,
-          borderRadius: 3,
-        },
-        {
-          label: "Service Station",
-          data: d.datasets.serv,
-          backgroundColor: "rgba(0, 200, 83, 0.8)",
-          borderColor: "rgba(0, 200, 83, 1)",
-          borderWidth: 1,
-          borderRadius: 3,
-        },
+        { label: "Status Hukum", data: d.datasets.shsk, backgroundColor: "rgba(255, 215, 0, 0.8)", borderColor: "#ffd700", borderWidth: 1, borderRadius: 3 },
+        { label: "Sertifikasi", data: d.datasets.sert, backgroundColor: "rgba(10, 25, 47, 0.8)", borderColor: "#0a192f", borderWidth: 1, borderRadius: 3 },
+        { label: "Service Station", data: d.datasets.serv, backgroundColor: "rgba(0, 200, 83, 0.8)", borderColor: "#00c853", borderWidth: 1, borderRadius: 3 }
       ],
     },
     options: {
@@ -961,34 +960,6 @@ async function initCharts(p = "year") {
       maintainAspectRatio: false,
       plugins: { legend: { display: true, position: "bottom" } },
       scales: { y: { beginAtZero: true } },
-    },
-  });
-
-  // --- DOUGHNUT CHART RENDER ---
-  const ctxD = document.getElementById("doughnutChart").getContext("2d");
-  if (doughnutChartInstance) doughnutChartInstance.destroy();
-  doughnutChartInstance = new Chart(ctxD, {
-    type: "doughnut",
-    data: {
-      labels: ["Status Hukum", "Sertifikasi", "Service Station", "Sisa Target"],
-      datasets: [
-        {
-          data: [
-            d.breakdown.shsk,
-            d.breakdown.sert,
-            d.breakdown.serv,
-            sisa < 0 ? 0 : sisa,
-          ],
-          backgroundColor: ["#ffd700", "#0a192f", "#00c853", "#eee"],
-          borderWidth: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: "70%",
-      plugins: { legend: { display: false } },
     },
   });
 }
