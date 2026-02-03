@@ -864,47 +864,40 @@ async function initCharts(p = "year") {
   let d = {
     year: new Date().getFullYear(),
     totalYear: 0,
-    breakdown: { shsk: 0, sert: 0, serv: 0 },
+    breakdown: { shsk: 0, sert: 0, serv: 0, psh: 0, exib: 0 },
     labels: [],
-    datasets: { shsk: [], sert: [], serv: [] },
+    datasets: { shsk: [], sert: [], serv: [], psh_main: [], exib_main: [] },
   };
 
   if (res.status === "SUCCESS") {
     d = res.data;
     
     // ==========================================================
-    // LOGIKA ULTRA FIX BUG 22 VS 23
-    // Kita paksa hitung SERVICE STATION dengan cara yang lebih teliti
+    // LOGIKA FIX SERVICE STATION (AKURASI DATA 23)
     // ==========================================================
     if (rawData.SERVICE && rawData.SERVICE.length > 0) {
-    const targetYear = d.year;
-    
-    const dataTahunIni = rawData.SERVICE.filter(item => {
-        // 1. Cek Tahun dulu
-        const tglStr = String(item.TANGGAL_VALIDASI_SERVICE_REPORT || "");
-        const isTahunCocok = tglStr.includes(String(targetYear));
-        
-        // 2. LOGIKA BARU: Cek apakah ada isi di kolom JENIS ALAT
-        // Kita tidak lagi cuma cari "LIFERAFT", tapi cari APAPUN alatnya
-        const jenisAlat = String(item.JENIS_ALAT_YANG_DISERVICE || "").toUpperCase();
-        const adaAlat = jenisAlat.includes("LIFERAFT") || 
-                        jenisAlat.includes("FIRE") || 
-                        jenisAlat.includes("EXT") || 
-                        jenisAlat.includes("CO2") || 
-                        jenisAlat.includes("LIFEBOAT");
+        const targetYear = d.year;
+        const dataTahunIni = rawData.SERVICE.filter(item => {
+            const tglStr = String(item.TANGGAL_VALIDASI_SERVICE_REPORT || "");
+            if (!tglStr || tglStr === "-") return false;
+            if (tglStr.includes(String(targetYear))) return true;
+            const tglObj = new Date(tglStr);
+            return tglObj.getFullYear() == targetYear;
+        });
+        d.breakdown.serv = dataTahunIni.length;
+    }
 
-        return isTahunCocok && adaAlat;
-    });
-
-    // Sekarang hasilnya pasti 23 (karena data FE doang juga ikut kehitung)
-    d.breakdown.serv = dataTahunIni.length;
-}
-    
-    // Update Total Akhir berdasarkan hitungan manual yang sudah diperbaiki
+    // HITUNG TOTAL AKHIR TERBARU (5 KATEGORI)
     d.totalYear = parseInt(d.breakdown.shsk || 0) + 
                   parseInt(d.breakdown.sert || 0) + 
-                  parseInt(d.breakdown.serv || 0);
+                  parseInt(d.breakdown.serv || 0) +
+                  parseInt(d.breakdown.psh || 0) +
+                  parseInt(d.breakdown.exib || 0);
   }
+
+  // --- CONFIG TARGET BARU ---
+  const TARGET_SETIAP_TAHUN = 3660;
+  const sisa = TARGET_SETIAP_TAHUN - d.totalYear;
 
   // --- UPDATE UI TEXT ---
   const centerText = document.querySelector(".chart-card strong");
@@ -912,30 +905,38 @@ async function initCharts(p = "year") {
 
   const titleEl = document.querySelector(".chart-card h3 i.fa-bullseye");
   if (titleEl && titleEl.parentNode) {
-    titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year}`;
+    titleEl.parentNode.innerHTML = `<i class="fa fa-bullseye" style="color: var(--gold)"></i> Target ${d.year} (${TARGET_SETIAP_TAHUN})`;
   }
 
   const targetInfo = document.querySelector(".target-info");
   if (targetInfo) {
     targetInfo.innerHTML = `
-      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12px;">
-        <span><i class="fa fa-circle" style="color: #ffd700"></i> Status Hukum: <b>${d.breakdown.shsk}</b></span>
-        <span><i class="fa fa-circle" style="color: #0a192f"></i> Sertifikasi: <b>${d.breakdown.sert}</b></span>
-        <span><i class="fa fa-circle" style="color: #00c853"></i> Service Station: <b>${d.breakdown.serv}</b></span>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:11px; margin-top:10px;">
+        <span><i class="fa fa-circle" style="color: #ffd700"></i> SHSK: <b>${d.breakdown.shsk}</b></span>
+        <span><i class="fa fa-circle" style="color: #0a192f"></i> Sert: <b>${d.breakdown.sert}</b></span>
+        <span><i class="fa fa-circle" style="color: #00c853"></i> Serv: <b>${d.breakdown.serv}</b></span>
+        <span><i class="fa fa-circle" style="color: #ff9f43"></i> Psh: <b>${d.breakdown.psh}</b></span>
+        <span><i class="fa fa-circle" style="color: #00f3ff"></i> Exib: <b>${d.breakdown.exib}</b></span>
       </div>`;
   }
 
-  // --- RENDER DOUGHNUT ---
-  const sisa = 2040 - d.totalYear;
+  // --- RENDER DOUGHNUT (5 KATEGORI + SISA) ---
   const ctxD = document.getElementById("doughnutChart").getContext("2d");
   if (doughnutChartInstance) doughnutChartInstance.destroy();
   doughnutChartInstance = new Chart(ctxD, {
     type: "doughnut",
     data: {
-      labels: ["Status Hukum", "Sertifikasi", "Service Station", "Sisa Target"],
+      labels: ["Status Hukum", "Sertifikasi", "Service Station", "Pengesahan", "Exibhitum", "Sisa Target"],
       datasets: [{
-        data: [d.breakdown.shsk, d.breakdown.sert, d.breakdown.serv, sisa < 0 ? 0 : sisa],
-        backgroundColor: ["#ffd700", "#0a192f", "#00c853", "#eee"],
+        data: [
+          d.breakdown.shsk, 
+          d.breakdown.sert, 
+          d.breakdown.serv, 
+          d.breakdown.psh, 
+          d.breakdown.exib, 
+          sisa < 0 ? 0 : sisa
+        ],
+        backgroundColor: ["#ffd700", "#0a192f", "#00c853", "#ff9f43", "#00f3ff", "#eee"],
         borderWidth: 0,
       }],
     },
@@ -947,7 +948,7 @@ async function initCharts(p = "year") {
     },
   });
 
-  // --- RENDER BAR CHART (MENGGUNAKAN DATA d.breakdown.serv YANG BARU) ---
+  // --- RENDER BAR CHART (5 KATEGORI) ---
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -955,9 +956,11 @@ async function initCharts(p = "year") {
     data: {
       labels: d.labels,
       datasets: [
-        { label: "Status Hukum", data: d.datasets.shsk, backgroundColor: "rgba(255, 215, 0, 0.8)", borderColor: "#ffd700", borderWidth: 1, borderRadius: 3 },
-        { label: "Sertifikasi", data: d.datasets.sert, backgroundColor: "rgba(10, 25, 47, 0.8)", borderColor: "#0a192f", borderWidth: 1, borderRadius: 3 },
-        { label: "Service Station", data: d.datasets.serv, backgroundColor: "rgba(0, 200, 83, 0.8)", borderColor: "#00c853", borderWidth: 1, borderRadius: 3 }
+        { label: "Status Hukum", data: d.datasets.shsk, backgroundColor: "#ffd700" },
+        { label: "Sertifikasi", data: d.datasets.sert, backgroundColor: "#0a192f" },
+        { label: "Service Station", data: d.datasets.serv, backgroundColor: "#00c853" },
+        { label: "Pengesahan", data: d.datasets.psh_main, backgroundColor: "#ff9f43" },
+        { label: "Exibhitum", data: d.datasets.exib_main, backgroundColor: "#00f3ff" }
       ],
     },
     options: {
