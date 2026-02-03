@@ -2613,7 +2613,7 @@ function renderTable(type) {
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
 
-  const limit = type === "EXIBHITUM" ? 25 : 10;
+  const limit = 25;
   const start = (currentPage[type] - 1) * limit;
   const pageData = filteredData[type].slice(start, start + limit);
 
@@ -2773,7 +2773,7 @@ function renderPagination(
   const container = document.getElementById(`pagination-${type}`);
   if (!container) return;
 
-  const limit = limitCustom || (type === "EXIBHITUM" ? 25 : 10);
+  const limit = limitCustom || 25;
   const totalRows =
     totalCustom !== null ? totalCustom : filteredData[type].length;
   const current = pageCustom !== null ? pageCustom : currentPage[type];
@@ -2829,7 +2829,7 @@ function goToPage(type, pageNum) {
     return;
   }
 
-  const limit = type === "EXIBHITUM" ? 25 : 10;
+  const limit = 25;
   const totalRows = filteredData[type].length;
   const totalPages = Math.ceil(totalRows / limit);
 
