@@ -866,7 +866,7 @@ async function initCharts(p = "year") {
     totalYear: 0,
     breakdown: { shsk: 0, sert: 0, serv: 0, psh: 0, exib: 0 },
     labels: [],
-    datasets: { shsk: [], sert: [], serv: [], psh_main: [], exib_main: [] },
+    datasets: { shsk: [], sert: [], serv: [], psh_main: [], exib_main: [], exibhitum: [0,0,0,0,0,0,0], pengesahan: [0,0,0,0,0,0,0] },
   };
 
   if (res.status === "SUCCESS") {
@@ -916,11 +916,11 @@ async function initCharts(p = "year") {
         <span><i class="fa fa-circle" style="color: #0a192f"></i> Sert: <b>${d.breakdown.sert}</b></span>
         <span><i class="fa fa-circle" style="color: #00c853"></i> Serv: <b>${d.breakdown.serv}</b></span>
         <span><i class="fa fa-circle" style="color: #ff9f43"></i> Psh: <b>${d.breakdown.psh}</b></span>
-        <span><i class="fa fa-circle" style="color: #00f3ff"></i> Exib: <b>${d.breakdown.exib}</b></span>
+        <span><i class="fa fa-circle" style="color: #00f3ff"></i> Exib: <b>${d.breakdown.exib}</b></b></span>
       </div>`;
   }
 
-  // --- RENDER DOUGHNUT (5 KATEGORI + SISA) ---
+  // --- 1. RENDER DOUGHNUT (5 KATEGORI + SISA) ---
   const ctxD = document.getElementById("doughnutChart").getContext("2d");
   if (doughnutChartInstance) doughnutChartInstance.destroy();
   doughnutChartInstance = new Chart(ctxD, {
@@ -948,7 +948,7 @@ async function initCharts(p = "year") {
     },
   });
 
-  // --- RENDER BAR CHART (5 KATEGORI) ---
+  // --- 2. RENDER BAR CHART UTAMA (5 KATEGORI) ---
   const ctxBar = document.getElementById("barChart").getContext("2d");
   if (barChartInstance) barChartInstance.destroy();
   barChartInstance = new Chart(ctxBar, {
@@ -956,7 +956,7 @@ async function initCharts(p = "year") {
     data: {
       labels: d.labels,
       datasets: [
-        { label: "Status Hukum", data: d.datasets.shsk, backgroundColor: "#ffd700" },
+        { label: "SHSK", data: d.datasets.shsk, backgroundColor: "#ffd700" },
         { label: "Sertifikasi", data: d.datasets.sert, backgroundColor: "#0a192f" },
         { label: "Service Station", data: d.datasets.serv, backgroundColor: "#00c853" },
         { label: "Pengesahan", data: d.datasets.psh_main, backgroundColor: "#ff9f43" },
@@ -970,51 +970,78 @@ async function initCharts(p = "year") {
       scales: { y: { beginAtZero: true } },
     },
   });
+
+  // --- 3. RENDER GRAFIK DETAIL EXIB & PSH (YANG HILANG) ---
+  const labelBuku = ["DECK", "MESIN", "ORB", "ORB TK. II", "RADIO", "SAMPAH", "BALLAST"];
+  
+  if (document.getElementById("chartExibhitum")) {
+    const ctxEx = document.getElementById("chartExibhitum").getContext("2d");
+    if (exChartInstance) exChartInstance.destroy();
+    exChartInstance = new Chart(ctxEx, {
+      type: "bar",
+      data: {
+        labels: labelBuku,
+        datasets: [{
+          label: "Jumlah Buku",
+          data: d.datasets.exibhitum || [0,0,0,0,0,0,0],
+          backgroundColor: "rgba(0, 243, 255, 0.7)",
+          borderRadius: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+  }
+
+  if (document.getElementById("chartPengesahan")) {
+    const ctxPsh = document.getElementById("chartPengesahan").getContext("2d");
+    if (pshChartInstance) pshChartInstance.destroy();
+    pshChartInstance = new Chart(ctxPsh, {
+      type: "bar",
+      data: {
+        labels: labelBuku,
+        datasets: [{
+          label: "Jumlah Buku",
+          data: d.datasets.pengesahan || [0,0,0,0,0,0,0],
+          backgroundColor: "rgba(255, 159, 67, 0.7)",
+          borderRadius: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+  }
 }
 
+// Fungsi Filter Chart Detail Tetap Sama
 async function updateExibChart(period, btn, type) {
   if (type === "ex")
-    document
-      .querySelectorAll(".filter-btn-ex")
-      .forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".filter-btn-ex").forEach((b) => b.classList.remove("active"));
   else
-    document
-      .querySelectorAll(".filter-btn-psh")
-      .forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".filter-btn-psh").forEach((b) => b.classList.remove("active"));
+    
   btn.classList.add("active");
   const res = await postData({ action: "getDashboardStats", period: period });
   if (res.status === "SUCCESS") {
     const d = res.data;
-    const labels = [
-      "DECK",
-      "MESIN",
-      "ORB",
-      "ORB TK. II",
-      "RADIO",
-      "SAMPAH",
-      "BALLAST",
-    ];
-    const dataSet =
-      type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
-    const color =
-      type === "ex" ? "rgba(0, 243, 255, 0.7)" : "rgba(255, 159, 67, 0.7)";
+    const labels = ["DECK", "MESIN", "ORB", "ORB TK. II", "RADIO", "SAMPAH", "BALLAST"];
+    const dataSet = type === "ex" ? d.datasets.exibhitum : d.datasets.pengesahan;
+    const color = type === "ex" ? "rgba(0, 243, 255, 0.7)" : "rgba(255, 159, 67, 0.7)";
     const canvasId = type === "ex" ? "chartExibhitum" : "chartPengesahan";
     const ctx = document.getElementById(canvasId).getContext("2d");
+    
     if (type === "ex" && exChartInstance) exChartInstance.destroy();
     if (type === "psh" && pshChartInstance) pshChartInstance.destroy();
+    
     const chartConfig = {
       type: "bar",
       data: {
         labels: labels,
-        datasets: [
-          {
-            label: "Jumlah Buku",
-            data: dataSet,
-            backgroundColor: color,
-            borderWidth: 1,
-            borderRadius: 4,
-          },
-        ],
+        datasets: [{
+          label: "Jumlah Buku",
+          data: dataSet,
+          backgroundColor: color,
+          borderWidth: 1,
+          borderRadius: 4,
+        }],
       },
       options: {
         responsive: true,
@@ -1027,7 +1054,6 @@ async function updateExibChart(period, btn, type) {
     else pshChartInstance = new Chart(ctx, chartConfig);
   }
 }
-
 // ====================================================================
 // 6. PROFILE PETUGAS
 // ====================================================================
