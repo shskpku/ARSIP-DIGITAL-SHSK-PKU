@@ -445,7 +445,7 @@ function renderMonitoringTable(page) {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  const limit = 10;
+  const limit = 25;
   const start = (page - 1) * limit;
   const end = start + limit;
   const pageData = monitoringDataCache.slice(start, end);
