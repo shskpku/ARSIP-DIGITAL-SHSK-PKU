@@ -445,31 +445,56 @@ function renderMonitoringTable(page) {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  const limit = 25;
+  const limit = 25; // Sudah kita set 25 baris ya Genk
   const start = (page - 1) * limit;
   const end = start + limit;
   const pageData = monitoringDataCache.slice(start, end);
 
   if (pageData.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="9" style="text-align:center;">Tidak ada data ditemukan.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Tidak ada data ditemukan.</td></tr>';
     document.getElementById("pagination-MONITORING").innerHTML = "";
     return;
   }
 
+  // --- LOGIKA PEMBATAS (SEPARATOR) ---
+  let lastYear = null;
+  let lastMonth = null;
+  const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+
   pageData.forEach((row, i) => {
-    tbody.innerHTML += `
-            <tr>
-                <td>${start + i + 1}</td>
-                <td>${row.tahun}</td>
-                <td>${row.bulan}</td>
-                <td style="text-align:left;">${row.perusahaan}</td>
-                <td>${row.shsk}</td>
-                <td>${row.sert}</td>
-                <td>${row.psh}</td>
-                <td>${row.exib}</td>
-                <td>${row.total}</td>
+    // 1. Cek Transisi Tahun
+    if (lastYear !== null && row.tahun !== lastYear) {
+        tbody.innerHTML += `
+            <tr class="row-separator-year">
+                <td colspan="9"><i class="fa fa-calendar-check"></i> TAHUN ANGGARAN: ${row.tahun}</td>
             </tr>`;
+    }
+
+    // 2. Cek Transisi Bulan (Atau jika tahun baru mulai, bulan juga harus tampil)
+    if (lastMonth !== null && (row.bulan !== lastMonth || row.tahun !== lastYear)) {
+        tbody.innerHTML += `
+            <tr class="row-separator-month">
+                <td colspan="9"><i class="fa fa-calendar-alt"></i> PERIODE: ${monthNames[row.bulan]} ${row.tahun}</td>
+            </tr>`;
+    }
+
+    // Update referensi terakhir
+    lastYear = row.tahun;
+    lastMonth = row.bulan;
+
+    // 3. Render Baris Data Perusahaan
+    tbody.innerHTML += `
+        <tr>
+            <td>${start + i + 1}</td>
+            <td>${row.tahun}</td>
+            <td>${row.bulan}</td>
+            <td style="text-align:left; font-weight:600;">${row.perusahaan}</td>
+            <td>${row.shsk}</td>
+            <td>${row.sert}</td>
+            <td>${row.psh}</td>
+            <td>${row.exib}</td>
+            <td style="background: #fff8e1; font-weight:bold; color:#d84315;">${row.total}</td>
+        </tr>`;
   });
 
   renderPagination("MONITORING", monitoringDataCache.length, page, limit);
