@@ -937,9 +937,9 @@ async function initCharts(p = "year") {
   if (targetInfo) {
     targetInfo.innerHTML = `
       <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:11px; margin-top:10px;">
-        <span><i class="fa fa-circle" style="color: #ffd700"></i> SHSK: <b>${d.breakdown.shsk}</b></span>
-        <span><i class="fa fa-circle" style="color: #0a192f"></i> Sert: <b>${d.breakdown.sert}</b></span>
-        <span><i class="fa fa-circle" style="color: #00c853"></i> Serv: <b>${d.breakdown.serv}</b></span>
+        <span><i class="fa fa-circle" style="color: #ffd700"></i> SH: <b>${d.breakdown.shsk}</b></span>
+        <span><i class="fa fa-circle" style="color: #0a192f"></i> SK: <b>${d.breakdown.sert}</b></span>
+        <span><i class="fa fa-circle" style="color: #00c853"></i> SS: <b>${d.breakdown.serv}</b></span>
         <span><i class="fa fa-circle" style="color: #ff9f43"></i> Psh: <b>${d.breakdown.psh}</b></span>
         <span><i class="fa fa-circle" style="color: #00f3ff"></i> Exib: <b>${d.breakdown.exib}</b></b></span>
       </div>`;
@@ -981,7 +981,7 @@ async function initCharts(p = "year") {
     data: {
       labels: d.labels,
       datasets: [
-        { label: "SHSK", data: d.datasets.shsk, backgroundColor: "#ffd700" },
+        { label: "Status Hukum", data: d.datasets.shsk, backgroundColor: "#ffd700" },
         { label: "Sertifikasi", data: d.datasets.sert, backgroundColor: "#0a192f" },
         { label: "Service Station", data: d.datasets.serv, backgroundColor: "#00c853" },
         { label: "Pengesahan", data: d.datasets.psh_main, backgroundColor: "#ff9f43" },
